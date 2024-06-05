@@ -9,6 +9,10 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{99F00D1F
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MURQ.Domain.Tests", "Tests\MURQ.Domain.Tests\MURQ.Domain.Tests.csproj", "{3604E24F-7B23-4C37-943A-6CFE6843E817}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MURQ.UI.SimpleConsole", "MURQ.UI.SimpleConsole\MURQ.UI.SimpleConsole.csproj", "{C433D875-8249-4F27-9F7C-2A908FCFB6E9}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MURQ.Application", "MURQ.Application\MURQ.Application.csproj", "{BE4731A6-F508-441D-890D-C11E697DEA48}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -23,6 +27,14 @@ Global
 		{3604E24F-7B23-4C37-943A-6CFE6843E817}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3604E24F-7B23-4C37-943A-6CFE6843E817}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{3604E24F-7B23-4C37-943A-6CFE6843E817}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C433D875-8249-4F27-9F7C-2A908FCFB6E9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C433D875-8249-4F27-9F7C-2A908FCFB6E9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C433D875-8249-4F27-9F7C-2A908FCFB6E9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C433D875-8249-4F27-9F7C-2A908FCFB6E9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BE4731A6-F508-441D-890D-C11E697DEA48}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BE4731A6-F508-441D-890D-C11E697DEA48}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BE4731A6-F508-441D-890D-C11E697DEA48}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BE4731A6-F508-441D-890D-C11E697DEA48}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
