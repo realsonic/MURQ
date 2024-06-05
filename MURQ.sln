@@ -13,6 +13,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MURQ.UI.SimpleConsole", "MU
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MURQ.Application", "MURQ.Application\MURQ.Application.csproj", "{BE4731A6-F508-441D-890D-C11E697DEA48}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MURQ.Demo.0", "Demo\MURQ.Demo.0\MURQ.Demo.0.csproj", "{1F468102-840A-4EE4-870F-AF0A45E3DB0A}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -35,6 +37,10 @@ Global
 		{BE4731A6-F508-441D-890D-C11E697DEA48}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{BE4731A6-F508-441D-890D-C11E697DEA48}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{BE4731A6-F508-441D-890D-C11E697DEA48}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1F468102-840A-4EE4-870F-AF0A45E3DB0A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1F468102-840A-4EE4-870F-AF0A45E3DB0A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1F468102-840A-4EE4-870F-AF0A45E3DB0A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1F468102-840A-4EE4-870F-AF0A45E3DB0A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
