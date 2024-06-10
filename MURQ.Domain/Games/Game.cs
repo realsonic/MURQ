@@ -11,35 +11,47 @@ public class Game
     public Game(Quest quest)
     {
         Quest = quest;
-        
+
         _globalRunningContext = new RunningContext();
         SubscribeToRunningContextEvents();
-    }
-
-    private void SubscribeToRunningContextEvents()
-    {
-        _globalRunningContext.OnTextPrinted += text => _currentScreenText.Append(text);
     }
 
     public Quest Quest { get; }
 
     public CurrentLocationView CurrentLocation => new()
     {
-        Text = _currentScreenText.ToString()
+        Text = _currentScreenText.ToString(),
+        Buttons = _currentScreenButtons
     };
 
     public void Start()
     {
         if (IsStarted) throw new MurqException("Игра уже запущена, второй раз запустить нельзя.");
 
-        ResetCurrentView();
+        ClearCurrentView();
         SetNextInstructionToFirstInQuest();
         RunInstructions();
     }
 
-    private void ResetCurrentView()
+    private void SubscribeToRunningContextEvents()
+    {
+        _globalRunningContext.OnTextPrinted += text => _currentScreenText.Append(text);
+        _globalRunningContext.OnButtonAdded += (caption, labelInstruction) => _currentScreenButtons.Add(new Button
+        {
+            Caption = caption,
+            OnButtonPressed = () =>
+            {
+                ClearCurrentView();
+                GoToLabel(labelInstruction);
+                RunInstructions();
+            }
+        });
+    }
+
+    private void ClearCurrentView()
     {
         _currentScreenText.Clear();
+        _currentScreenButtons.Clear();
     }
 
     private void RunInstructions()
@@ -63,25 +75,44 @@ public class Game
         CurrentInstruction.Run(_globalRunningContext);
     }
 
-    private void PromoteNextInstruction()
+    private void GoToLabel(LabelInstruction? labelInstruction)
     {
-        if (_currentInstructionIndex is not null)
+        if (labelInstruction is not null)
         {
-            _previousInstructionIndex = _currentInstructionIndex;
-
-            int nextInstructionIndex = _currentInstructionIndex.Value + 1;
-            if (nextInstructionIndex <= Quest.Instructions.Count - 1)
-            {
-                _currentInstructionIndex = nextInstructionIndex;
-            }
-            else
-            {
-                _currentInstructionIndex = null;
-            }
+            SetCurrentInstruction(labelInstruction);
         }
     }
 
-    private void SetNextInstructionToFirstInQuest() => _currentInstructionIndex = Quest.Instructions.Count > 0 ? 0 : null;
+    private void SetCurrentInstruction(Instruction instruction)
+    {
+        int? instructionIndex = Quest.GetInstructionIndex(instruction);
+        if (instructionIndex is not null)
+        {
+            _currentInstructionIndex = instructionIndex;
+        }
+    }
+
+    private void PromoteNextInstruction()
+    {
+        if (_currentInstructionIndex is null) return;
+
+        _previousInstructionIndex = _currentInstructionIndex;
+
+        // todo перенести логику в Quest
+        int nextInstructionIndex = _currentInstructionIndex.Value + 1;
+        if (nextInstructionIndex <= Quest.Instructions.Count - 1)
+        {
+            _currentInstructionIndex = nextInstructionIndex;
+        }
+        else
+        {
+            _currentInstructionIndex = null;
+        }
+    }
+
+    private void SetNextInstructionToFirstInQuest() =>
+        _currentInstructionIndex = Quest.Instructions.Count > 0 ? 0 : null;
+
     private void SetModeRunningInstructions() => _gameMode = GameMode.RunningInstructions;
     private void SetModeWaitingUserInput() => _gameMode = GameMode.WaitingUserInput;
 
@@ -97,6 +128,15 @@ public class Game
     public class CurrentLocationView
     {
         public string? Text { get; init; }
+        public IReadOnlyCollection<Button>? Buttons { get; init; }
+    }
+
+    public class Button
+    {
+        public required string Caption { get; init; }
+        public required Action OnButtonPressed { get; init; }
+
+        public void Press() => OnButtonPressed();
     }
 
     private GameMode _gameMode = GameMode.InitialState;
@@ -104,4 +144,5 @@ public class Game
     private int? _currentInstructionIndex;
     private readonly RunningContext _globalRunningContext;
     private readonly StringBuilder _currentScreenText = new();
+    private readonly List<Button> _currentScreenButtons = new();
 }
