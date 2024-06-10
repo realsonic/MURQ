@@ -1,0 +1,54 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.9.34902.65
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MURQ.Domain", "MURQ.Domain\MURQ.Domain.csproj", "{D95873B5-EA3B-41D7-A124-F5E002A54034}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{99F00D1F-4C3B-43C3-9847-C4D475E288E8}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MURQ.Domain.Tests", "Tests\MURQ.Domain.Tests\MURQ.Domain.Tests.csproj", "{3604E24F-7B23-4C37-943A-6CFE6843E817}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MURQ.UI.SimpleConsole", "MURQ.UI.SimpleConsole\MURQ.UI.SimpleConsole.csproj", "{C433D875-8249-4F27-9F7C-2A908FCFB6E9}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MURQ.Application", "MURQ.Application\MURQ.Application.csproj", "{BE4731A6-F508-441D-890D-C11E697DEA48}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MURQ.Demo.0", "Demo\MURQ.Demo.0\MURQ.Demo.0.csproj", "{1F468102-840A-4EE4-870F-AF0A45E3DB0A}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{D95873B5-EA3B-41D7-A124-F5E002A54034}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D95873B5-EA3B-41D7-A124-F5E002A54034}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D95873B5-EA3B-41D7-A124-F5E002A54034}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D95873B5-EA3B-41D7-A124-F5E002A54034}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3604E24F-7B23-4C37-943A-6CFE6843E817}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3604E24F-7B23-4C37-943A-6CFE6843E817}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3604E24F-7B23-4C37-943A-6CFE6843E817}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3604E24F-7B23-4C37-943A-6CFE6843E817}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C433D875-8249-4F27-9F7C-2A908FCFB6E9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C433D875-8249-4F27-9F7C-2A908FCFB6E9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C433D875-8249-4F27-9F7C-2A908FCFB6E9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C433D875-8249-4F27-9F7C-2A908FCFB6E9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BE4731A6-F508-441D-890D-C11E697DEA48}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BE4731A6-F508-441D-890D-C11E697DEA48}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BE4731A6-F508-441D-890D-C11E697DEA48}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BE4731A6-F508-441D-890D-C11E697DEA48}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1F468102-840A-4EE4-870F-AF0A45E3DB0A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1F468102-840A-4EE4-870F-AF0A45E3DB0A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1F468102-840A-4EE4-870F-AF0A45E3DB0A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1F468102-840A-4EE4-870F-AF0A45E3DB0A}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{3604E24F-7B23-4C37-943A-6CFE6843E817} = {99F00D1F-4C3B-43C3-9847-C4D475E288E8}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {BF74B623-EA0C-4F20-9A5E-8C3B13147F9E}
+	EndGlobalSection
+EndGlobal
