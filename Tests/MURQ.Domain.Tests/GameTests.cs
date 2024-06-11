@@ -51,11 +51,11 @@ public class GameTests
     public void Button_goes_to_label()
     {
         // Arrange
-        var labelInstruction = new LabelInstruction{Label = "Начало"};
+        var labelInstruction = new LabelInstruction { Label = "Начало" };
         var quest = new Quest([
             labelInstruction,
-            new PrintInstruction {Text = "Text"},
-            new ButtonInstruction {Caption = "Push me", LabelInstruction = labelInstruction}
+            new PrintInstruction { Text = "Text" },
+            new ButtonInstruction { Caption = "Push me", LabelInstruction = labelInstruction }
         ]);
         var game = new Game(quest);
 
@@ -68,5 +68,23 @@ public class GameTests
         game.CurrentLocation.Buttons!.First().Press();
         game.CurrentLocation.Text.Should().Be("Text");
         game.CurrentLocation.Buttons!.First().Caption.Should().Be("Push me");
+    }
+
+    [Fact]
+    public void End_stops()
+    {
+        // Arrange
+        var quest = new Quest([
+            new LabelInstruction { Label = "Первая локация" },
+            new EndInstruction(),
+            new LabelInstruction { Label = "Вторая локация" }
+        ]);
+        var game = new Game(quest);
+
+        // Act
+        game.Start();
+
+        // Assert
+        game.CurrentLocation.Name.Should().Be("Первая локация");
     }
 }

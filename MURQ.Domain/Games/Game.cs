@@ -20,6 +20,7 @@ public class Game
 
     public CurrentLocationView CurrentLocation => new()
     {
+        Name = _currentLocationName,
         Text = _currentScreenText.ToString(),
         Buttons = _currentScreenButtons
     };
@@ -35,12 +36,14 @@ public class Game
 
     private void SubscribeToRunningContextEvents()
     {
+        _globalGameContext.OnLocationChanged += locationName => _currentLocationName = locationName;
         _globalGameContext.OnTextPrinted += text => _currentScreenText.Append(text);
         _globalGameContext.OnButtonAdded += (caption, labelInstruction) => _currentScreenButtons.Add(new Button
         {
             Caption = caption,
             OnButtonPressed = () => GoToNewLocation(labelInstruction)
         });
+        _globalGameContext.OnEnd += StopAndWaitUser;
     }
 
     private void GoToNewLocation(LabelInstruction? labelInstruction)
@@ -48,6 +51,11 @@ public class Game
         ClearCurrentView();
         GoToLabel(labelInstruction);
         RunInstructions();
+    }
+
+    private void StopAndWaitUser()
+    {
+        SetModeWaitingUserInput();
     }
 
     private void ClearCurrentView()
@@ -97,6 +105,7 @@ public class Game
 
     public class CurrentLocationView
     {
+        public string? Name { get; init; }
         public string? Text { get; init; }
         public IReadOnlyCollection<Button>? Buttons { get; init; }
     }
@@ -114,4 +123,5 @@ public class Game
     private readonly GameContext _globalGameContext;
     private readonly StringBuilder _currentScreenText = new();
     private readonly List<Button> _currentScreenButtons = new();
+    private string? _currentLocationName;
 }

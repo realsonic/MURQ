@@ -7,4 +7,5 @@ public interface IGameContext
     void PrintText(string? text);
     void AddButton(string caption, LabelInstruction? labelInstruction);
     void ChangeLocation(string label);
+    void End();
 }
