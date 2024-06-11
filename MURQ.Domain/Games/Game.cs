@@ -11,35 +11,63 @@ public class Game
     public Game(Quest quest)
     {
         Quest = quest;
-        
-        _globalRunningContext = new RunningContext();
+
+        _globalGameContext = new GameContext();
         SubscribeToRunningContextEvents();
     }
 
-    private void SubscribeToRunningContextEvents()
-    {
-        _globalRunningContext.OnTextPrinted += text => _currentScreenText.Append(text);
-    }
+    public event Action? OnLocationChanged;
 
     public Quest Quest { get; }
 
     public CurrentLocationView CurrentLocation => new()
     {
-        Text = _currentScreenText.ToString()
+        Name = _currentLocationName,
+        Text = _currentScreenText.ToString(),
+        Buttons = _currentScreenButtons
     };
 
     public void Start()
     {
         if (IsStarted) throw new MurqException("Игра уже запущена, второй раз запустить нельзя.");
 
-        ResetCurrentView();
+        ClearCurrentView();
         SetNextInstructionToFirstInQuest();
         RunInstructions();
     }
 
-    private void ResetCurrentView()
+    private void SubscribeToRunningContextEvents()
+    {
+        _globalGameContext.OnLocationChanged += locationName =>
+        {
+            _currentLocationName = locationName;
+            OnLocationChanged?.Invoke();
+        };
+        _globalGameContext.OnTextPrinted += text => _currentScreenText.Append(text);
+        _globalGameContext.OnButtonAdded += (caption, labelInstruction) => _currentScreenButtons.Add(new Button
+        {
+            Caption = caption,
+            OnButtonPressed = () => GoToNewLocation(labelInstruction)
+        });
+        _globalGameContext.OnEnd += StopAndWaitUser;
+    }
+
+    private void GoToNewLocation(LabelInstruction? labelInstruction)
+    {
+        ClearCurrentView();
+        GoToLabel(labelInstruction);
+        RunInstructions();
+    }
+
+    private void StopAndWaitUser()
+    {
+        SetModeWaitingUserInput();
+    }
+
+    private void ClearCurrentView()
     {
         _currentScreenText.Clear();
+        _currentScreenButtons.Clear();
     }
 
     private void RunInstructions()
@@ -54,54 +82,52 @@ public class Game
 
     private void RunCurrentInstruction()
     {
-        if (CurrentInstruction is null)
+        if (_currentInstruction is null)
         {
             SetModeWaitingUserInput();
             return;
         }
 
-        CurrentInstruction.Run(_globalRunningContext);
+        _currentInstruction.Run(_globalGameContext);
     }
 
-    private void PromoteNextInstruction()
+    private void GoToLabel(LabelInstruction? labelInstruction)
     {
-        if (_currentInstructionIndex is not null)
+        if (labelInstruction is not null)
         {
-            _previousInstructionIndex = _currentInstructionIndex;
-
-            int nextInstructionIndex = _currentInstructionIndex.Value + 1;
-            if (nextInstructionIndex <= Quest.Instructions.Count - 1)
-            {
-                _currentInstructionIndex = nextInstructionIndex;
-            }
-            else
-            {
-                _currentInstructionIndex = null;
-            }
+            SetCurrentInstruction(labelInstruction);
         }
     }
 
-    private void SetNextInstructionToFirstInQuest() => _currentInstructionIndex = Quest.Instructions.Count > 0 ? 0 : null;
+    private void PromoteNextInstruction() => _currentInstruction = Quest.GetNextInstruction(_currentInstruction);
+
+    private void SetNextInstructionToFirstInQuest() => _currentInstruction = Quest.FirstInstruction;
     private void SetModeRunningInstructions() => _gameMode = GameMode.RunningInstructions;
     private void SetModeWaitingUserInput() => _gameMode = GameMode.WaitingUserInput;
+    private void SetCurrentInstruction(Instruction instruction) => _currentInstruction = instruction;
 
     private bool IsStarted => _gameMode is not GameMode.InitialState;
     private bool IsRunningInstructions => _gameMode == GameMode.RunningInstructions;
 
-    private Instruction? CurrentInstruction =>
-        _currentInstructionIndex is not null ? Quest.Instructions[_currentInstructionIndex.Value] : null;
-
-    private Instruction? PreviousInstruction =>
-        _previousInstructionIndex is not null ? Quest.Instructions[_previousInstructionIndex.Value] : null;
-
     public class CurrentLocationView
     {
+        public string? Name { get; init; }
         public string? Text { get; init; }
+        public IReadOnlyList<Button> Buttons { get; init; } = [];
+    }
+
+    public class Button
+    {
+        public required string Caption { get; init; }
+        public required Action OnButtonPressed { get; init; }
+
+        public void Press() => OnButtonPressed();
     }
 
     private GameMode _gameMode = GameMode.InitialState;
-    private int? _previousInstructionIndex;
-    private int? _currentInstructionIndex;
-    private readonly RunningContext _globalRunningContext;
+    private Instruction? _currentInstruction;
+    private readonly GameContext _globalGameContext;
     private readonly StringBuilder _currentScreenText = new();
+    private readonly List<Button> _currentScreenButtons = new();
+    private string? _currentLocationName;
 }

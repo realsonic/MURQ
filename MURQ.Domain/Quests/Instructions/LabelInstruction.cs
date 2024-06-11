@@ -4,13 +4,13 @@ using MURQ.Domain.Games;
 
 namespace MURQ.Domain.Quests.Instructions;
 
-[DebuggerDisplay("p {Text,nq}")]
-public class PrintInstruction : Instruction
+[DebuggerDisplay(":{Label,nq}")]
+public class LabelInstruction : Instruction
 {
-    public string? Text { get; init; }
+    public required string Label { get; init; }
 
     public override void Run(IGameContext gameContext)
     {
-        gameContext.PrintText(Text);
+        gameContext.ChangeLocation(Label);
     }
 }
