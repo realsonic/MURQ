@@ -12,7 +12,7 @@ public class Game
     {
         Quest = quest;
 
-        _globalRunningContext = new RunningContext();
+        _globalGameContext = new GameContext();
         SubscribeToRunningContextEvents();
     }
 
@@ -35,17 +35,19 @@ public class Game
 
     private void SubscribeToRunningContextEvents()
     {
-        _globalRunningContext.OnTextPrinted += text => _currentScreenText.Append(text);
-        _globalRunningContext.OnButtonAdded += (caption, labelInstruction) => _currentScreenButtons.Add(new Button
+        _globalGameContext.OnTextPrinted += text => _currentScreenText.Append(text);
+        _globalGameContext.OnButtonAdded += (caption, labelInstruction) => _currentScreenButtons.Add(new Button
         {
             Caption = caption,
-            OnButtonPressed = () =>
-            {
-                ClearCurrentView();
-                GoToLabel(labelInstruction);
-                RunInstructions();
-            }
+            OnButtonPressed = () => RunNewLocation(labelInstruction)
         });
+    }
+
+    private void RunNewLocation(LabelInstruction? labelInstruction)
+    {
+        ClearCurrentView();
+        GoToLabel(labelInstruction);
+        RunInstructions();
     }
 
     private void ClearCurrentView()
@@ -72,7 +74,7 @@ public class Game
             return;
         }
 
-        CurrentInstruction.Run(_globalRunningContext);
+        CurrentInstruction.Run(_globalGameContext);
     }
 
     private void GoToLabel(LabelInstruction? labelInstruction)
@@ -142,7 +144,7 @@ public class Game
     private GameMode _gameMode = GameMode.InitialState;
     private int? _previousInstructionIndex;
     private int? _currentInstructionIndex;
-    private readonly RunningContext _globalRunningContext;
+    private readonly GameContext _globalGameContext;
     private readonly StringBuilder _currentScreenText = new();
     private readonly List<Button> _currentScreenButtons = new();
 }
