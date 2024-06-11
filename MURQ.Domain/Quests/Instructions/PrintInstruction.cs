@@ -9,8 +9,8 @@ public class PrintInstruction : Instruction
 {
     public string? Text { get; init; }
 
-    public override void Run(RunningContext runningContext)
+    public override void Run(IGameContext gameContext)
     {
-        runningContext.PrintText(Text);
+        gameContext.PrintText(Text);
     }
 }

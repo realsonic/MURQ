@@ -11,8 +11,8 @@ public class ButtonInstruction : Instruction
 
     public LabelInstruction? LabelInstruction { get; init; }
 
-    public override void Run(RunningContext runningContext)
+    public override void Run(IGameContext gameContext)
     {
-        runningContext.AddButton(Caption, LabelInstruction);
+        gameContext.AddButton(Caption, LabelInstruction);
     }
 }

@@ -8,9 +8,20 @@ public class Quest(IImmutableList<Instruction> instructions)
 {
     public IImmutableList<Instruction> Instructions { get; } = instructions;
 
-    public int? GetInstructionIndex(Instruction instruction)
+    public Instruction? FirstInstruction => Instructions.Count > 0 ? Instructions[0] : null;
+
+    public Instruction? GetNextInstruction(Instruction? currentInstruction)
     {
-        int instructionIndex = Instructions.IndexOf(instruction, 0, 1, null);
-        return instructionIndex >= 0 ? instructionIndex : null;
+        if (currentInstruction is null) return null;
+
+        int currentInstructionIndex = Instructions.IndexOf(currentInstruction);
+
+        if (currentInstructionIndex == -1) return null;
+
+        int nextInstructionIndex = currentInstructionIndex + 1;
+
+        return nextInstructionIndex > MaxInstructionIndex ? null : Instructions[nextInstructionIndex];
     }
+
+    private int MaxInstructionIndex => Instructions.Count - 1;
 }
