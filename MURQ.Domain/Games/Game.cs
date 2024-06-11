@@ -16,6 +16,8 @@ public class Game
         SubscribeToRunningContextEvents();
     }
 
+    public event Action? OnLocationChanged;
+
     public Quest Quest { get; }
 
     public CurrentLocationView CurrentLocation => new()
@@ -36,7 +38,11 @@ public class Game
 
     private void SubscribeToRunningContextEvents()
     {
-        _globalGameContext.OnLocationChanged += locationName => _currentLocationName = locationName;
+        _globalGameContext.OnLocationChanged += locationName =>
+        {
+            _currentLocationName = locationName;
+            OnLocationChanged?.Invoke();
+        };
         _globalGameContext.OnTextPrinted += text => _currentScreenText.Append(text);
         _globalGameContext.OnButtonAdded += (caption, labelInstruction) => _currentScreenButtons.Add(new Button
         {
@@ -107,7 +113,7 @@ public class Game
     {
         public string? Name { get; init; }
         public string? Text { get; init; }
-        public IReadOnlyCollection<Button>? Buttons { get; init; }
+        public IReadOnlyList<Button> Buttons { get; init; } = [];
     }
 
     public class Button
