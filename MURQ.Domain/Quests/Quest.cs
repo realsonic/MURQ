@@ -1,5 +1,6 @@
 ﻿using System.Collections.Immutable;
 
+using MURQ.Domain.Exceptions;
 using MURQ.Domain.Quests.Instructions;
 
 namespace MURQ.Domain.Quests;
@@ -16,7 +17,8 @@ public class Quest(IImmutableList<Instruction> instructions)
 
         int currentInstructionIndex = Instructions.IndexOf(currentInstruction);
 
-        if (currentInstructionIndex == -1) return null;
+        if (currentInstructionIndex == -1)
+            throw new MurqException($"Инструкция {currentInstruction} не принадлежит этому квесту.");
 
         int nextInstructionIndex = currentInstructionIndex + 1;
 

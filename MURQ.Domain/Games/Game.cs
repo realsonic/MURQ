@@ -54,6 +54,8 @@ public class Game
 
     private void GoToNewLocation(LabelInstruction? labelInstruction)
     {
+        if (labelInstruction is null) return;
+        
         ClearCurrentView();
         GoToLabel(labelInstruction);
         RunInstructions();
