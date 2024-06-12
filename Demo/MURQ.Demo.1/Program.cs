@@ -55,6 +55,6 @@ static int GetValidChoice(int maxNumber)
         if (!char.IsDigit(keyInfo.KeyChar)) continue;
 
         var number = Convert.ToInt32(keyInfo.KeyChar.ToString());
-        if (number == 1 && number <= maxNumber) return number;
+        if (number >= 1 && number <= maxNumber) return number;
     }
 }
