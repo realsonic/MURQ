@@ -2,17 +2,17 @@
 
 using MURQ.Domain.Games;
 
-namespace MURQ.Domain.Quests.Instructions;
+namespace MURQ.Domain.Quests.Statements;
 
 [DebuggerDisplay("btn {LabelInstruction?.Label,nq},{Caption,nq}")]
-public class ButtonInstruction : Instruction
+public class ButtonStatement : Statement
 {
     public required string Caption { get; init; }
 
-    public LabelInstruction? LabelInstruction { get; init; }
+    public LabelStatement? LabelStatement { get; init; }
 
     public override void Run(IGameContext gameContext)
     {
-        gameContext.AddButton(Caption, LabelInstruction);
+        gameContext.AddButton(Caption, LabelStatement);
     }
 }

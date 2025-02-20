@@ -2,7 +2,7 @@
 
 using MURQ.Domain.Exceptions;
 using MURQ.Domain.Quests;
-using MURQ.Domain.Quests.Instructions;
+using MURQ.Domain.Quests.Statements;
 
 namespace MURQ.Domain.Games;
 
@@ -32,8 +32,8 @@ public class Game
         if (IsStarted) throw new MurqException("Игра уже запущена, второй раз запустить нельзя.");
 
         ClearCurrentView();
-        SetNextInstructionToFirstInQuest();
-        RunInstructions();
+        SetNextStatementToStarting();
+        RunStatements();
     }
 
     private void SubscribeToRunningContextEvents()
@@ -44,21 +44,21 @@ public class Game
             OnLocationChanged?.Invoke();
         };
         _globalGameContext.OnTextPrinted += text => _currentScreenText.Append(text);
-        _globalGameContext.OnButtonAdded += (caption, labelInstruction) => _currentScreenButtons.Add(new Button
+        _globalGameContext.OnButtonAdded += (caption, labelStatement) => _currentScreenButtons.Add(new Button
         {
             Caption = caption,
-            OnButtonPressed = () => GoToNewLocation(labelInstruction)
+            OnButtonPressed = () => GoToNewLocation(labelStatement)
         });
         _globalGameContext.OnEnd += StopAndWaitUser;
     }
 
-    private void GoToNewLocation(LabelInstruction? labelInstruction)
+    private void GoToNewLocation(LabelStatement? labelStatement)
     {
-        if (labelInstruction is null) return;
+        if (labelStatement is null) return;
         
         ClearCurrentView();
-        GoToLabel(labelInstruction);
-        RunInstructions();
+        GoToLabel(labelStatement);
+        RunStatements();
     }
 
     private void StopAndWaitUser()
@@ -72,44 +72,44 @@ public class Game
         _currentScreenButtons.Clear();
     }
 
-    private void RunInstructions()
+    private void RunStatements()
     {
-        SetModeRunningInstructions();
-        while (IsRunningInstructions)
+        SetModeRunningStatements();
+        while (IsRunningStatements)
         {
-            RunCurrentInstruction();
-            PromoteNextInstruction();
+            RunCurrentStatement();
+            PromoteNextStatement();
         }
     }
 
-    private void RunCurrentInstruction()
+    private void RunCurrentStatement()
     {
-        if (_currentInstruction is null)
+        if (_currentStatement is null)
         {
             SetModeWaitingUserInput();
             return;
         }
 
-        _currentInstruction.Run(_globalGameContext);
+        _currentStatement.Run(_globalGameContext);
     }
 
-    private void GoToLabel(LabelInstruction? labelInstruction)
+    private void GoToLabel(LabelStatement? labelStatement)
     {
-        if (labelInstruction is not null)
+        if (labelStatement is not null)
         {
-            SetCurrentInstruction(labelInstruction);
+            SetCurrentStatement(labelStatement);
         }
     }
 
-    private void PromoteNextInstruction() => _currentInstruction = Quest.GetNextInstruction(_currentInstruction);
+    private void PromoteNextStatement() => _currentStatement = Quest.GetNextStatement(_currentStatement);
 
-    private void SetNextInstructionToFirstInQuest() => _currentInstruction = Quest.FirstInstruction;
-    private void SetModeRunningInstructions() => _gameMode = GameMode.RunningInstructions;
+    private void SetNextStatementToStarting() => _currentStatement = Quest.StartingStatement;
+    private void SetModeRunningStatements() => _gameMode = GameMode.RunningStatements;
     private void SetModeWaitingUserInput() => _gameMode = GameMode.WaitingUserInput;
-    private void SetCurrentInstruction(Instruction instruction) => _currentInstruction = instruction;
+    private void SetCurrentStatement(Statement statement) => _currentStatement = statement;
 
     private bool IsStarted => _gameMode is not GameMode.InitialState;
-    private bool IsRunningInstructions => _gameMode == GameMode.RunningInstructions;
+    private bool IsRunningStatements => _gameMode == GameMode.RunningStatements;
 
     public class CurrentLocationView
     {
@@ -127,7 +127,7 @@ public class Game
     }
 
     private GameMode _gameMode = GameMode.InitialState;
-    private Instruction? _currentInstruction;
+    private Statement? _currentStatement;
     private readonly GameContext _globalGameContext;
     private readonly StringBuilder _currentScreenText = new();
     private readonly List<Button> _currentScreenButtons = new();

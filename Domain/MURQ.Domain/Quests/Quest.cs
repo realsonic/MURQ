@@ -1,29 +1,29 @@
 ﻿using System.Collections.Immutable;
 
 using MURQ.Domain.Exceptions;
-using MURQ.Domain.Quests.Instructions;
+using MURQ.Domain.Quests.Statements;
 
 namespace MURQ.Domain.Quests;
 
-public class Quest(IImmutableList<Instruction> instructions)
+public class Quest(IEnumerable<Statement> statements)
 {
-    public IImmutableList<Instruction> Instructions { get; } = instructions;
+    public IImmutableList<Statement> Statements { get; } = statements.ToImmutableList();
 
-    public Instruction? FirstInstruction => Instructions.Count > 0 ? Instructions[0] : null;
+    public Statement? StartingStatement => Statements.Count > 0 ? Statements[0] : null;
 
-    public Instruction? GetNextInstruction(Instruction? currentInstruction)
+    public Statement? GetNextStatement(Statement? currentStatement)
     {
-        if (currentInstruction is null) return null;
+        if (currentStatement is null) return null;
 
-        int currentInstructionIndex = Instructions.IndexOf(currentInstruction);
+        int currentStatementIndex = Statements.IndexOf(currentStatement);
 
-        if (currentInstructionIndex == -1)
-            throw new MurqException($"Инструкция {currentInstruction} не принадлежит этому квесту.");
+        if (currentStatementIndex == -1)
+            throw new MurqException($"Инструкция {currentStatement} не принадлежит этому квесту.");
 
-        int nextInstructionIndex = currentInstructionIndex + 1;
+        int nextStatementIndex = currentStatementIndex + 1;
 
-        return nextInstructionIndex > MaxInstructionIndex ? null : Instructions[nextInstructionIndex];
+        return nextStatementIndex > MaxStatementIndex ? null : Statements[nextStatementIndex];
     }
 
-    private int MaxInstructionIndex => Instructions.Count - 1;
+    private int MaxStatementIndex => Statements.Count - 1;
 }

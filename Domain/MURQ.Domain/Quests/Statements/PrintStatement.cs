@@ -2,10 +2,10 @@
 
 using MURQ.Domain.Games;
 
-namespace MURQ.Domain.Quests.Instructions;
+namespace MURQ.Domain.Quests.Statements;
 
 [DebuggerDisplay("p {Text,nq}")]
-public class PrintInstruction : Instruction
+public class PrintStatement : Statement
 {
     public string? Text { get; init; }
 

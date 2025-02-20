@@ -1,6 +1,6 @@
 using MURQ.Domain.Games;
 using MURQ.Domain.Quests;
-using MURQ.Domain.Quests.Instructions;
+using MURQ.Domain.Quests.Statements;
 
 namespace MURQ.Domain.Tests;
 
@@ -21,8 +21,8 @@ public class GameTests
     public void Print_shows_text()
     {
         // Arrange
-        var printInstruction = new PrintInstruction { Text = "Hello World!" };
-        var quest = new Quest([printInstruction]);
+        var printStatement = new PrintStatement { Text = "Hello World!" };
+        var quest = new Quest([printStatement]);
         var game = new Game(quest);
 
         // Act
@@ -36,8 +36,8 @@ public class GameTests
     public void ButtonInstruction_adds_button()
     {
         // Arrange
-        var btnInstruction = new ButtonInstruction { Caption = "Push me" };
-        var quest = new Quest([btnInstruction]);
+        var btnStatement = new ButtonStatement { Caption = "Push me" };
+        var quest = new Quest([btnStatement]);
         var game = new Game(quest);
 
         // Act
@@ -51,11 +51,11 @@ public class GameTests
     public void Button_goes_to_label()
     {
         // Arrange
-        var labelInstruction = new LabelInstruction { Label = "Начало" };
+        var labelStatement = new LabelStatement { Label = "Начало" };
         var quest = new Quest([
-            labelInstruction,
-            new PrintInstruction { Text = "Text" },
-            new ButtonInstruction { Caption = "Push me", LabelInstruction = labelInstruction }
+            labelStatement,
+            new PrintStatement { Text = "Text" },
+            new ButtonStatement { Caption = "Push me", LabelStatement = labelStatement }
         ]);
         var game = new Game(quest);
 
@@ -75,9 +75,9 @@ public class GameTests
     {
         // Arrange
         var quest = new Quest([
-            new LabelInstruction { Label = "Первая локация" },
-            new EndInstruction(),
-            new LabelInstruction { Label = "Вторая локация" }
+            new LabelStatement { Label = "Первая локация" },
+            new EndStatement(),
+            new LabelStatement { Label = "Вторая локация" }
         ]);
         var game = new Game(quest);
 

@@ -3,6 +3,6 @@
 internal enum GameMode
 {
     InitialState,
-    RunningInstructions,
+    RunningStatements,
     WaitingUserInput
 }

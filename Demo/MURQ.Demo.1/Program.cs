@@ -1,27 +1,27 @@
-﻿using System.Text;
-
-using MURQ.Domain.Games;
+﻿using MURQ.Domain.Games;
 using MURQ.Domain.Quests;
-using MURQ.Domain.Quests.Instructions;
+using MURQ.Domain.Quests.Statements;
+
+using System.Text;
 
 Console.OutputEncoding = Encoding.UTF8;
 Console.Title = "Мурка. Демо 1";
 
-var hereLabel = new LabelInstruction { Label = "Здесь" };
-var thereLabel = new LabelInstruction { Label = "Там" };
+var hereLabel = new LabelStatement { Label = "Здесь" };
+var thereLabel = new LabelStatement { Label = "Там" };
 
 var quest = new Quest([
     hereLabel,
-    new PrintInstruction
+    new PrintStatement
     {
         Text =
             "Привет! Это простое демо MURQ: квест, в котором есть пара локаций да пара кнопок, чтобы ходить туда-сюда.\n"
     },
-    new ButtonInstruction { Caption = "Туда", LabelInstruction = thereLabel },
-    new EndInstruction(),
+    new ButtonStatement { Caption = "Туда", LabelStatement = thereLabel },
+    new EndStatement(),
     thereLabel,
-    new PrintInstruction { Text = "Вы попали туда!\n" },
-    new ButtonInstruction { Caption = "Сюда", LabelInstruction = hereLabel }
+    new PrintStatement { Text = "Вы попали туда!\n" },
+    new ButtonStatement { Caption = "Сюда", LabelStatement = hereLabel }
 ]);
 
 var game = new Game(quest);
