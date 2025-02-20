@@ -3,6 +3,7 @@
 /// <summary>
 /// Базовая ошибка домена MURQ.
 /// </summary>
+[Serializable]
 public class MurqException : Exception
 {
     public MurqException(string? message) : base(message)
