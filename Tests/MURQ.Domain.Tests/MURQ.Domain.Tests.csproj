@@ -18,7 +18,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\MURQ.Domain\MURQ.Domain.csproj" />
+    <ProjectReference Include="..\..\Domain\MURQ.Domain\MURQ.Domain.csproj" />
   </ItemGroup>
 
   <ItemGroup>
