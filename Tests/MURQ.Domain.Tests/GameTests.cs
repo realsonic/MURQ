@@ -6,7 +6,7 @@ namespace MURQ.Domain.Tests;
 
 public class GameTests
 {
-    [Fact]
+    [Fact(DisplayName = "Пустой квест запускается")]
     public void Empty_quest_starts()
     {
         // Arrange
@@ -17,7 +17,7 @@ public class GameTests
         game.Start();
     }
 
-    [Fact]
+    [Fact(DisplayName = "Print выводит текст")]
     public void Print_shows_text()
     {
         // Arrange
@@ -32,7 +32,7 @@ public class GameTests
         game.CurrentLocation.Text.Should().Be("Hello World!");
     }
 
-    [Fact]
+    [Fact(DisplayName = "Button добавляет кнопку")]
     public void ButtonInstruction_adds_button()
     {
         // Arrange
@@ -44,10 +44,10 @@ public class GameTests
         game.Start();
 
         // Assert
-        game.CurrentLocation.Buttons!.First().Caption.Should().Be("Push me");
+        game.CurrentLocation.Buttons![0].Caption.Should().Be("Push me");
     }
 
-    [Fact]
+    [Fact(DisplayName = "Кнопка переходит на метку")]
     public void Button_goes_to_label()
     {
         // Arrange
@@ -62,15 +62,15 @@ public class GameTests
         // Act & Assert: start game
         game.Start();
         game.CurrentLocation.Text.Should().Be("Text");
-        game.CurrentLocation.Buttons!.First().Caption.Should().Be("Push me");
+        game.CurrentLocation.Buttons![0].Caption.Should().Be("Push me");
 
         // Act & Assert: push button
-        game.CurrentLocation.Buttons!.First().Press();
+        game.CurrentLocation.Buttons![0].Press();
         game.CurrentLocation.Text.Should().Be("Text");
-        game.CurrentLocation.Buttons!.First().Caption.Should().Be("Push me");
+        game.CurrentLocation.Buttons![0].Caption.Should().Be("Push me");
     }
 
-    [Fact]
+    [Fact(DisplayName = "End останавливает выполнение")]
     public void End_stops()
     {
         // Arrange
