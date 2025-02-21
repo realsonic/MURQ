@@ -1,9 +1,9 @@
 ﻿using MURQ.Domain.Quests;
 using MURQ.Domain.Quests.Statements;
-using MURQ.URQL.Tokens.Tokens;
-using MURQ.URQL.Tokens.Tokens.Statements;
+using MURQ.URQL.Parsing.Tokens;
+using MURQ.URQL.Parsing.Tokens.Statements;
 
-namespace MURQ.URQL.Parser;
+namespace MURQ.URQL.Parsing.Parsers;
 
 public class UrqlParser
 {
@@ -48,7 +48,7 @@ public class UrqlParser
 
     private TToken Match<TToken>()
     {
-        if(lookahead is TToken token)
+        if (lookahead is TToken token)
         {
             lookahead = NextTerminal();
             return token;

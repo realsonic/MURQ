@@ -2,8 +2,8 @@ using FluentAssertions;
 
 using MURQ.Domain.Quests;
 using MURQ.Domain.Quests.Statements;
-using MURQ.URQL.Parser;
-using MURQ.URQL.Tokens.Tokens.Statements;
+using MURQ.URQL.Parsing.Parsers;
+using MURQ.URQL.Parsing.Tokens.Statements;
 
 namespace MURQ.URQL.Tests;
 

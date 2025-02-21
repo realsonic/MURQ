@@ -1,6 +1,6 @@
 ﻿using System.Collections;
 
-namespace MURQ.URQL.Tokens.Locations;
+namespace MURQ.URQL.Parsing.Locations;
 
 public class PositionedEnumerable(IEnumerable<char> enumerable) : IEnumerable<(char, Position)>
 {

@@ -1,4 +1,4 @@
-﻿namespace MURQ.URQL.Tokens.Locations;
+﻿namespace MURQ.URQL.Parsing.Locations;
 
 public record Position(int Line, int Column)
 {

@@ -8,7 +8,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\..\Domain\MURQ.Domain\MURQ.Domain.csproj" />
-    <ProjectReference Include="..\MURQ.URQL.Tokens\MURQ.URQL.Tokens.csproj" />
   </ItemGroup>
 
 </Project>

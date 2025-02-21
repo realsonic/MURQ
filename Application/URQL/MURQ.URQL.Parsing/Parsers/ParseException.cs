@@ -1,9 +1,7 @@
-﻿using MURQ.Domain.Exceptions;
-
-namespace MURQ.URQL.Parser;
+﻿namespace MURQ.URQL.Parsing.Parsers;
 
 [Serializable]
-internal class ParseException : MurqException
+public class ParseException : UrqlException
 {
     public ParseException(string? message) : base(message)
     {
