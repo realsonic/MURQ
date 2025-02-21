@@ -26,3 +26,8 @@ public class PositionedEnumerable(IEnumerable<char> enumerable) : IEnumerable<(c
         }
     }
 }
+
+public static class PositionedEnumerableExtensions
+{
+    public static PositionedEnumerable ToPositionedEnumerable(this IEnumerable<char> enumerable) => new(enumerable);
+}
