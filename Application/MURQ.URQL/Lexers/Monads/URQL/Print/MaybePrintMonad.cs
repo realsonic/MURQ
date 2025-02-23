@@ -1,7 +1,7 @@
-﻿using MURQ.URQL.Parsing.Locations;
-using MURQ.URQL.Parsing.Tokens.Statements;
+﻿using MURQ.URQL.Locations;
+using MURQ.URQL.Tokens.Statements;
 
-namespace MURQ.URQL.Parsing.Lexers.Monads.URQL.Print;
+namespace MURQ.URQL.Lexers.Monads.URQL.Print;
 
 public record MaybePrintMonad(string Lexeme, Location Location) : UncompletedLexemeMonad(Lexeme, Location)
 {

@@ -1,4 +1,4 @@
-﻿using MURQ.URQL.Parsing.Locations;
+﻿using MURQ.URQL.Locations;
 
-namespace MURQ.URQL.Parsing.Tokens.Statements;
+namespace MURQ.URQL.Tokens.Statements;
 public record PrintToken(string Text, string Lexeme, Location Location) : StatementToken(Lexeme, Location);

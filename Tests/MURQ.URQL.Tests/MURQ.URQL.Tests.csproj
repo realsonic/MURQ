@@ -18,7 +18,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\Application\URQL\MURQ.URQL.Parsing\MURQ.URQL.Parsing.csproj" />
+    <ProjectReference Include="..\..\Application\MURQ.URQL\MURQ.URQL.csproj" />
     <ProjectReference Include="..\..\Domain\MURQ.Domain\MURQ.Domain.csproj" />
   </ItemGroup>
 

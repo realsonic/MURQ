@@ -1,6 +1,6 @@
 ﻿using MURQ.Domain.Exceptions;
 
-namespace MURQ.URQL.Parsing;
+namespace MURQ.URQL;
 
 [Serializable]
 public class UrqlException : MurqException

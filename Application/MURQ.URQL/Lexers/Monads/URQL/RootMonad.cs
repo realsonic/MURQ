@@ -1,9 +1,9 @@
-﻿using MURQ.URQL.Parsing.Lexers.Monads.URQL.Print;
-using MURQ.URQL.Parsing.Locations;
+﻿using MURQ.URQL.Lexers.Monads.URQL.Print;
+using MURQ.URQL.Locations;
 
-namespace MURQ.URQL.Parsing.Lexers.Monads.URQL;
+namespace MURQ.URQL.Lexers.Monads.URQL;
 
-public record RootMonad(Position Position) : UncompletedLexemeMonad(string.Empty, new Location(Position, Position))
+public record RootMonad(Position Position) : UncompletedLexemeMonad(string.Empty, Location.StartAt(Position))
 {
     public override LexemeMonad Append(char character, Position position)
     {

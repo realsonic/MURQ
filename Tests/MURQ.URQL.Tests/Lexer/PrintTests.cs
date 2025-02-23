@@ -1,7 +1,7 @@
 ﻿using FluentAssertions;
 
-using MURQ.URQL.Parsing.Lexers;
-using MURQ.URQL.Parsing.Tokens.Statements;
+using MURQ.URQL.Lexers;
+using MURQ.URQL.Tokens.Statements;
 
 namespace MURQ.URQL.Tests.Lexer;
 public class PrintTests

@@ -1,9 +1,9 @@
 ﻿using MURQ.Domain.Quests;
 using MURQ.Domain.Quests.Statements;
-using MURQ.URQL.Parsing.Tokens;
-using MURQ.URQL.Parsing.Tokens.Statements;
+using MURQ.URQL.Tokens;
+using MURQ.URQL.Tokens.Statements;
 
-namespace MURQ.URQL.Parsing.Parsers;
+namespace MURQ.URQL.Parsers;
 
 public class UrqlParser
 {

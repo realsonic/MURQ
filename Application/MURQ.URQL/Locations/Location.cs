@@ -1,4 +1,4 @@
-﻿namespace MURQ.URQL.Parsing.Locations;
+﻿namespace MURQ.URQL.Locations;
 
 public record Location(Position Start, Position End)
 {

@@ -1,4 +1,4 @@
-﻿namespace MURQ.URQL.Parsing.Lexers;
+﻿namespace MURQ.URQL.Lexers;
 
 [Serializable]
 internal class LexingException : UrqlException
