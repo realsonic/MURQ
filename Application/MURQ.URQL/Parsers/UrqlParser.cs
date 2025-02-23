@@ -1,5 +1,5 @@
-﻿using MURQ.Domain.Quests;
-using MURQ.Domain.Quests.Statements;
+﻿using MURQ.URQL.SyntaxTree;
+using MURQ.URQL.SyntaxTree.Statements;
 using MURQ.URQL.Tokens;
 using MURQ.URQL.Tokens.Statements;
 
@@ -13,37 +13,37 @@ public class UrqlParser
         lookahead = NextTerminal();
     }
 
-    public Quest ParseQuest()
+    public QuestSto ParseQuest()
     {
-        var statements = ParseStatementsAdapted();
-        return new Quest(statements);
+        IEnumerable<StatementSto> statements = ParseStatementsAdapted();
+        return new QuestSto(statements.ToList());
     }
 
-    private IEnumerable<Statement> ParseStatementsAdapted()
+    private IEnumerable<StatementSto> ParseStatementsAdapted()
     {
         return ParseStatementsRest();
     }
 
-    private IEnumerable<Statement> ParseStatementsRest()
+    private IEnumerable<StatementSto> ParseStatementsRest()
     {
         if (lookahead is StatementToken)
         {
-            List<Statement> statements = [ParseStatement()];
+            List<StatementSto> statements = [ParseStatement()];
             statements.AddRange(ParseStatementsRest());
             return statements;
         }
         else return [];
     }
 
-    private Statement ParseStatement()
+    private StatementSto ParseStatement()
     {
         return ParsePrint();
     }
 
-    private PrintStatement ParsePrint()
+    private PrintStatementSto ParsePrint()
     {
         PrintToken printToken = Match<PrintToken>();
-        return new PrintStatement { Text = printToken.Text };
+        return new PrintStatementSto(printToken.Text);
     }
 
     private TToken Match<TToken>()
@@ -55,12 +55,6 @@ public class UrqlParser
         }
         else throw new ParseException($"Ожидался токен {typeof(TToken)}, а встретился {lookahead}.");
     }
-
-    //private void Match(Token token)
-    //{
-    //    if (lookahead?.GetType() == token.GetType()) lookahead = NextTerminal();
-    //    else throw new Exception($"Syntax error: expected '{token}', but met '{lookahead}'");
-    //}
 
     private Token? NextTerminal() => enumerator.MoveNext() ? enumerator.Current : null;
 

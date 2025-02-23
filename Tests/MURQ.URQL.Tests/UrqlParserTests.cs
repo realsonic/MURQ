@@ -1,8 +1,8 @@
 using FluentAssertions;
 
-using MURQ.Domain.Quests;
-using MURQ.Domain.Quests.Statements;
 using MURQ.URQL.Parsers;
+using MURQ.URQL.SyntaxTree;
+using MURQ.URQL.SyntaxTree.Statements;
 using MURQ.URQL.Tokens.Statements;
 
 namespace MURQ.URQL.Tests;
@@ -16,38 +16,45 @@ public class UrqlParserTests
         UrqlParser sut = new([]);
 
         // Act
-        Quest quest = sut.ParseQuest();
+        QuestSto questSto = sut.ParseQuest();
 
         // Arrange
-        quest.Statements.Should().BeEmpty();
+        questSto.Statements.Should().BeEmpty();
     }
 
     [Fact(DisplayName = "Одна инструкция p распознаётся")]
     public void One_p_parsed()
     {
         // Arrange
-        UrqlParser sut = new([new PrintToken("Привет!", "p Привет!", ((1, 1), (1, 9)))]);
+        UrqlParser sut = new([
+            new PrintToken("Привет!", "p Привет!", ((1, 1), (1, 9)))
+        ]);
 
         // Act
-        Quest quest = sut.ParseQuest();
+        QuestSto questSto = sut.ParseQuest();
 
         // Asssert
-        quest.Statements.Should().BeEquivalentTo([new PrintStatement { Text = "Привет!" }]);
+        questSto.Statements.Should().BeEquivalentTo([
+            new PrintStatementSto("Привет!")
+        ]);
     }
 
     [Fact(DisplayName = "Две инструкции p распознаются")]
     public void Two_p_parsed()
     {
         // Arrange
-        UrqlParser sut = new([new PrintToken("Привет!", "p Привет!", ((1, 1), (1, 9))), new PrintToken("Пока!", "p Пока!", ((1, 1), (1, 7)))]);
+        UrqlParser sut = new([
+            new PrintToken("Привет!", "p Привет!", ((1, 1), (1, 9))), 
+            new PrintToken("Пока!", "p Пока!", ((1, 1), (1, 7)))
+        ]);
 
         // Act
-        Quest quest = sut.ParseQuest();
+        QuestSto questSto = sut.ParseQuest();
 
         // Asssert
-        quest.Statements.Should().BeEquivalentTo([
-            new PrintStatement { Text = "Привет!" },
-            new PrintStatement { Text = "Пока!" }
+        questSto.Statements.Should().BeEquivalentTo([
+            new PrintStatementSto("Привет!"),
+            new PrintStatementSto("Пока!")
         ]);
     }
 }

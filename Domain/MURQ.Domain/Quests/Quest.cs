@@ -1,6 +1,6 @@
 ﻿using System.Collections.Immutable;
 
-using MURQ.Domain.Exceptions;
+using MURQ.Common.Exceptions;
 using MURQ.Domain.Quests.Statements;
 
 namespace MURQ.Domain.Quests;

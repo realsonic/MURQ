@@ -1,4 +1,4 @@
-﻿namespace MURQ.Domain.Exceptions;
+﻿namespace MURQ.Common.Exceptions;
 
 /// <summary>
 /// Базовая ошибка домена MURQ.

@@ -32,9 +32,8 @@ public class PrintTests
         var tokens = sut.Scan();
 
         // Assert
-        tokens.Should().BeEquivalentTo(new PrintToken[]
-        {
-            new("Привет!", "p Привет!", ((1, 1), (1, 9)))
-        });
+        tokens.Should().BeEquivalentTo([
+            new PrintToken("Привет!", "p Привет!", ((1, 1), (1, 9)))
+        ]);
     }
 }

@@ -1,6 +1,6 @@
 ﻿using System.Text;
 
-using MURQ.Domain.Exceptions;
+using MURQ.Common.Exceptions;
 using MURQ.Domain.Quests;
 using MURQ.Domain.Quests.Statements;
 

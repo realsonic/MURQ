@@ -1,4 +1,4 @@
-﻿using MURQ.Domain.Exceptions;
+﻿using MURQ.Common.Exceptions;
 
 namespace MURQ.URQL;
 
