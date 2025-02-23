@@ -2,7 +2,7 @@
 
 using MURQ.URQL.Parsing.Lexers;
 
-namespace MURQ.URQL.Tests;
+namespace MURQ.URQL.Tests.Lexer;
 public class UrqlLexerTests
 {
     [Fact(DisplayName = "Строка пробельных символов не возвращает токенов")]

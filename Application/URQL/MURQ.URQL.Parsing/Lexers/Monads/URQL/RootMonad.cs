@@ -1,4 +1,5 @@
-﻿using MURQ.URQL.Parsing.Locations;
+﻿using MURQ.URQL.Parsing.Lexers.Monads.URQL.Print;
+using MURQ.URQL.Parsing.Locations;
 
 namespace MURQ.URQL.Parsing.Lexers.Monads.URQL;
 
@@ -9,7 +10,8 @@ public record RootMonad(Position Position) : UncompletedLexemeMonad(string.Empty
         if (character is ' ' or '\t' or '\r' or '\n')
             return new RootMonad(position);
 
-        // monads...
+        if (character.IsEqualIgnoreCase('p'))
+            return new MaybePrintMonad(character.ToString(), Location.StartAt(position));
 
         return new UnknownLexemeMonad(character.ToString(), Location.StartAt(position));
     }
