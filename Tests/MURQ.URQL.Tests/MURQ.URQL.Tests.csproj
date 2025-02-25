@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
@@ -18,7 +18,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\Domain\MURQ.Domain\MURQ.Domain.csproj" />
+    <ProjectReference Include="..\..\Application\MURQ.URQL\MURQ.URQL.csproj" />
   </ItemGroup>
 
   <ItemGroup>

@@ -1,12 +1,12 @@
 using MURQ.Domain.Games;
 using MURQ.Domain.Quests;
-using MURQ.Domain.Quests.Instructions;
+using MURQ.Domain.Quests.Statements;
 
 namespace MURQ.Domain.Tests;
 
 public class GameTests
 {
-    [Fact]
+    [Fact(DisplayName = "Пустой квест запускается")]
     public void Empty_quest_starts()
     {
         // Arrange
@@ -17,12 +17,12 @@ public class GameTests
         game.Start();
     }
 
-    [Fact]
+    [Fact(DisplayName = "Print выводит текст")]
     public void Print_shows_text()
     {
         // Arrange
-        var printInstruction = new PrintInstruction { Text = "Hello World!" };
-        var quest = new Quest([printInstruction]);
+        var printStatement = new PrintStatement { Text = "Hello World!" };
+        var quest = new Quest([printStatement]);
         var game = new Game(quest);
 
         // Act
@@ -32,52 +32,52 @@ public class GameTests
         game.CurrentLocation.Text.Should().Be("Hello World!");
     }
 
-    [Fact]
+    [Fact(DisplayName = "Button добавляет кнопку")]
     public void ButtonInstruction_adds_button()
     {
         // Arrange
-        var btnInstruction = new ButtonInstruction { Caption = "Push me" };
-        var quest = new Quest([btnInstruction]);
+        var btnStatement = new ButtonStatement { Caption = "Push me" };
+        var quest = new Quest([btnStatement]);
         var game = new Game(quest);
 
         // Act
         game.Start();
 
         // Assert
-        game.CurrentLocation.Buttons!.First().Caption.Should().Be("Push me");
+        game.CurrentLocation.Buttons![0].Caption.Should().Be("Push me");
     }
 
-    [Fact]
+    [Fact(DisplayName = "Кнопка переходит на метку")]
     public void Button_goes_to_label()
     {
         // Arrange
-        var labelInstruction = new LabelInstruction { Label = "Начало" };
+        var labelStatement = new LabelStatement { Label = "Начало" };
         var quest = new Quest([
-            labelInstruction,
-            new PrintInstruction { Text = "Text" },
-            new ButtonInstruction { Caption = "Push me", LabelInstruction = labelInstruction }
+            labelStatement,
+            new PrintStatement { Text = "Text" },
+            new ButtonStatement { Caption = "Push me", LabelStatement = labelStatement }
         ]);
         var game = new Game(quest);
 
         // Act & Assert: start game
         game.Start();
         game.CurrentLocation.Text.Should().Be("Text");
-        game.CurrentLocation.Buttons!.First().Caption.Should().Be("Push me");
+        game.CurrentLocation.Buttons![0].Caption.Should().Be("Push me");
 
         // Act & Assert: push button
-        game.CurrentLocation.Buttons!.First().Press();
+        game.CurrentLocation.Buttons![0].Press();
         game.CurrentLocation.Text.Should().Be("Text");
-        game.CurrentLocation.Buttons!.First().Caption.Should().Be("Push me");
+        game.CurrentLocation.Buttons![0].Caption.Should().Be("Push me");
     }
 
-    [Fact]
+    [Fact(DisplayName = "End останавливает выполнение")]
     public void End_stops()
     {
         // Arrange
         var quest = new Quest([
-            new LabelInstruction { Label = "Первая локация" },
-            new EndInstruction(),
-            new LabelInstruction { Label = "Вторая локация" }
+            new LabelStatement { Label = "Первая локация" },
+            new EndStatement(),
+            new LabelStatement { Label = "Вторая локация" }
         ]);
         var game = new Game(quest);
 

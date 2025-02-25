@@ -1,6 +1,6 @@
 ﻿using MURQ.Domain.Games;
 using MURQ.Domain.Quests;
-using MURQ.Domain.Quests.Instructions;
+using MURQ.Domain.Quests.Statements;
 
 using System.Text;
 
@@ -8,7 +8,7 @@ Console.OutputEncoding = Encoding.UTF8;
 Console.Title = "Мурка. Демо 0";
 
 var quest = new Quest([
-    new PrintInstruction
+    new PrintStatement
         { Text = "Привет! Это самое простое демо MURQ: квест, в котором только эта строчка текста. Пока!" }
 ]);
 

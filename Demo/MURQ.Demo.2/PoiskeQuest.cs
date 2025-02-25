@@ -1,5 +1,5 @@
 ﻿using MURQ.Domain.Quests;
-using MURQ.Domain.Quests.Instructions;
+using MURQ.Domain.Quests.Statements;
 
 namespace MURQ.Demo._2;
 
@@ -119,18 +119,18 @@ internal class PoiskeQuestBuilder
     {
         for (var i = 1; i <= 12; i++)
         {
-            LabelDictionary[i] = new LabelInstruction { Label = i.ToString() };
+            LabelDictionary[i] = new LabelStatement { Label = i.ToString() };
         }
     }
 
-    private LabelInstruction Label(int label) => LabelDictionary[label];
+    private LabelStatement Label(int label) => LabelDictionary[label];
 
-    private static PrintInstruction Pln(string text) => new() { Text = text + "\n" };
+    private static PrintStatement Pln(string text) => new() { Text = text + "\n" };
 
-    private ButtonInstruction Btn(int label, string caption) =>
-        new() { Caption = caption, LabelInstruction = LabelDictionary[label] };
+    private ButtonStatement Btn(int label, string caption) =>
+        new() { Caption = caption, LabelStatement = LabelDictionary[label] };
 
-    private static EndInstruction End() => new();
+    private static EndStatement End() => new();
 
-    private Dictionary<int, LabelInstruction> LabelDictionary { get; } = [];
+    private Dictionary<int, LabelStatement> LabelDictionary { get; } = [];
 }
