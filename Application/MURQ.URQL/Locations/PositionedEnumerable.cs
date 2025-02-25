@@ -22,7 +22,15 @@ public class PositionedEnumerable(IEnumerable<char> enumerable) : IEnumerable<(c
         {
             yield return (character, position);
 
-            position = character is '\n' ? position.NewLine() : position.AddColumn();
+            switch (character)
+            {
+                case '\n':
+                    position = position.NewLine();
+                    break;
+                case not '\r':
+                    position = position.AddColumn();
+                    break;
+            }
         }
     }
 }

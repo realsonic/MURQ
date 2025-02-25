@@ -1,0 +1,14 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\Domain\MURQ.Domain\MURQ.Domain.csproj" />
+    <ProjectReference Include="..\MURQ.URQL\MURQ.URQL.csproj" />
+  </ItemGroup>
+
+</Project>

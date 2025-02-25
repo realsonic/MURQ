@@ -36,4 +36,23 @@ public class PrintTests
             new PrintToken("Привет!", "p Привет!", ((1, 1), (1, 9)))
         ]);
     }
+    
+    [Fact(DisplayName = "Два p с текстом дают два токена Print с текстом")]
+    public void Two_p_with_text_gives_two_PrintToken_with_text()
+    {
+        // Arrange
+        UrqlLexer sut = new("""
+            p Привет, 
+            p мир!
+            """);
+
+        // Act
+        var tokens = sut.Scan();
+
+        // Assert
+        tokens.Should().BeEquivalentTo([
+            new PrintToken("Привет, ", "p Привет, ", ((1, 1), (1, 10))),
+            new PrintToken("мир!", "p мир!", ((2, 1), (2, 6)))
+        ]);
+    }
 }
