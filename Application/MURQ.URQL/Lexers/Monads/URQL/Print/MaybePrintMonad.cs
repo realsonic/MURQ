@@ -12,6 +12,9 @@ public record MaybePrintMonad(string Lexeme, Location Location) : UncompletedLex
         if (character is ' ')
             return new UncompletedPrintMonad(string.Empty, false, Lexeme + character, Location.EndAt(position));
 
+        if (character is '\n')
+            return new CompletedLexemeMonad(new PrintToken(string.Empty, Lexeme, Location), null);
+
         if (character.IsEqualIgnoreCase('l'))
             return new MaybePlnMonad(PlnLexemeProgress.PL, Lexeme + character, Location.EndAt(position));
 

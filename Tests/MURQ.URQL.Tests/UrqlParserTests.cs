@@ -9,7 +9,7 @@ namespace MURQ.URQL.Tests;
 
 public class UrqlParserTests
 {
-    [Fact(DisplayName = "Пустой исходник не падает")]
+    [Fact(DisplayName = "Когда нет токенов, разбор завершается успешно")]
     public void Empty_works()
     {
         // Arrange
@@ -22,7 +22,7 @@ public class UrqlParserTests
         questSto.Statements.Should().BeEmpty();
     }
 
-    [Fact(DisplayName = "Одна инструкция p распознаётся")]
+    [Fact(DisplayName = "Один токен Print разбирается")]
     public void One_p_parsed()
     {
         // Arrange
@@ -39,7 +39,7 @@ public class UrqlParserTests
         ]);
     }
 
-    [Fact(DisplayName = "Две инструкции p распознаются")]
+    [Fact(DisplayName = "Два токена Print разбираются")]
     public void Two_p_parsed()
     {
         // Arrange

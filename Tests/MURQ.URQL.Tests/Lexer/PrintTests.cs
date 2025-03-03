@@ -6,7 +6,7 @@ using MURQ.URQL.Tokens.Statements;
 namespace MURQ.URQL.Tests.Lexer;
 public class PrintTests
 {
-    [Fact(DisplayName = "\"p \\n\" даёт токен Print с пустым текстом")]
+    [Fact(DisplayName = "p с пробелом и новой строкой даёт токен Print с пустым текстом")]
     public void P_space_newline_gives_PrintToken_with_empty_text()
     {
         // Arrange
