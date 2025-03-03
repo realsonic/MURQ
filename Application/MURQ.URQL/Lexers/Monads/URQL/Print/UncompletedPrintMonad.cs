@@ -10,9 +10,6 @@ public record UncompletedPrintMonad(string Text, bool IsPlnStatement, string Lex
         if (character is '\n')
             return new CompletedLexemeMonad(new PrintToken(Text + (IsPlnStatement ? "\n" : string.Empty), Lexeme, Location), null);
 
-        if (character is '\r') // пропускаем возврат каретки (он обычно идёт перед новой строкой \n)
-            return new UncompletedPrintMonad(Text, IsPlnStatement, Lexeme, Location);
-
         return new UncompletedPrintMonad(Text + character, IsPlnStatement, Lexeme + character, Location.EndAt(position));
     }
 

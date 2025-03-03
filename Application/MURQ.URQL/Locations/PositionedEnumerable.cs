@@ -20,17 +20,16 @@ public class PositionedEnumerable(IEnumerable<char> enumerable) : IEnumerable<(c
 
         foreach (char character in enumerable)
         {
+            if (character is '\r') // трактуем как бесполезный символ, игнорируем
+                continue;
+
             yield return (character, position);
 
-            switch (character)
+            position = character switch
             {
-                case '\n':
-                    position = position.NewLine();
-                    break;
-                case not '\r':
-                    position = position.AddColumn();
-                    break;
-            }
+                '\n' => position.NewLine(),
+                _ => position.AddColumn(),
+            };
         }
     }
 }
