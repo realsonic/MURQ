@@ -1,4 +1,4 @@
-using FluentAssertions;
+п»їusing FluentAssertions;
 
 using MURQ.Application;
 using MURQ.Domain.Games;
@@ -8,7 +8,7 @@ namespace MURQ.EndToEndTests;
 
 public class QstTests
 {
-    [Fact(DisplayName = "Два p отображают одну строку текста")]
+    [Fact(DisplayName = "Р”РІР° p РѕС‚РѕР±СЂР°Р¶Р°СЋС‚ РѕРґРЅСѓ СЃС‚СЂРѕРєСѓ С‚РµРєСЃС‚Р°")]
     public async Task Two_p_shows_one_line()
     {
         // Arrange
@@ -21,10 +21,10 @@ public class QstTests
         sut.Start();
 
         // Assert
-        sut.CurrentLocation.Text.Should().Be("Привет, мир!");
+        sut.CurrentLocation.Text.Should().Be("РџСЂРёРІРµС‚, РјРёСЂ!");
     }
 
-    [Fact(DisplayName = "p без пробела не генерирует текста")]
+    [Fact(DisplayName = "p Р±РµР· РїСЂРѕР±РµР»Р° РЅРµ РіРµРЅРµСЂРёСЂСѓРµС‚ С‚РµРєСЃС‚Р°")]
     public async Task P_with_no_space_gives_no_text()
     {
         // Arrange
@@ -37,10 +37,10 @@ public class QstTests
         sut.Start();
 
         // Assert
-        sut.CurrentLocation.Text.Should().Be("Привет, мир!");
+        sut.CurrentLocation.Text.Should().Be("РџСЂРёРІРµС‚, РјРёСЂ!");
     }
 
-    [Fact(DisplayName = "pln отображает одну строку текста с новой строкой в конце")]
+    [Fact(DisplayName = "pln РѕС‚РѕР±СЂР°Р¶Р°РµС‚ РѕРґРЅСѓ СЃС‚СЂРѕРєСѓ С‚РµРєСЃС‚Р° СЃ РЅРѕРІРѕР№ СЃС‚СЂРѕРєРѕР№ РІ РєРѕРЅС†Рµ")]
     public async Task Pln_shows_one_line_with_new_line()
     {
         // Arrange
@@ -53,6 +53,6 @@ public class QstTests
         sut.Start();
 
         // Assert
-        sut.CurrentLocation.Text.Should().Be("Привет, мир!\n");
+        sut.CurrentLocation.Text.Should().Be("РџСЂРёРІРµС‚, РјРёСЂ!\n");
     }
 }
