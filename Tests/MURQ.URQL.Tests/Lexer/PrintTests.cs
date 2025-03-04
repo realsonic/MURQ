@@ -6,7 +6,7 @@ using MURQ.URQL.Tokens.Statements;
 namespace MURQ.URQL.Tests.Lexer;
 public class PrintTests
 {
-    [Fact(DisplayName = "\"p \\n\" даёт токен Print с пустым текстом")]
+    [Fact(DisplayName = "p с пробелом и новой строкой даёт токен Print с пустым текстом")]
     public void P_space_newline_gives_PrintToken_with_empty_text()
     {
         // Arrange
@@ -18,7 +18,7 @@ public class PrintTests
         // Assert
         tokens.Should().BeEquivalentTo(new PrintToken[]
         {
-            new(string.Empty, "p ", ((1, 1), (1, 2)))
+            new(string.Empty, false, "p ", ((1, 1), (1, 2)))
         });
     }
     
@@ -33,7 +33,7 @@ public class PrintTests
 
         // Assert
         tokens.Should().BeEquivalentTo([
-            new PrintToken("Привет!", "p Привет!", ((1, 1), (1, 9)))
+            new PrintToken("Привет!", false, "p Привет!", ((1, 1), (1, 9)))
         ]);
     }
     
@@ -51,8 +51,8 @@ public class PrintTests
 
         // Assert
         tokens.Should().BeEquivalentTo([
-            new PrintToken("Привет, ", "p Привет, ", ((1, 1), (1, 10))),
-            new PrintToken("мир!", "p мир!", ((2, 1), (2, 6)))
+            new PrintToken("Привет, ", false, "p Привет, ", ((1, 1), (1, 10))),
+            new PrintToken("мир!", false, "p мир!", ((2, 1), (2, 6)))
         ]);
     }
 }

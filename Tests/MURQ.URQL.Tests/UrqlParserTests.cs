@@ -9,7 +9,7 @@ namespace MURQ.URQL.Tests;
 
 public class UrqlParserTests
 {
-    [Fact(DisplayName = "Пустой исходник не падает")]
+    [Fact(DisplayName = "Когда нет токенов, разбор завершается успешно")]
     public void Empty_works()
     {
         // Arrange
@@ -22,12 +22,12 @@ public class UrqlParserTests
         questSto.Statements.Should().BeEmpty();
     }
 
-    [Fact(DisplayName = "Одна инструкция p распознаётся")]
+    [Fact(DisplayName = "Один токен Print разбирается")]
     public void One_p_parsed()
     {
         // Arrange
         UrqlParser sut = new([
-            new PrintToken("Привет!", "p Привет!", ((1, 1), (1, 9)))
+            new PrintToken("Привет!", false, "p Привет!", ((1, 1), (1, 9)))
         ]);
 
         // Act
@@ -35,17 +35,17 @@ public class UrqlParserTests
 
         // Asssert
         questSto.Statements.Should().BeEquivalentTo([
-            new PrintStatementSto("Привет!")
+            new PrintStatementSto("Привет!", false)
         ]);
     }
 
-    [Fact(DisplayName = "Две инструкции p распознаются")]
+    [Fact(DisplayName = "Два токена Print разбираются")]
     public void Two_p_parsed()
     {
         // Arrange
         UrqlParser sut = new([
-            new PrintToken("Привет!", "p Привет!", ((1, 1), (1, 9))), 
-            new PrintToken("Пока!", "p Пока!", ((1, 1), (1, 7)))
+            new PrintToken("Привет!", false, "p Привет!", ((1, 1), (1, 9))), 
+            new PrintToken("Пока!", false, "p Пока!", ((1, 1), (1, 7)))
         ]);
 
         // Act
@@ -53,8 +53,8 @@ public class UrqlParserTests
 
         // Asssert
         questSto.Statements.Should().BeEquivalentTo([
-            new PrintStatementSto("Привет!"),
-            new PrintStatementSto("Пока!")
+            new PrintStatementSto("Привет!", false),
+            new PrintStatementSto("Пока!", false)
         ]);
     }
 }

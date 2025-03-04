@@ -10,11 +10,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Remove="Quests\TwoP.qst" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Content Include="Quests\TwoP.qst">
+    <Content Include="Quests\*.qst">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
