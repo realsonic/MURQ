@@ -3,18 +3,13 @@ using MURQ.URQL.Tokens.Statements;
 
 namespace MURQ.URQL.Lexers.Monads.URQL.Print;
 
-public record UncompletedPrintMonad(string Text, string Lexeme, Location Location) : UncompletedLexemeMonad(Lexeme, Location)
+public record UncompletedPrintMonad(string Text, bool IsPlnStatement, string Lexeme, Location Location) : UncompletedLexemeMonad(Lexeme, Location)
 {
-    public override LexemeMonad Append(char character, Position position)
+    public override LexemeMonad Append(char character, Position position) => character switch
     {
-        if (character is '\n')
-            return new CompletedLexemeMonad(new PrintToken(Text, Lexeme, Location), null);
+        '\n' => new CompletedLexemeMonad(new PrintToken(Text, IsPlnStatement, Lexeme, Location), null),
+        _ => new UncompletedPrintMonad(Text + character, IsPlnStatement, Lexeme + character, Location.EndAt(position))
+    };
 
-        if (character is '\r') // пропускаем возврат каретки (он обычно идёт перед новой строкой \n)
-            return new UncompletedPrintMonad(Text, Lexeme, Location);
-
-        return new UncompletedPrintMonad(Text + character, Lexeme + character, Location.EndAt(position));
-    }
-
-    public override LexemeMonad Finalize() => new CompletedLexemeMonad(new PrintToken(Text, Lexeme, Location), null);
+    public override LexemeMonad Finalize() => new CompletedLexemeMonad(new PrintToken(Text, IsPlnStatement, Lexeme, Location), null);
 }

@@ -43,7 +43,7 @@ public class UrqlParser
     private PrintStatementSto ParsePrint()
     {
         PrintToken printToken = Match<PrintToken>();
-        return new PrintStatementSto(printToken.Text);
+        return new PrintStatementSto(printToken.Text, printToken.IsNewLineAtEnd);
     }
 
     private TToken Match<TToken>()

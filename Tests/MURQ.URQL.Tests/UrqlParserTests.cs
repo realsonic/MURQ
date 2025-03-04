@@ -1,4 +1,4 @@
-using FluentAssertions;
+п»їusing FluentAssertions;
 
 using MURQ.URQL.Parsers;
 using MURQ.URQL.SyntaxTree;
@@ -9,7 +9,7 @@ namespace MURQ.URQL.Tests;
 
 public class UrqlParserTests
 {
-    [Fact(DisplayName = "Пустой исходник не падает")]
+    [Fact(DisplayName = "РљРѕРіРґР° РЅРµС‚ С‚РѕРєРµРЅРѕРІ, СЂР°Р·Р±РѕСЂ Р·Р°РІРµСЂС€Р°РµС‚СЃСЏ СѓСЃРїРµС€РЅРѕ")]
     public void Empty_works()
     {
         // Arrange
@@ -22,12 +22,12 @@ public class UrqlParserTests
         questSto.Statements.Should().BeEmpty();
     }
 
-    [Fact(DisplayName = "Одна инструкция p распознаётся")]
+    [Fact(DisplayName = "РћРґРёРЅ С‚РѕРєРµРЅ Print СЂР°Р·Р±РёСЂР°РµС‚СЃСЏ")]
     public void One_p_parsed()
     {
         // Arrange
         UrqlParser sut = new([
-            new PrintToken("Привет!", "p Привет!", ((1, 1), (1, 9)))
+            new PrintToken("РџСЂРёРІРµС‚!", false, "p РџСЂРёРІРµС‚!", ((1, 1), (1, 9)))
         ]);
 
         // Act
@@ -35,17 +35,17 @@ public class UrqlParserTests
 
         // Asssert
         questSto.Statements.Should().BeEquivalentTo([
-            new PrintStatementSto("Привет!")
+            new PrintStatementSto("РџСЂРёРІРµС‚!", false)
         ]);
     }
 
-    [Fact(DisplayName = "Две инструкции p распознаются")]
+    [Fact(DisplayName = "Р”РІР° С‚РѕРєРµРЅР° Print СЂР°Р·Р±РёСЂР°СЋС‚СЃСЏ")]
     public void Two_p_parsed()
     {
         // Arrange
         UrqlParser sut = new([
-            new PrintToken("Привет!", "p Привет!", ((1, 1), (1, 9))), 
-            new PrintToken("Пока!", "p Пока!", ((1, 1), (1, 7)))
+            new PrintToken("РџСЂРёРІРµС‚!", false, "p РџСЂРёРІРµС‚!", ((1, 1), (1, 9))), 
+            new PrintToken("РџРѕРєР°!", false, "p РџРѕРєР°!", ((1, 1), (1, 7)))
         ]);
 
         // Act
@@ -53,8 +53,8 @@ public class UrqlParserTests
 
         // Asssert
         questSto.Statements.Should().BeEquivalentTo([
-            new PrintStatementSto("Привет!"),
-            new PrintStatementSto("Пока!")
+            new PrintStatementSto("РџСЂРёРІРµС‚!", false),
+            new PrintStatementSto("РџРѕРєР°!", false)
         ]);
     }
 }
