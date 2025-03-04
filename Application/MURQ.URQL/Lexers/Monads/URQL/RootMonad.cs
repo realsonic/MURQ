@@ -5,16 +5,12 @@ namespace MURQ.URQL.Lexers.Monads.URQL;
 
 public record RootMonad(Position Position) : UncompletedLexemeMonad(string.Empty, Location.StartAt(Position))
 {
-    public override LexemeMonad Append(char character, Position position)
+    public override LexemeMonad Append(char character, Position position) => character switch
     {
-        if (character is ' ' or '\t' or '\r' or '\n')
-            return new RootMonad(position);
-
-        if (character.IsEqualIgnoreCase('p'))
-            return new MaybePrintMonad(character.ToString(), Location.StartAt(position));
-
-        return new UnknownLexemeMonad(character.ToString(), Location.StartAt(position));
-    }
+        ' ' or '\t' or '\r' or '\n' => new RootMonad(position),
+        'p' or 'P' => new MaybePrintMonad(MaybePrintMonad.PrintLexemeProgress.P, character.ToString(), Location.StartAt(position)),
+        _ => new UnknownLexemeMonad(character.ToString(), Location.StartAt(position))
+    };
 
     public override LexemeMonad Finalize() => new RootMonad(this);
 
