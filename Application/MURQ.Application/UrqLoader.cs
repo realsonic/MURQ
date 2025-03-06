@@ -17,8 +17,9 @@ public class UrqLoader(IEnumerable<char> source)
 
         QuestSto questSto = parser.ParseQuest();
 
-        Quest quest = new(statements: questSto.Statements.Select(statementSto => statementSto switch
+        Quest quest = new(statements: questSto.Statements.Select<StatementSto, Statement>(statementSto => statementSto switch
         {
+            LabelStatementSto labelStatementSto => new LabelStatement() { Label = labelStatementSto.Label },
             PrintStatementSto printStatementSto => new PrintStatement() { Text = printStatementSto.Text, IsNewLineAtEnd = printStatementSto.IsNewLineAtEnd },
             _ => throw new MurqException($"Неизвестный тип инструкции {statementSto}.")
         }));
