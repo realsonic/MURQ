@@ -37,7 +37,18 @@ public class UrqlParser
 
     private StatementSto ParseStatement()
     {
-        return ParsePrint();
+        return lookahead switch
+        {
+            LabelToken => ParseLabel(),
+            PrintToken => ParsePrint(),
+            _ => throw new ParseException($"Ожидалась инструкция, а встретился {lookahead}."),
+        };
+    }
+
+    private LabelStatementSto ParseLabel()
+    {
+        LabelToken labelToken = Match<LabelToken>();
+        return new LabelStatementSto(labelToken.Label);
     }
 
     private PrintStatementSto ParsePrint()

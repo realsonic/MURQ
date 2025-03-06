@@ -3,6 +3,7 @@
 using MURQ.Application;
 using MURQ.Domain.Games;
 using MURQ.Domain.Quests;
+using MURQ.Domain.Quests.Statements;
 
 namespace MURQ.EndToEndTests;
 
@@ -15,7 +16,7 @@ public class QstTests
         string questSource = await File.ReadAllTextAsync(@"Quests/Two_P.qst");
         UrqLoader urqLoader = new(questSource);
         Quest quest = urqLoader.LoadQuest();
-        Game sut = new(quest); 
+        Game sut = new(quest);
 
         // Act
         sut.Start();
@@ -31,7 +32,7 @@ public class QstTests
         string questSource = await File.ReadAllTextAsync(@"Quests/P_wo_text.qst");
         UrqLoader urqLoader = new(questSource);
         Quest quest = urqLoader.LoadQuest();
-        Game sut = new(quest); 
+        Game sut = new(quest);
 
         // Act
         sut.Start();
@@ -47,12 +48,33 @@ public class QstTests
         string questSource = await File.ReadAllTextAsync(@"Quests/Pln.qst");
         UrqLoader urqLoader = new(questSource);
         Quest quest = urqLoader.LoadQuest();
-        Game sut = new(quest); 
+        Game sut = new(quest);
 
         // Act
         sut.Start();
 
         // Assert
         sut.CurrentLocation.Text.Should().Be("Привет, мир!\n");
+    }
+
+    [Fact(DisplayName = "Метки загружаются")]
+    public async Task Labels_loaded()
+    {
+        // Arrange
+        string questSource = await File.ReadAllTextAsync(@"Quests/Labels.qst");
+        UrqLoader urqLoader = new(questSource);
+        Quest quest = urqLoader.LoadQuest();
+        Game sut = new(quest);
+
+        // Act
+        sut.Start();
+
+        // Assert
+        List<string> labelList = [.. sut.Quest.Statements.OfType<LabelStatement>().Select(labelStatement => labelStatement.Label)];
+        labelList.Should().BeEquivalentTo([
+            "Метка1", 
+            "Метка2", 
+            "Метка3"
+        ]);
     }
 }
