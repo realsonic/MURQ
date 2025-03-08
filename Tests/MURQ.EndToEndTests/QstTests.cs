@@ -77,4 +77,22 @@ public class QstTests
             "Метка3"
         ]);
     }
+
+    [Fact(DisplayName = "Кнопка переходит на эту же локацию")]
+    public async Task Button_works()
+    {
+        // Arrange
+        string questSource = await File.ReadAllTextAsync(@"Quests/Location_and_btn.qst");
+        UrqLoader urqLoader = new(questSource);
+        Quest quest = urqLoader.LoadQuest();
+        Game sut = new(quest);
+
+        // Act
+        sut.Start();
+        sut.CurrentLocation.Buttons[0].Press();
+
+        // Assert
+        sut.CurrentLocation.Text.Should().Be("Привет, это тест кнопки!\n");
+        sut.CurrentLocation.Buttons[0].Caption.Should().Be("Нажми меня, чтобы попасть снова сюда.");
+    }
 }
