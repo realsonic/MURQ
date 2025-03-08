@@ -4,7 +4,7 @@ using MURQ.Domain.Games;
 
 namespace MURQ.Domain.Quests.Statements;
 
-[DebuggerDisplay("btn {LabelInstruction?.Label,nq},{Caption,nq}")]
+[DebuggerDisplay("btn {LabelStatement?.Label,nq},{Caption,nq}")]
 public class ButtonStatement : Statement
 {
     public required string Caption { get; init; }

@@ -17,10 +17,27 @@ public class UrqLoader(IEnumerable<char> source)
 
         QuestSto questSto = parser.ParseQuest();
 
+        Dictionary<LabelStatementSto, LabelStatement> labelStatementDictionaryBySto = questSto.Statements
+            .OfType<LabelStatementSto>()
+            .ToDictionary(
+                labelStatementSto => labelStatementSto,
+                labelStatementSto => new LabelStatement { Label = labelStatementSto.Label });
+
+        Dictionary<string, LabelStatement> labelStatementDictionaryByLowerLabel = labelStatementDictionaryBySto.Values
+            .ToDictionary(
+                labelStatement => labelStatement.Label.ToLower(),
+                LabelStatement => LabelStatement);
+
         Quest quest = new(statements: questSto.Statements.Select<StatementSto, Statement>(statementSto => statementSto switch
         {
-            LabelStatementSto labelStatementSto => new LabelStatement() { Label = labelStatementSto.Label },
-            PrintStatementSto printStatementSto => new PrintStatement() { Text = printStatementSto.Text, IsNewLineAtEnd = printStatementSto.IsNewLineAtEnd },
+            LabelStatementSto labelStatementSto => labelStatementDictionaryBySto[labelStatementSto],
+            PrintStatementSto printStatementSto => new PrintStatement { Text = printStatementSto.Text, IsNewLineAtEnd = printStatementSto.IsNewLineAtEnd },
+            ButtonStatementSto buttonStatementSto => new ButtonStatement
+            {
+                LabelStatement = labelStatementDictionaryByLowerLabel.TryGetValue(buttonStatementSto.Label.ToLower(), out LabelStatement? labelStatement) ?
+                    labelStatement : null,
+                Caption = buttonStatementSto.Caption
+            },
             _ => throw new MurqException($"Неизвестный тип инструкции {statementSto}.")
         }));
 
