@@ -95,4 +95,24 @@ public class QstTests
         sut.CurrentLocation.Text.Should().Be("Привет, это тест кнопки!\n");
         sut.CurrentLocation.Buttons[0].Caption.Should().Be("Нажми меня, чтобы попасть снова сюда.");
     }
+
+    [Fact(DisplayName = "Из первой локации можно перейти во вторую и в третью")]
+    public async Task Can_go_from_first_location_to_second_and_third()
+    {
+        // Arrange
+        string questSource = await File.ReadAllTextAsync(@"Quests/Three_locations.qst");
+        UrqLoader urqLoader = new(questSource);
+        Quest quest = urqLoader.LoadQuest();
+        Game sut = new(quest);
+
+        // Act
+        sut.Start();
+        sut.CurrentLocation.Buttons[0].Press();
+        sut.CurrentLocation.Buttons[0].Press();
+
+        // Assert
+        sut.CurrentLocation.Name.Should().Be("Далеко");
+        sut.CurrentLocation.Text.Should().Be("Вы попали совсем далеко!\n");
+        sut.CurrentLocation.Buttons[0].Caption.Should().Be("Назад!");
+    }
 }
