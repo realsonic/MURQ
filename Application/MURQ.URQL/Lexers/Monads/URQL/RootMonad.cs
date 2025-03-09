@@ -3,6 +3,7 @@ using MURQ.URQL.Lexers.Monads.URQL.Print;
 using MURQ.URQL.Locations;
 
 using static MURQ.URQL.Lexers.Monads.URQL.Button.MaybeButtonMonad;
+using static MURQ.URQL.Lexers.Monads.URQL.MaybeEndMonad;
 
 namespace MURQ.URQL.Lexers.Monads.URQL;
 
@@ -14,6 +15,7 @@ public record RootMonad(Position Position) : UncompletedLexemeMonad(string.Empty
         ':' => new UncompletedLabelMonad(string.Empty, character.ToString(), Location.StartAt(position)),
         'p' or 'P' => new MaybePrintMonad(MaybePrintMonad.PrintLexemeProgress.P, character.ToString(), Location.StartAt(position)),
         'b' or 'B' => new MaybeButtonMonad(ButtonLexemeProgress.B, character.ToString(), Location.StartAt(position)),
+        'e' or 'E' => new MaybeEndMonad(EndLexemeProgress.E, character.ToString(), Location.StartAt(position)),
         _ => new UnknownLexemeMonad(character.ToString(), Location.StartAt(position))
     };
 

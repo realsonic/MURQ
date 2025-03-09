@@ -42,6 +42,7 @@ public class UrqlParser
             LabelToken => ParseLabel(),
             PrintToken => ParsePrint(),
             ButtonToken => ParseButton(),
+            EndToken => ParseEnd(),
             _ => throw new ParseException($"Ожидалась инструкция, а встретился {lookahead}."),
         };
     }
@@ -62,6 +63,12 @@ public class UrqlParser
     {
         ButtonToken buttonToken = Match<ButtonToken>();
         return new ButtonStatementSto(buttonToken.Label, buttonToken.Caption);
+    }
+
+    private EndStatementSto ParseEnd()
+    {
+        _ = Match<EndToken>();
+        return new EndStatementSto();
     }
 
     private TToken Match<TToken>()
