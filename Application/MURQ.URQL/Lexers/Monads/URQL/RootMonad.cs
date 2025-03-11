@@ -12,6 +12,7 @@ public record RootMonad(Position Position) : UncompletedLexemeMonad(string.Empty
     public override LexemeMonad Append(char character, Position position) => character switch
     {
         ' ' or '\t' or '\r' or '\n' => new RootMonad(position),
+        ';' => new UncompletedCommentMonad(character.ToString(), Location.StartAt(position)),
         ':' => new UncompletedLabelMonad(string.Empty, character.ToString(), Location.StartAt(position)),
         'p' or 'P' => new MaybePrintMonad(MaybePrintMonad.PrintLexemeProgress.P, character.ToString(), Location.StartAt(position)),
         'b' or 'B' => new MaybeButtonMonad(ButtonLexemeProgress.B, character.ToString(), Location.StartAt(position)),
