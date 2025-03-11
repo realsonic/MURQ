@@ -115,4 +115,20 @@ public class QstTests
         sut.CurrentLocation.Text.Should().Be("Вы попали совсем далеко!\n");
         sut.CurrentLocation.Buttons[0].Caption.Should().Be("Назад!");
     }
+
+    [Fact(DisplayName = "Комментарии игнорируются")]
+    public async Task Comments_ignored()
+    {
+        // Arrange
+        string questSource = await File.ReadAllTextAsync(@"Quests/Pln_and_single_comments_on_separate_lines.qst");
+        UrqLoader urqLoader = new(questSource);
+        Quest quest = urqLoader.LoadQuest();
+        Game sut = new(quest);
+
+        // Act
+        sut.Start();
+
+        // Assert
+        sut.CurrentLocation.Text.Should().Be("Привет, мир!\n");
+    }
 }
