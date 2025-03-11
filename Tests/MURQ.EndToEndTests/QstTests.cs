@@ -116,7 +116,7 @@ public class QstTests
         sut.CurrentLocation.Buttons[0].Caption.Should().Be("Назад!");
     }
 
-    [Fact(DisplayName = "Комментарии игнорируются")]
+    [Fact(DisplayName = "Однострочные комментарии в отдельной строке игнорируются")]
     public async Task Comments_ignored()
     {
         // Arrange
