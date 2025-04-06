@@ -7,14 +7,9 @@ public record UncompletedLabelMonad(string Label, string Lexeme, Location Locati
 {
     public override LexemeMonad Append(char character, Position position) => character switch
     {
-        '\n' when Label.Length > 0 => new CompletedLexemeMonad(new LabelToken(Label, Lexeme, Location), null),
-        '\n' when Label.Length is 0 => new UnknownLexemeMonad(Lexeme, Location),
+        '\n' or ';' => new CompletedLexemeMonad(new LabelToken(Label, Lexeme, Location), RootMonad.Remain(character, position)),
         _ => new UncompletedLabelMonad(Label + character, Lexeme + character, Location.EndAt(position))
     };
 
-    public override LexemeMonad Finalize() => Label.Length switch
-    {
-        > 0 => new CompletedLexemeMonad(new LabelToken(Label, Lexeme, Location), null),
-        _ => new UnknownLexemeMonad(Lexeme, Location)
-    };
+    public override LexemeMonad Finalize() => new CompletedLexemeMonad(new LabelToken(Label, Lexeme, Location), null);
 }

@@ -7,7 +7,7 @@ public record UncompletedPrintMonad(string Text, bool IsPlnStatement, string Lex
 {
     public override LexemeMonad Append(char character, Position position) => character switch
     {
-        '\n' => new CompletedLexemeMonad(new PrintToken(Text, IsPlnStatement, Lexeme, Location), null),
+        '\n' or ';' => new CompletedLexemeMonad(new PrintToken(Text, IsPlnStatement, Lexeme, Location), RootMonad.Remain(character, position)),
         _ => new UncompletedPrintMonad(Text + character, IsPlnStatement, Lexeme + character, Location.EndAt(position))
     };
 

@@ -3,6 +3,7 @@
 using MURQ.URQL.Parsers;
 using MURQ.URQL.SyntaxTree;
 using MURQ.URQL.SyntaxTree.Statements;
+using MURQ.URQL.Tokens;
 using MURQ.URQL.Tokens.Statements;
 
 namespace MURQ.URQL.Tests;
@@ -44,7 +45,8 @@ public class UrqlParserTests
     {
         // Arrange
         UrqlParser sut = new([
-            new PrintToken("Привет!", false, "p Привет!", ((1, 1), (1, 9))), 
+            new PrintToken("Привет!", false, "p Привет!", ((1, 1), (1, 9))),
+            new NewLineToken("\n", ((1, 1), (1, 10))),
             new PrintToken("Пока!", false, "p Пока!", ((1, 1), (1, 7)))
         ]);
 
