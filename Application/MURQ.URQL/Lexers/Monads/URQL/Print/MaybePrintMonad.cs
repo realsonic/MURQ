@@ -13,7 +13,7 @@ public record MaybePrintMonad(PrintLexemeProgress LexemeProgress, string Lexeme,
         {
             'l' or 'L' => new MaybePrintMonad(PrintLexemeProgress.PL, Lexeme + character, Location.EndAt(position)),
             ' ' or '\t' => new UncompletedPrintMonad(string.Empty, false, Lexeme + character, Location.EndAt(position)),
-            '\n' => new CompletedLexemeMonad(new PrintToken(string.Empty, false, Lexeme, Location), RootMonad.Remain(character, position)),
+            '\n' or ';' => new CompletedLexemeMonad(new PrintToken(string.Empty, false, Lexeme, Location), RootMonad.Remain(character, position)),
             _ => new UnknownLexemeMonad(Lexeme + character, Location.EndAt(position))
         },
 
@@ -22,7 +22,7 @@ public record MaybePrintMonad(PrintLexemeProgress LexemeProgress, string Lexeme,
         PrintLexemeProgress.PLN => character switch
         {
             ' ' or '\t' => new UncompletedPrintMonad(string.Empty, true, Lexeme + character, Location.EndAt(position)),
-            '\n' => new CompletedLexemeMonad(new PrintToken(string.Empty, true, Lexeme, Location), RootMonad.Remain(character, position)),
+            '\n' or ';' => new CompletedLexemeMonad(new PrintToken(string.Empty, true, Lexeme, Location), RootMonad.Remain(character, position)),
             _ => new UnknownLexemeMonad(Lexeme + character, Location.EndAt(position))
         },
 
