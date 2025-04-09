@@ -11,7 +11,7 @@ public record MaybeEndMonad(EndLexemeProgress LexemeProgress, string Lexeme, Loc
     {
         EndLexemeProgress.E when character is 'n' or 'N' => new MaybeEndMonad(EndLexemeProgress.EN, Lexeme + character, Location.EndAt(position)),
         EndLexemeProgress.EN when character is 'd' or 'D' => new MaybeEndMonad(EndLexemeProgress.END, Lexeme + character, Location.EndAt(position)),
-        EndLexemeProgress.END when character is '\n' => new CompletedLexemeMonad(new EndToken(Lexeme, Location), null),
+        EndLexemeProgress.END when character is ' ' or '\t' or '\n' or ';' => new CompletedLexemeMonad(new EndToken(Lexeme, Location), RootMonad.Remain(character, position)),
         _ => new UnknownLexemeMonad(Lexeme + character, Location.EndAt(position))
     };
 

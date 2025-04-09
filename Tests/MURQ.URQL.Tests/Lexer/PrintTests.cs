@@ -1,6 +1,7 @@
 ﻿using FluentAssertions;
 
 using MURQ.URQL.Lexers;
+using MURQ.URQL.Tokens;
 using MURQ.URQL.Tokens.Statements;
 
 namespace MURQ.URQL.Tests.Lexer;
@@ -16,10 +17,10 @@ public class PrintTests
         var tokens = sut.Scan();
 
         // Assert
-        tokens.Should().BeEquivalentTo(new PrintToken[]
-        {
-            new(string.Empty, false, "p ", ((1, 1), (1, 2)))
-        });
+        tokens.Should().BeEquivalentTo<Token>([
+            new PrintToken(string.Empty, false, "p ", ((1, 1), (1, 2))),
+            new NewLineToken("\n", ((1, 3), (1, 3)))
+        ]);
     }
     
     [Fact(DisplayName = "p с текстом даёт токен Print с текстом")]
@@ -50,7 +51,7 @@ public class PrintTests
         var tokens = sut.Scan();
 
         // Assert
-        tokens.Should().BeEquivalentTo([
+        tokens.OfType<PrintToken>().Should().BeEquivalentTo([
             new PrintToken("Привет, ", false, "p Привет, ", ((1, 1), (1, 10))),
             new PrintToken("мир!", false, "p мир!", ((2, 1), (2, 6)))
         ]);

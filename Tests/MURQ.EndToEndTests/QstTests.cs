@@ -131,4 +131,23 @@ public class QstTests
         // Assert
         sut.CurrentLocation.Text.Should().Be("Привет, мир!\n");
     }
+
+    [Fact(DisplayName = "Однострочные комментарии игнорируются")]
+    public async Task Comments_everywhere_ignored()
+    {
+        // Arrange
+        string questSource = await File.ReadAllTextAsync(@"Quests/Pln_and_single_comments_everywhere.qst");
+        UrqLoader urqLoader = new(questSource);
+        Quest quest = urqLoader.LoadQuest();
+        Game sut = new(quest);
+
+        // Act
+        sut.Start();
+
+        // Assert
+        sut.CurrentLocation.Name.Should().Be("1");
+        sut.CurrentLocation.Text.Should().Be("Привет, мир! \n");
+        sut.CurrentLocation.Buttons[0].Caption.Should().Be("Повторить!");
+        (sut.Quest.Statements[2] as ButtonStatement)!.LabelStatement!.Label.Should().Be("1");
+    }
 }

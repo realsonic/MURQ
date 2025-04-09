@@ -7,37 +7,27 @@ namespace MURQ.URQL.Lexers.Monads.URQL.Print;
 
 public record MaybePrintMonad(PrintLexemeProgress LexemeProgress, string Lexeme, Location Location) : UncompletedLexemeMonad(Lexeme, Location)
 {
-    public override LexemeMonad Append(char character, Position position)
+    public override LexemeMonad Append(char character, Position position) => LexemeProgress switch
     {
-        switch (LexemeProgress)
+        PrintLexemeProgress.P => character switch
         {
-            case PrintLexemeProgress.P:
-                switch (character)
-                {
-                    case ' ': return new UncompletedPrintMonad(string.Empty, false, Lexeme + character, Location.EndAt(position));
-                    case '\n': return new CompletedLexemeMonad(new PrintToken(string.Empty, false, Lexeme, Location), null);
-                    case 'l' or 'L': return new MaybePrintMonad(PrintLexemeProgress.PL, Lexeme + character, Location.EndAt(position));
-                }
-                break;
+            'l' or 'L' => new MaybePrintMonad(PrintLexemeProgress.PL, Lexeme + character, Location.EndAt(position)),
+            ' ' or '\t' => new UncompletedPrintMonad(string.Empty, false, Lexeme + character, Location.EndAt(position)),
+            '\n' or ';' => new CompletedLexemeMonad(new PrintToken(string.Empty, false, Lexeme, Location), RootMonad.Remain(character, position)),
+            _ => new UnknownLexemeMonad(Lexeme + character, Location.EndAt(position))
+        },
 
-            case PrintLexemeProgress.PL:
-                switch (character)
-                {
-                    case 'n' or 'N': return new MaybePrintMonad(PrintLexemeProgress.PLN, Lexeme + character, Location.EndAt(position));
-                }
-                break;
+        PrintLexemeProgress.PL when character is 'n' or 'N' => new MaybePrintMonad(PrintLexemeProgress.PLN, Lexeme + character, Location.EndAt(position)),
 
-            case PrintLexemeProgress.PLN:
-                switch (character)
-                {
-                    case ' ': return new UncompletedPrintMonad(string.Empty, true, Lexeme + character, Location.EndAt(position));
-                    case '\n': return new CompletedLexemeMonad(new PrintToken(string.Empty, true, Lexeme, Location), null);
-                }
-                break;
-        }
+        PrintLexemeProgress.PLN => character switch
+        {
+            ' ' or '\t' => new UncompletedPrintMonad(string.Empty, true, Lexeme + character, Location.EndAt(position)),
+            '\n' or ';' => new CompletedLexemeMonad(new PrintToken(string.Empty, true, Lexeme, Location), RootMonad.Remain(character, position)),
+            _ => new UnknownLexemeMonad(Lexeme + character, Location.EndAt(position))
+        },
 
-        return new UnknownLexemeMonad(Lexeme + character, Location.EndAt(position));
-    }
+        _ => new UnknownLexemeMonad(Lexeme + character, Location.EndAt(position))
+    };
 
     public override LexemeMonad Finalize() => LexemeProgress switch
     {

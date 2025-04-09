@@ -5,6 +5,13 @@ using MURQ.URQL.Tokens.Statements;
 
 namespace MURQ.URQL.Parsers;
 
+/// <summary>
+/// Парсер URQL по методу рекурсивного спуска.
+/// </summary>
+/// <remarks>
+///     <para>Описание грамматики можно найти в файле <c>URQL Syntax.md</c> в папке документов <c>docs</c>.</para>
+///     <para>Грамматики в комментариях методов нетерминалов (<c>Parse*</c>) приведены в нотации EBNF от PlantUML: https://plantuml.com/en/ebnf.</para>
+/// </remarks>
 public class UrqlParser
 {
     public UrqlParser(IEnumerable<Token> tokens)
@@ -15,24 +22,65 @@ public class UrqlParser
 
     public QuestSto ParseQuest()
     {
-        IEnumerable<StatementSto> statements = ParseStatementsAdapted();
-        return new QuestSto(statements.ToList());
+        List<StatementSto> statements = [.. ParseStatementsAdapted()];
+        
+        // обязательно пройти IEnumerable, иначе lookahead не обнулится и проверка ниже упадёт 
+
+        if (lookahead is not null)
+        {
+            throw new ParseException($"Ожидался конец, а встретился: {lookahead}");
+        }
+
+        return new QuestSto(statements);
     }
 
+    /// <summary>
+    /// Грамматика:
+    /// <code>
+    /// statementsAdapted = [statement], statementsRest;
+    /// </code>
+    /// </summary>
+    /// <returns>Перечисление инструкций</returns>
     private IEnumerable<StatementSto> ParseStatementsAdapted()
     {
-        return ParseStatementsRest();
+        if (lookahead.IsStartOfStatement())
+        {
+            yield return ParseStatement();
+        }
+
+        foreach (var statementSto in ParseStatementsRest())
+        {
+            yield return statementSto;
+        }
     }
 
+    /// <summary>
+    /// Грамматика:
+    /// <code>
+    /// statementsRest = [? New line ?, [statement], statementsRest];
+    /// </code>
+    /// </summary>
+    /// <returns>Перечисление инструкций</returns>
     private IEnumerable<StatementSto> ParseStatementsRest()
     {
-        if (lookahead is StatementToken)
+        if (lookahead is NewLineToken) // 2ая ветка
         {
-            List<StatementSto> statements = [ParseStatement()];
-            statements.AddRange(ParseStatementsRest());
-            return statements;
+            Match<NewLineToken>();
+
+            if (lookahead.IsStartOfStatement())
+            {
+                yield return ParseStatement();
+            }
+
+            foreach (var statementSto in ParseStatementsRest())
+            {
+                yield return statementSto;
+            }
         }
-        else return [];
+        else
+        {
+            yield break; // ϵ-продукция
+        }
     }
 
     private StatementSto ParseStatement()
@@ -50,7 +98,15 @@ public class UrqlParser
     private LabelStatementSto ParseLabel()
     {
         LabelToken labelToken = Match<LabelToken>();
-        return new LabelStatementSto(labelToken.Label);
+
+        string label = labelToken.Label.Trim();
+
+        if(label == string.Empty)
+        {
+            throw new ParseException($"Метка пустая: {labelToken}");
+        }
+
+        return new LabelStatementSto(label);
     }
 
     private PrintStatementSto ParsePrint()
@@ -62,12 +118,21 @@ public class UrqlParser
     private ButtonStatementSto ParseButton()
     {
         ButtonToken buttonToken = Match<ButtonToken>();
-        return new ButtonStatementSto(buttonToken.Label, buttonToken.Caption);
+
+        string label = buttonToken.Label.Trim();
+        if (label == string.Empty)
+        {
+            throw new ParseException($"Метка кнопки пустая: {buttonToken}");
+        }
+
+        string caption = buttonToken.Caption.Trim();
+
+        return new ButtonStatementSto(label, caption);
     }
 
     private EndStatementSto ParseEnd()
     {
-        _ = Match<EndToken>();
+        Match<EndToken>();
         return new EndStatementSto();
     }
 
@@ -85,4 +150,12 @@ public class UrqlParser
 
     private readonly IEnumerator<Token> enumerator;
     private Token? lookahead;
+}
+
+public static class TerminalStartExtendsions
+{
+    public static bool IsStartOfStatement(this Token? token)
+    {
+        return token is StatementToken; // работает, пока statement - только инструкция без конструкций
+    }
 }
