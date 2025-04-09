@@ -98,13 +98,15 @@ public class UrqlParser
     private LabelStatementSto ParseLabel()
     {
         LabelToken labelToken = Match<LabelToken>();
-        
-        if(labelToken.Label.Length is 0)
+
+        string label = labelToken.Label.Trim();
+
+        if(label == string.Empty)
         {
             throw new ParseException($"Метка пустая: {labelToken}");
         }
-        
-        return new LabelStatementSto(labelToken.Label.TrimEnd());
+
+        return new LabelStatementSto(label);
     }
 
     private PrintStatementSto ParsePrint()
@@ -117,17 +119,20 @@ public class UrqlParser
     {
         ButtonToken buttonToken = Match<ButtonToken>();
 
-        if (buttonToken.Label.Length is 0)
+        string label = buttonToken.Label.Trim();
+        if (label == string.Empty)
         {
             throw new ParseException($"Метка кнопки пустая: {buttonToken}");
         }
 
-        return new ButtonStatementSto(buttonToken.Label.TrimStart(), buttonToken.Caption);
+        string caption = buttonToken.Caption.Trim();
+
+        return new ButtonStatementSto(label, caption);
     }
 
     private EndStatementSto ParseEnd()
     {
-        _ = Match<EndToken>();
+        Match<EndToken>();
         return new EndStatementSto();
     }
 

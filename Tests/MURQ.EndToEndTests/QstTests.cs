@@ -147,7 +147,7 @@ public class QstTests
         // Assert
         sut.CurrentLocation.Name.Should().Be("1");
         sut.CurrentLocation.Text.Should().Be("Привет, мир! \n");
-        sut.CurrentLocation.Buttons[0].Caption.Should().Be("Повторить! ");
+        sut.CurrentLocation.Buttons[0].Caption.Should().Be("Повторить!");
         (sut.Quest.Statements[2] as ButtonStatement)!.LabelStatement!.Label.Should().Be("1");
     }
 }
