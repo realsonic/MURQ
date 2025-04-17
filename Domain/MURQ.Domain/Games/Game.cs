@@ -1,8 +1,8 @@
-﻿using System.Text;
-
-using MURQ.Common.Exceptions;
+﻿using MURQ.Common.Exceptions;
 using MURQ.Domain.Quests;
 using MURQ.Domain.Quests.Statements;
+
+using System.Text;
 
 namespace MURQ.Domain.Games;
 
@@ -17,6 +17,7 @@ public class Game
     }
 
     public event Action? OnLocationChanged;
+    public event Action? OnScreenCleared;
 
     public Quest Quest { get; }
 
@@ -43,19 +44,28 @@ public class Game
             _currentLocationName = locationName;
             OnLocationChanged?.Invoke();
         };
+
         _globalGameContext.OnTextPrinted += text => _currentScreenText.Append(text);
+
         _globalGameContext.OnButtonAdded += (caption, labelStatement) => _currentScreenButtons.Add(new Button
         {
             Caption = caption,
             OnButtonPressed = () => GoToNewLocation(labelStatement)
         });
+
         _globalGameContext.OnEnd += StopAndWaitUser;
+
+        _globalGameContext.OnClearScreen += () =>
+        {
+            ClearCurrentView();
+            OnScreenCleared?.Invoke();
+        };
     }
 
     private void GoToNewLocation(LabelStatement? labelStatement)
     {
         if (labelStatement is null) return;
-        
+
         ClearCurrentView();
         GoToLabel(labelStatement);
         RunStatements();

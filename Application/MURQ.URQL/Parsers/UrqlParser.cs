@@ -91,6 +91,7 @@ public class UrqlParser
             PrintToken => ParsePrint(),
             ButtonToken => ParseButton(),
             EndToken => ParseEnd(),
+            ClearScreenToken => ParseClearScreen(),
             _ => throw new ParseException($"Ожидалась инструкция, а встретился {lookahead}."),
         };
     }
@@ -134,6 +135,12 @@ public class UrqlParser
     {
         Match<EndToken>();
         return new EndStatementSto();
+    }
+
+    private ClearScreenStatementSto ParseClearScreen()
+    {
+        Match<ClearScreenToken>();
+        return new ClearScreenStatementSto();
     }
 
     private TToken Match<TToken>()

@@ -150,4 +150,24 @@ public class QstTests
         sut.CurrentLocation.Buttons[0].Caption.Should().Be("Повторить!");
         (sut.Quest.Statements[2] as ButtonStatement)!.LabelStatement!.Label.Should().Be("1");
     }
+
+    [Fact(DisplayName = "cls очищает текст и кнопки локации и вызывает событие OnScreenCleared")]
+    public async Task Cls_clears_text_and_buttons_and_fires_OnScreenCleared()
+    {
+        // Arrange
+        string questSource = await File.ReadAllTextAsync(@"Quests/Loc_Cls.qst");
+        UrqLoader urqLoader = new(questSource);
+        Quest quest = urqLoader.LoadQuest();
+        Game sut = new(quest);
+        bool eventWasFired = false;
+        sut.OnScreenCleared += () => eventWasFired = true;
+
+        // Act
+        sut.Start();
+
+        // Assert
+        sut.CurrentLocation.Text.Should().BeEmpty();
+        sut.CurrentLocation.Buttons.Should().BeEmpty();
+        eventWasFired.Should().BeTrue();
+    }
 }

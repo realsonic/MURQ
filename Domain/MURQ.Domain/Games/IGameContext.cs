@@ -8,4 +8,5 @@ public interface IGameContext
     void AddButton(string caption, LabelStatement? labelInstruction);
     void ChangeLocation(string label);
     void End();
+    void ClearScreen();
 }
