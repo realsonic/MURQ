@@ -8,6 +8,7 @@ public class GameContext : IGameContext
     public event Action<string, LabelStatement?>? OnButtonAdded;
     public event Action? OnEnd;
     public event Action<string>? OnLocationChanged;
+    public event Action? OnClearScreen;
 
     public void PrintText(string? text) => OnTextPrinted?.Invoke(text);
 
@@ -17,4 +18,6 @@ public class GameContext : IGameContext
     public void End() => OnEnd?.Invoke();
     
     public void ChangeLocation(string label) => OnLocationChanged?.Invoke(label);
+
+    public void ClearScreen() => OnClearScreen?.Invoke();
 }

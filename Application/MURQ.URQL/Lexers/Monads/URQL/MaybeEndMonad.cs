@@ -18,7 +18,7 @@ public record MaybeEndMonad(EndLexemeProgress LexemeProgress, string Lexeme, Loc
     public override LexemeMonad Finalize() => LexemeProgress switch
     {
         EndLexemeProgress.END => new CompletedLexemeMonad(new EndToken(Lexeme, Location), null),
-        _ => new UnknownLexemeMonad(Lexeme, Location),
+        _ => new UnknownLexemeMonad(Lexeme, Location)
     };
 
     public enum EndLexemeProgress

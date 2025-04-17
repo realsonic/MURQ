@@ -39,6 +39,7 @@ public class UrqLoader(IEnumerable<char> source)
                 Caption = buttonStatementSto.Caption
             },
             EndStatementSto endStatementSto => new EndStatement(),
+            ClearScreenStatementSto clearScreenStatementSto => new ClearScreenStatement(),
             _ => throw new MurqException($"Неизвестный тип инструкции {statementSto}.")
         }));
 
