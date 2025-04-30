@@ -15,6 +15,8 @@ public class UrqPlayer(IQuestLoader questLoader, IUserInterface userInterface, I
         {
             var quest = await questLoader.LoadQuest(stoppingToken);
 
+            ShowQuestName(questLoader.QuestName);
+
             var game = new Game(quest);
             game.Start();
 
@@ -68,6 +70,8 @@ public class UrqPlayer(IQuestLoader questLoader, IUserInterface userInterface, I
 
         """);
     }
+
+    private void ShowQuestName(string? questName) => userInterface.WriteLine($"{questName}\n");
 
     private void SayGoodbye()
     {

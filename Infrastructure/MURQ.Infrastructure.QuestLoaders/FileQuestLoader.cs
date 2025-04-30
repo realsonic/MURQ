@@ -18,6 +18,8 @@ public class FileQuestLoader : IQuestLoader
 
     public string? QstFilePath { get; }
 
+    public string? QuestName => $"Файл: {Path.GetFileName(QstFilePath)}";
+
     public async Task<Quest> LoadQuest(CancellationToken stoppingToken)
     {
         if (QstFilePath == null)
