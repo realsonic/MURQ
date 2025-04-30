@@ -56,12 +56,13 @@ public class UrqPlayer(IQuestLoader questLoader, IUserInterface userInterface, I
     {
         string version = versionProvider.Version;
         userInterface.SetTitle($"MURQ.Console {version}");
+        var versionWithPrefix = $"v.{version}";
         userInterface.WriteLine($"""
 
                 /\_/\
                ( o.o )
             |   >   < 
-             | /     \      v.{version} 
+             | /     \     {versionWithPrefix,10} 
              _(___ __ )_ _____ _____
             |     |  |  | ___ |     | 
             | | | |  |  |    -|  |  | 

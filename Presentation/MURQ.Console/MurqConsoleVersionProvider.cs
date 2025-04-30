@@ -11,8 +11,9 @@ internal class MurqConsoleVersionProvider : IVersionProvider
     private static string GetVersion()
     {
         Assembly assembly = Assembly.GetExecutingAssembly();
-        return assembly.GetCustomAttribute<AssemblyFileVersionAttribute>()?.Version
+        return assembly.GetName().Version?.ToString(3)
+            ?? assembly.GetCustomAttribute<AssemblyFileVersionAttribute>()?.Version
             ?? assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion
-            ?? "(ошибка получения версии)";
+            ?? "(версия не найдена)";
     }
 }
