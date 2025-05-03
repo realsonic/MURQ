@@ -1,0 +1,25 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net9.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+	<VersionPrefix>0.1.0</VersionPrefix>
+	<VersionSuffix>$([System.DateTime]::Now.toString(`yyyyMMdd`))</VersionSuffix>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="9.0.4" />
+    <PackageReference Include="Microsoft.Extensions.Hosting" Version="9.0.4" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\Application\MURQ.Application\MURQ.Application.csproj" />
+    <ProjectReference Include="..\..\Application\MURQ.URQL\MURQ.URQL.csproj" />
+    <ProjectReference Include="..\..\Domain\MURQ.Domain\MURQ.Domain.csproj" />
+    <ProjectReference Include="..\..\Infrastructure\MURQ.Infrastructure.ConsoleInterface\MURQ.Infrastructure.ConsoleInterface.csproj" />
+    <ProjectReference Include="..\..\Infrastructure\MURQ.Infrastructure.QuestLoaders\MURQ.Infrastructure.QuestLoaders.csproj" />
+  </ItemGroup>
+
+</Project>
