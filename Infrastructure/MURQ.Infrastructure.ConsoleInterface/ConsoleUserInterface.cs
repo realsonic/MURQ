@@ -78,10 +78,6 @@ public class ConsoleUserInterface : IUserInterface
 
     private static UserChoice GetValidChoice(Dictionary<int, Game.Button> numberedButtons)
     {
-        /* FIXME
-         * 1. Что делать, если кнопок больше 9? Ввести 10+ уже невожможно. Нужен выбор кнопок как в DOS_URQ.
-         */
-
         int? minNumber = numberedButtons.Count > 0 ? numberedButtons.Keys.Min() : null;
         int? maxNumber = numberedButtons.Count > 0 ? numberedButtons.Keys.Max() : null;
 
