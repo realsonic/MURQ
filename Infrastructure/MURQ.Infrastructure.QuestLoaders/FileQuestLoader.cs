@@ -18,9 +18,7 @@ public class FileQuestLoader : IQuestLoader
 
     public string? QstFilePath { get; }
 
-    public string? QuestName => $"Файл: {Path.GetFileName(QstFilePath)}";
-
-    public async Task<Quest> LoadQuest(CancellationToken stoppingToken)
+    public async Task<(Quest Quest, string QuestName)> LoadQuest(CancellationToken stoppingToken)
     {
         if (QstFilePath == null)
             throw new MurqException("Путь к файлу квеста не задан");
@@ -32,6 +30,6 @@ public class FileQuestLoader : IQuestLoader
         UrqLoader urqLoader = new(questSource);
         Quest quest = urqLoader.LoadQuest();
 
-        return quest;
+        return (quest, $"Файл: {Path.GetFileName(QstFilePath)}");
     }
 }

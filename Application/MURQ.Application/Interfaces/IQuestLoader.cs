@@ -8,15 +8,10 @@ namespace MURQ.Application.Interfaces;
 public interface IQuestLoader
 {
     /// <summary>
-    /// Имя загруженного квеста.
-    /// </summary>
-    string? QuestName { get; }
-
-    /// <summary>
     /// Загрузить квест.
     /// </summary>
     /// <param name="stoppingToken">Токен остановки.</param>
     /// <returns>Квест.</returns>
 
-    Task<Quest> LoadQuest(CancellationToken stoppingToken);
+    Task<(Quest Quest, string QuestName)> LoadQuest(CancellationToken stoppingToken);
 }

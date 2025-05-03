@@ -1,5 +1,6 @@
 ﻿using MURQ.Application.Interfaces;
 using MURQ.Domain.Games;
+using MURQ.Domain.Quests;
 
 using static MURQ.Application.Interfaces.IUserInterface;
 
@@ -13,9 +14,9 @@ public class UrqPlayer(IQuestLoader questLoader, IUserInterface userInterface, I
 
         try
         {
-            var quest = await questLoader.LoadQuest(stoppingToken);
+            (Quest quest, string questName) = await questLoader.LoadQuest(stoppingToken);
 
-            ShowQuestName(questLoader.QuestName);
+            ShowQuestName(questName);
 
             var game = new Game(quest);
             game.Start();
