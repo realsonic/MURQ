@@ -134,5 +134,12 @@ public class ConsoleUserInterface : IUserInterface
         }
     }
 
+    /// <inheritdoc/>
+    public void ClearSceen()
+    {
+        Console.Clear();
+        lastWrittenText = string.Empty;
+    }
+
     private string? lastWrittenText = null;
 }

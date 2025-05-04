@@ -19,6 +19,8 @@ public class UrqPlayer(IQuestLoader questLoader, IUserInterface userInterface, I
             ShowQuestName(questName);
 
             var game = new Game(quest);
+            game.OnScreenCleared += userInterface.ClearSceen;
+
             game.Start();
 
             RunPlayCycle(game);

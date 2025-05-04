@@ -14,10 +14,15 @@ public interface IUserInterface
     void Write(string? text = null);
 
     /// <summary>
-    /// Выыести текст игроку и добавить новую строку в конце.
+    /// Вывести текст игроку и добавить новую строку в конце.
     /// </summary>
     /// <param name="text">Текст.</param>
     void WriteLine(string? text = null);
+    
+    /// <summary>
+    /// Очистить экран.
+    /// </summary>
+    void ClearSceen();
 
     void WriteHighlighted(string? text = null);
     void WriteLineHighlighted(string? text = null);

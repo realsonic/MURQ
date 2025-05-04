@@ -399,3 +399,4 @@ FodyWeavers.xsd
 *.bak
 /.vscode
 **/launchSettings.json
+*.qst
