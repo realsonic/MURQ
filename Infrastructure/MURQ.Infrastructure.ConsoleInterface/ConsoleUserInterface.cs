@@ -16,8 +16,8 @@ public class ConsoleUserInterface : IUserInterface
         Console.OutputEncoding = Encoding.UTF8;
         if (!Console.IsOutputRedirected)
         {
-        Console.CursorVisible = false; // без курсора красивее :)
-    }
+            Console.CursorVisible = false; // без курсора красивее :)
+        }
     }
 
     public void SetTitle(string title) => Console.Title = title;
@@ -72,7 +72,7 @@ public class ConsoleUserInterface : IUserInterface
         WriteLine();
 
         DoInColors(ConsoleColor.Black, ConsoleColor.Red, () => WriteLine($" [ОШИБКА] {ClassifyExceptionMessage(exception)} "));
-        
+
         WriteLine();
     }
 
