@@ -14,7 +14,10 @@ public class ConsoleUserInterface : IUserInterface
     public ConsoleUserInterface()
     {
         Console.OutputEncoding = Encoding.UTF8;
-        Console.CursorVisible = false; // без курсора красивее :)
+        if (!Console.IsOutputRedirected)
+        {
+            Console.CursorVisible = false; // без курсора красивее :)
+        }
     }
 
     public void SetTitle(string title) => Console.Title = title;
@@ -46,7 +49,22 @@ public class ConsoleUserInterface : IUserInterface
         return userChoice;
     }
 
-    public void WaitAnyKey() => Console.ReadKey(true);
+    /// <inheritdoc/>
+    public void ClearSceen()
+    {
+        if (!Console.IsOutputRedirected)
+            Console.Clear();
+
+        lastWrittenText = string.Empty;
+    }
+
+    public void WaitAnyKey()
+    {
+        if (!Console.IsInputRedirected)
+            Console.ReadKey(true);
+        else
+            Console.Read();
+    }
 
     public void ReportException(Exception exception)
     {
@@ -54,7 +72,7 @@ public class ConsoleUserInterface : IUserInterface
         WriteLine();
 
         DoInColors(ConsoleColor.Black, ConsoleColor.Red, () => WriteLine($" [ОШИБКА] {ClassifyExceptionMessage(exception)} "));
-        
+
         WriteLine();
     }
 
@@ -83,23 +101,54 @@ public class ConsoleUserInterface : IUserInterface
 
         while (true)
         {
-            ConsoleKeyInfo keyInfo = Console.ReadKey(true);
+            UserInput userInput = UserInput.GetInput();
 
-            if (IsButtonNumber(keyInfo))
+            if (userInput.IsButtonNumber())
             {
-                var pressedNumber = Convert.ToInt32(keyInfo.KeyChar.ToString());
+                int pressedNumber = userInput.GetButtonNumber();
                 if (pressedNumber >= minNumber && pressedNumber <= maxNumber)
                     return new ButtonChosen(numberedButtons[pressedNumber]);
             }
 
-            if (IsQuit(keyInfo))
+            if (userInput.IsQuit())
             {
                 return new QuitChosen();
             }
         }
+    }
 
-        static bool IsButtonNumber(ConsoleKeyInfo keyInfo) => char.IsDigit(keyInfo.KeyChar);
-        static bool IsQuit(ConsoleKeyInfo keyInfo) => keyInfo.Key is ConsoleKey.Q && keyInfo.Modifiers is ConsoleModifiers.Control;
+    private abstract record UserInput
+    {
+        public static UserInput GetInput()
+        {
+            if (!Console.IsInputRedirected)
+            {
+                return new KeyInfoInput(Console.ReadKey(true));
+            }
+            else
+            {
+                int readChar = Console.Read();
+                return new CharInput(readChar is not -1 ? Convert.ToChar(readChar) : null);
+            }
+        }
+
+        public abstract bool IsButtonNumber();
+        public abstract int GetButtonNumber();
+        public abstract bool IsQuit();
+    }
+
+    private record KeyInfoInput(ConsoleKeyInfo ConsoleKeyInfo) : UserInput
+    {
+        public override bool IsButtonNumber() => char.IsDigit(ConsoleKeyInfo.KeyChar);
+        public override int GetButtonNumber() => Convert.ToInt32(ConsoleKeyInfo.KeyChar.ToString());
+        public override bool IsQuit() => ConsoleKeyInfo.Key is ConsoleKey.Q && ConsoleKeyInfo.Modifiers is ConsoleModifiers.Control;
+    }
+
+    private record CharInput(char? Char) : UserInput
+    {
+        public override bool IsButtonNumber() => Char is not null && char.IsDigit(Char.Value);
+        public override int GetButtonNumber() => Convert.ToInt32(Char.ToString());
+        public override bool IsQuit() => Char is null or 'q' or 'Q';
     }
 
     private static string ClassifyExceptionMessage(Exception exception) => exception switch
@@ -132,13 +181,6 @@ public class ConsoleUserInterface : IUserInterface
             Console.ForegroundColor = previousForegroundColor;
             Console.BackgroundColor = previousBackgroundColor;
         }
-    }
-
-    /// <inheritdoc/>
-    public void ClearSceen()
-    {
-        Console.Clear();
-        lastWrittenText = string.Empty;
     }
 
     private string? lastWrittenText = null;

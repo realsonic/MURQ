@@ -5,7 +5,7 @@
     <TargetFramework>net9.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
-	<VersionPrefix>0.1.1</VersionPrefix>
+	<VersionPrefix>0.2.0-dev</VersionPrefix>
 	<VersionSuffix>$([System.DateTime]::Now.toString(`yyyyMMdd`))</VersionSuffix>
   </PropertyGroup>
 
