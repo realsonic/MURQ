@@ -26,7 +26,7 @@ public class ConsoleUserInterface : IUserInterface
     {
         Console.Write(text);
         
-        if (text != string.Empty)
+        if (!string.IsNullOrEmpty(text))
             lastWrittenText = text;
     }
 
