@@ -14,16 +14,12 @@ public class UrqPlayer(IQuestLoader questLoader, IUserInterface userInterface, I
 
         try
         {
-            (Quest quest, string questName) = await questLoader.LoadQuest(stoppingToken);
+            Game game = await LoadQuestAndStartGame(stoppingToken);
 
-            ShowQuestName(questName);
+            await RunPlayCycle(game, stoppingToken);
 
-            var game = new Game(quest);
-            game.OnScreenCleared += userInterface.ClearSceen;
-
-            game.Start();
-
-            RunPlayCycle(game);
+            SayGoodbye();
+            PromptAnyKey();
         }
         catch (Exception ex)
         {
@@ -32,7 +28,21 @@ public class UrqPlayer(IQuestLoader questLoader, IUserInterface userInterface, I
         }
     }
 
-    private void RunPlayCycle(Game game)
+    private async Task<Game> LoadQuestAndStartGame(CancellationToken stoppingToken)
+    {
+        (Quest quest, string questName) = await questLoader.LoadQuest(stoppingToken);
+
+        var game = new Game(quest);
+        game.OnScreenCleared += userInterface.ClearSceen;
+
+        ShowQuestName(questName);
+
+        game.Start();
+
+        return game;
+    }
+
+    private async Task RunPlayCycle(Game game, CancellationToken stoppingToken)
     {
         while (true)
         {
@@ -47,9 +57,10 @@ public class UrqPlayer(IQuestLoader questLoader, IUserInterface userInterface, I
                 case ButtonChosen buttonChosen:
                     buttonChosen.Button.Press();
                     break;
+                case ReloadChosen:
+                    game = await LoadQuestAndStartGame(stoppingToken);
+                    break;
                 case QuitChosen:
-                    SayGoodbye();
-                    PromptAnyKey();
                     return;
             }
         }

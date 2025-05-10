@@ -18,7 +18,7 @@ public interface IUserInterface
     /// </summary>
     /// <param name="text">Текст.</param>
     void WriteLine(string? text = null);
-    
+
     /// <summary>
     /// Очистить экран.
     /// </summary>
@@ -33,5 +33,6 @@ public interface IUserInterface
 
     public abstract record UserChoice();
     public record ButtonChosen(Game.Button Button) : UserChoice;
+    public record ReloadChosen : UserChoice;
     public record QuitChosen : UserChoice;
 }

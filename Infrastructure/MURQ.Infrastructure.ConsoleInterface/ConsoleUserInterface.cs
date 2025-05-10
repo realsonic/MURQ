@@ -112,10 +112,11 @@ public class ConsoleUserInterface : IUserInterface
                     return new ButtonChosen(numberedButtons[pressedNumber]);
             }
 
+            if (userInput.IsReload())
+                return new ReloadChosen();
+
             if (userInput.IsQuit())
-            {
                 return new QuitChosen();
-            }
         }
     }
 
@@ -136,6 +137,7 @@ public class ConsoleUserInterface : IUserInterface
 
         public abstract bool IsButtonNumber();
         public abstract int GetButtonNumber();
+        public abstract bool IsReload();
         public abstract bool IsQuit();
     }
 
@@ -143,6 +145,7 @@ public class ConsoleUserInterface : IUserInterface
     {
         public override bool IsButtonNumber() => char.IsDigit(ConsoleKeyInfo.KeyChar);
         public override int GetButtonNumber() => Convert.ToInt32(ConsoleKeyInfo.KeyChar.ToString());
+        public override bool IsReload() => ConsoleKeyInfo.Key is ConsoleKey.R && ConsoleKeyInfo.Modifiers is ConsoleModifiers.Control;
         public override bool IsQuit() => ConsoleKeyInfo.Key is ConsoleKey.Q && ConsoleKeyInfo.Modifiers is ConsoleModifiers.Control;
     }
 
@@ -150,6 +153,7 @@ public class ConsoleUserInterface : IUserInterface
     {
         public override bool IsButtonNumber() => Char is not null && char.IsDigit(Char.Value);
         public override int GetButtonNumber() => Convert.ToInt32(Char.ToString());
+        public override bool IsReload() => Char is 'r' or 'R';
         public override bool IsQuit() => Char is null or 'q' or 'Q';
     }
 
