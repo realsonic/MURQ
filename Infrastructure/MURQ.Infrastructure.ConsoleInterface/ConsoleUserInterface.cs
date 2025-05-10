@@ -25,7 +25,9 @@ public class ConsoleUserInterface : IUserInterface
     public void Write(string? text = null)
     {
         Console.Write(text);
-        lastWrittenText = text;
+        
+        if (!string.IsNullOrEmpty(text))
+            lastWrittenText = text;
     }
 
     public void WriteLine(string? text = null) => Write(text + '\n');
@@ -55,7 +57,7 @@ public class ConsoleUserInterface : IUserInterface
         if (!Console.IsOutputRedirected)
             Console.Clear();
 
-        lastWrittenText = string.Empty;
+        lastWrittenText = null;
     }
 
     public void WaitAnyKey()
