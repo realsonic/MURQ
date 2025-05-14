@@ -114,12 +114,12 @@ public class Game
     private void PromoteNextStatement() => _currentStatement = Quest.GetNextStatement(_currentStatement);
 
     private void SetNextStatementToStarting() => _currentStatement = Quest.StartingStatement;
-    private void SetModeRunningStatements() => _gameMode = GameMode.RunningStatements;
-    private void SetModeWaitingUserInput() => _gameMode = GameMode.WaitingUserInput;
+    private void SetModeRunningStatements() => _gameState = GameState.RunningStatements;
+    private void SetModeWaitingUserInput() => _gameState = GameState.WaitingUserInput;
     private void SetCurrentStatement(Statement statement) => _currentStatement = statement;
 
-    private bool IsStarted => _gameMode is not GameMode.InitialState;
-    private bool IsRunningStatements => _gameMode == GameMode.RunningStatements;
+    private bool IsStarted => _gameState is not GameState.InitialState;
+    private bool IsRunningStatements => _gameState == GameState.RunningStatements;
 
     public class CurrentLocationView
     {
@@ -136,10 +136,10 @@ public class Game
         public void Press() => OnButtonPressed();
     }
 
-    private GameMode _gameMode = GameMode.InitialState;
+    private GameState _gameState = GameState.InitialState;
     private Statement? _currentStatement;
     private readonly GameContext _globalGameContext;
     private readonly StringBuilder _currentScreenText = new();
-    private readonly List<Button> _currentScreenButtons = new();
+    private readonly List<Button> _currentScreenButtons = [];
     private string? _currentLocationName;
 }

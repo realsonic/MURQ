@@ -1,6 +1,6 @@
 ﻿namespace MURQ.Domain.Games;
 
-internal enum GameMode
+internal enum GameState
 {
     InitialState,
     RunningStatements,

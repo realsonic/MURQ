@@ -12,11 +12,10 @@ public class GameContext : IGameContext
 
     public void PrintText(string? text) => OnTextPrinted?.Invoke(text);
 
-    public void AddButton(string caption, LabelStatement? labelStatement) =>
-        OnButtonAdded?.Invoke(caption, labelStatement);
+    public void AddButton(string caption, LabelStatement? labelStatement) => OnButtonAdded?.Invoke(caption, labelStatement);
 
     public void End() => OnEnd?.Invoke();
-    
+
     public void ChangeLocation(string label) => OnLocationChanged?.Invoke(label);
 
     public void ClearScreen() => OnClearScreen?.Invoke();
