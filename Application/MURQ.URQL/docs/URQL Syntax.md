@@ -8,10 +8,14 @@ statements = [
         | statement
     ];
 
-statement = ? Label ?
+statement = assignVariableStatement
+    | ? Label ?
     | ? Print ?
     | ? Button ?
-    | ? End ?;
+    | ? End ?
+    | ? ClearScreen ?;
+
+assignVariableStatement = ? Variable ?,  ? EqualityToken ? (*""=""*), ? Number ?;
 @endebnf
 ```
 
@@ -63,6 +67,18 @@ classDiagram
 
     Statement <|-- End
     note for End "Конец локации"
+
+    Statement <|-- ClearScreen
+    note for ClearScreen "Очистка экрана"
+
+    Token <|-- Variable
+    note for Variable "Переменная"
+
+    Token <|-- Equality
+    note for Equality "Символ '='"
+
+    Token <|-- Number
+    note for Number "Число"
 ```
 
 # Лексемы

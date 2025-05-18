@@ -11,6 +11,6 @@ public class LabelStatement : Statement
 
     public override void Run(IGameContext gameContext)
     {
-        gameContext.ChangeLocation(Label);
+        gameContext.EnterLocation(Label);
     }
 }

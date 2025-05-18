@@ -7,30 +7,30 @@ namespace MURQ.URQL.Lexers.Monads.URQL.Button;
 
 public record UncompletedButtonMonad(UncompletedButtonLexemeProgress LexemeProgress, string Label, string Caption, string Lexeme, Location Location) : UncompletedLexemeMonad(Lexeme, Location)
 {
-    public override LexemeMonad Append(char character, Position position)
+    public override LexemeMonad Append(char character, Position position) => LexemeProgress switch
     {
-        return LexemeProgress switch
+        UncompletedButtonLexemeProgress.Label => character switch
         {
-            UncompletedButtonLexemeProgress.Label => character switch
-            {
-                ',' => new UncompletedButtonMonad(UncompletedButtonLexemeProgress.Caption, Label, string.Empty, Lexeme + character, Location.EndAt(position)),
-                not '\n' => new UncompletedButtonMonad(UncompletedButtonLexemeProgress.Label, Label + character, string.Empty, Lexeme + character, Location.EndAt(position)),
-                _ => new UnknownLexemeMonad(Lexeme + character, Location.EndAt(position))
-            },
+            ',' => new UncompletedButtonMonad(UncompletedButtonLexemeProgress.Caption, Label, string.Empty, Lexeme + character, Location.EndAt(position)),
+            not '\n' => new UncompletedButtonMonad(UncompletedButtonLexemeProgress.Label, Label + character, string.Empty, Lexeme + character, Location.EndAt(position)),
+            _ => new UnknownLexemeMonad(Lexeme + character, Location.EndAt(position), $"в кнопке ожидалась запятая после метки")
+        },
 
-            UncompletedButtonLexemeProgress.Caption => character switch
-            {
-                '\n' or ';' => new CompletedLexemeMonad(new ButtonToken(Label, Caption, Lexeme, Location), RootMonad.Remain(character, position)),
-                _ => new UncompletedButtonMonad(UncompletedButtonLexemeProgress.Caption, Label, Caption + character, Lexeme + character, Location.EndAt(position))
-            },
+        UncompletedButtonLexemeProgress.Caption => character switch
+        {
+            '\n' or ';' => new CompletedLexemeMonad(new ButtonToken(Label, Caption, Lexeme, Location), RootMonad.Remain(character, position)),
+            _ => new UncompletedButtonMonad(UncompletedButtonLexemeProgress.Caption, Label, Caption + character, Lexeme + character, Location.EndAt(position))
+        },
 
-            _ => throw new LexingException($"Неожиданное состояние монады лексемы кнопки: {nameof(LexemeProgress)} = {LexemeProgress}")
-        };
-    }
+        _ => throw new LexingException($"Неожиданное состояние монады лексемы кнопки: {nameof(LexemeProgress)} = {LexemeProgress}")
+    };
 
-    public override LexemeMonad Finalize() => LexemeProgress is UncompletedButtonLexemeProgress.Caption
-            ? new CompletedLexemeMonad(new ButtonToken(Label, Caption, Lexeme, Location), null)
-            : new UnknownLexemeMonad(Lexeme, Location);
+    public override LexemeMonad Finalize() => LexemeProgress switch
+    {
+        UncompletedButtonLexemeProgress.Label => new UnknownLexemeMonad(Lexeme, Location, $"в кнопке ожидалась запятая после метки"),
+        UncompletedButtonLexemeProgress.Caption => new CompletedLexemeMonad(new ButtonToken(Label, Caption, Lexeme, Location), null),
+        _ => throw new LexingException($"Неожиданное состояние монады лексемы кнопки: {nameof(LexemeProgress)} = {LexemeProgress}")
+    };
 
     public enum UncompletedButtonLexemeProgress
     {

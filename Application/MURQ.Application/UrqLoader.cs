@@ -44,15 +44,25 @@ public class UrqLoader(IEnumerable<char> source)
         ButtonStatementSto buttonStatementSto => ProduceButtonStatement(buttonStatementSto, labelsByLowers),
         EndStatementSto => new EndStatement(),
         ClearScreenStatementSto => new ClearScreenStatement(),
+        AssignVariableStatementSto assignVariableStatementSto => ProduceAssignVariableStatement(assignVariableStatementSto),
         _ => throw new MurqException($"Неизвестный тип инструкции {statementSto}.")
     };
 
-    private static PrintStatement ProducePrintStatement(PrintStatementSto printStatementSto) =>
-        new() { Text = printStatementSto.Text, IsNewLineAtEnd = printStatementSto.IsNewLineAtEnd };
+    private static PrintStatement ProducePrintStatement(PrintStatementSto printStatementSto) => new()
+    {
+        Text = printStatementSto.Text,
+        IsNewLineAtEnd = printStatementSto.IsNewLineAtEnd
+    };
 
     private static ButtonStatement ProduceButtonStatement(ButtonStatementSto buttonStatementSto, Dictionary<string, LabelStatement> labelsBySto) => new()
     {
         LabelStatement = labelsBySto.TryGetValue(buttonStatementSto.Label.ToLower(), out LabelStatement? labelStatement) ? labelStatement : null,
         Caption = buttonStatementSto.Caption
+    };
+
+    private static AssignVariableStatement ProduceAssignVariableStatement(AssignVariableStatementSto assignVariableStatementSto) => new()
+    {
+        VariableName = assignVariableStatementSto.VariableName,
+        Value = assignVariableStatementSto.Value
     };
 }

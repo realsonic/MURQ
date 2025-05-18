@@ -23,7 +23,7 @@ public class UrqlParser
     public QuestSto ParseQuest()
     {
         List<StatementSto> statements = [.. ParseStatementsAdapted()];
-        
+
         // обязательно пройти IEnumerable, иначе lookahead не обнулится и проверка ниже упадёт 
 
         if (lookahead is not null)
@@ -83,18 +83,16 @@ public class UrqlParser
         }
     }
 
-    private StatementSto ParseStatement()
+    private StatementSto ParseStatement() => lookahead switch
     {
-        return lookahead switch
-        {
-            LabelToken => ParseLabel(),
-            PrintToken => ParsePrint(),
-            ButtonToken => ParseButton(),
-            EndToken => ParseEnd(),
-            ClearScreenToken => ParseClearScreen(),
-            _ => throw new ParseException($"Ожидалась инструкция, а встретился {lookahead}."),
-        };
-    }
+        LabelToken => ParseLabel(),
+        PrintToken => ParsePrint(),
+        ButtonToken => ParseButton(),
+        EndToken => ParseEnd(),
+        ClearScreenToken => ParseClearScreen(),
+        VariableToken => ParseAssignVariableStatement(),
+        _ => throw new ParseException($"Ожидалась инструкция, а встретился {lookahead}."),
+    };
 
     private LabelStatementSto ParseLabel()
     {
@@ -102,7 +100,7 @@ public class UrqlParser
 
         string label = labelToken.Label.Trim();
 
-        if(label == string.Empty)
+        if (label == string.Empty)
         {
             throw new ParseException($"Метка пустая: {labelToken}");
         }
@@ -143,6 +141,15 @@ public class UrqlParser
         return new ClearScreenStatementSto();
     }
 
+    private AssignVariableStatementSto ParseAssignVariableStatement()
+    {
+        VariableToken variableToken = Match<VariableToken>();
+        Match<EqualityToken>();
+        NumberToken numberToken = Match<NumberToken>();
+
+        return new AssignVariableStatementSto(variableToken.Name, numberToken.Value);
+    }
+
     private TToken Match<TToken>()
     {
         if (lookahead is TToken token)
@@ -150,7 +157,7 @@ public class UrqlParser
             lookahead = NextTerminal();
             return token;
         }
-        else throw new ParseException($"Ожидался токен {typeof(TToken)}, а встретился {lookahead}.");
+        else throw new ParseException($"Ожидался токен {typeof(TToken)}, а встретился {lookahead}");
     }
 
     private Token? NextTerminal() => enumerator.MoveNext() ? enumerator.Current : null;
@@ -159,10 +166,11 @@ public class UrqlParser
     private Token? lookahead;
 }
 
-public static class TerminalStartExtendsions
+public static class TerminalStartExtensions
 {
     public static bool IsStartOfStatement(this Token? token)
-    {
-        return token is StatementToken; // работает, пока statement - только инструкция без конструкций
-    }
+        => token.IsStartOfAssignVariableStatement()
+        || token is StatementToken;
+
+    public static bool IsStartOfAssignVariableStatement(this Token? token) => token is VariableToken;
 }

@@ -1,4 +1,5 @@
 ﻿using MURQ.Common.Exceptions;
+using MURQ.Domain.Games.Variables;
 using MURQ.Domain.Quests;
 using MURQ.Domain.Quests.Statements;
 
@@ -16,7 +17,7 @@ public class Game
         SubscribeToRunningContextEvents();
     }
 
-    public event Action? OnLocationChanged;
+    public event Action? OnLocationEntered;
     public event Action? OnScreenCleared;
 
     public Quest Quest { get; }
@@ -37,12 +38,14 @@ public class Game
         RunStatements();
     }
 
+    public Variable? GetVariable(string name) => _variables.TryGetValue(name, out Variable? variable) ? variable : null;
+
     private void SubscribeToRunningContextEvents()
     {
-        _globalGameContext.OnLocationChanged += locationName =>
+        _globalGameContext.OnLocationEntered += locationName =>
         {
             _currentLocationName = locationName;
-            OnLocationChanged?.Invoke();
+            OnLocationEntered?.Invoke();
         };
 
         _globalGameContext.OnTextPrinted += text => _currentScreenText.Append(text);
@@ -60,6 +63,8 @@ public class Game
             ClearCurrentView();
             OnScreenCleared?.Invoke();
         };
+
+        _globalGameContext.OnVariableAssignment += AssignVariable;
     }
 
     private void GoToNewLocation(LabelStatement? labelStatement)
@@ -111,6 +116,11 @@ public class Game
         }
     }
 
+    private void AssignVariable(string name, decimal value)
+    {
+        _variables[name] = new DecimalVariable(name, value);
+    }
+
     private void PromoteNextStatement() => _currentStatement = Quest.GetNextStatement(_currentStatement);
 
     private void SetNextStatementToStarting() => _currentStatement = Quest.StartingStatement;
@@ -142,4 +152,5 @@ public class Game
     private readonly StringBuilder _currentScreenText = new();
     private readonly List<Button> _currentScreenButtons = [];
     private string? _currentLocationName;
+    private readonly Dictionary<string, Variable> _variables = new(StringComparer.InvariantCultureIgnoreCase);
 }
