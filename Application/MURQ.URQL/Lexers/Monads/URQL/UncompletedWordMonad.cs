@@ -10,6 +10,7 @@ public record UncompletedWordMonad(string Lexeme, Location Location) : Uncomplet
 
     public override LexemeMonad Append(char character, Position position) => character switch
     {
+        '_' => new MaybeVariableMonad(Lexeme + character, Location.EndAt(position)),
         _ when char.IsLetterOrDigit(character) => new UncompletedWordMonad(Lexeme + character, Location.EndAt(position)),
         _ => SpecifyMonad() + (character, position)
     };

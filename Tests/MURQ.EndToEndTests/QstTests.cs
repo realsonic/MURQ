@@ -172,7 +172,7 @@ public class QstTests
         eventWasFired.Should().BeTrue();
     }
 
-    [Fact(DisplayName = "Переменной присваивается число")]
+    [Fact(DisplayName = "Переменным присваиваются числа")]
     public async Task Number_set_to_variable()
     {
         // Arrange
@@ -185,8 +185,14 @@ public class QstTests
         sut.Start();
 
         // Assert
-        var variable = sut.GetVariable("bT");
-        variable.Should().BeOfType<DecimalVariable>();
-        variable.As<DecimalVariable>().Value.Should().Be(4);
+        var variable1 = sut.GetVariable("bT");
+        variable1.Should().BeOfType<DecimalVariable>();
+        variable1.As<DecimalVariable>().Value.Should().Be(4);
+        var variable2 = sut.GetVariable("_under");
+        variable2.Should().BeOfType<DecimalVariable>();
+        variable2.As<DecimalVariable>().Value.Should().Be(5);
+        var variable3 = sut.GetVariable("und_er");
+        variable3.Should().BeOfType<DecimalVariable>();
+        variable3.As<DecimalVariable>().Value.Should().Be(10);
     }
 }

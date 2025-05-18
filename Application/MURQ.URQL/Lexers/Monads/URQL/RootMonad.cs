@@ -12,7 +12,8 @@ public record RootMonad(Position Position) : UncompletedLexemeMonad(string.Empty
         ';' => new UncompletedCommentMonad(character.ToString(), Location.StartAt(position)),
         ':' => new UncompletedLabelMonad(string.Empty, character.ToString(), Location.StartAt(position)),
         '=' => new CompletedLexemeMonad(new EqualityToken(Lexeme, Location.StartAt(position)), null),
-        _ when char.IsLetter(character) || character is '_' => new UncompletedWordMonad(character, position),
+        '_' => new MaybeVariableMonad(character, position),
+        _ when char.IsLetter(character) => new UncompletedWordMonad(character, position),
         _ when char.IsDigit(character) => new UncompletedNumberMonad(character.ToString(), Location.StartAt(position)),
         _ => new UnknownLexemeMonad(character.ToString(), Location.StartAt(position))
     };
