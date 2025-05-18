@@ -105,13 +105,13 @@ public class UrqlParser
             throw new ParseException($"Метка пустая: {labelToken}");
         }
 
-        return new LabelStatementSto(label);
+        return new LabelStatementSto(label) { Location = labelToken.Location };
     }
 
     private PrintStatementSto ParsePrint()
     {
         PrintToken printToken = Match<PrintToken>();
-        return new PrintStatementSto(printToken.Text, printToken.IsNewLineAtEnd);
+        return new PrintStatementSto(printToken.Text, printToken.IsNewLineAtEnd) { Location = printToken.Location };
     }
 
     private ButtonStatementSto ParseButton()
@@ -126,19 +126,19 @@ public class UrqlParser
 
         string caption = buttonToken.Caption.Trim();
 
-        return new ButtonStatementSto(label, caption);
+        return new ButtonStatementSto(label, caption) { Location = buttonToken.Location };
     }
 
     private EndStatementSto ParseEnd()
     {
-        Match<EndToken>();
-        return new EndStatementSto();
+        EndToken endToken = Match<EndToken>();
+        return new EndStatementSto() { Location = endToken.Location };
     }
 
     private ClearScreenStatementSto ParseClearScreen()
     {
-        Match<ClearScreenToken>();
-        return new ClearScreenStatementSto();
+        ClearScreenToken clearScreenToken = Match<ClearScreenToken>();
+        return new ClearScreenStatementSto() { Location = clearScreenToken.Location };
     }
 
     private AssignVariableStatementSto ParseAssignVariableStatement()
@@ -147,7 +147,7 @@ public class UrqlParser
         Match<EqualityToken>();
         NumberToken numberToken = Match<NumberToken>();
 
-        return new AssignVariableStatementSto(variableToken.Name, numberToken.Value);
+        return new AssignVariableStatementSto(variableToken.Name, numberToken.Value) { Location = (variableToken.Location, numberToken.Location) };
     }
 
     private TToken Match<TToken>()

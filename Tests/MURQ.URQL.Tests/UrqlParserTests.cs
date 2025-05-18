@@ -36,7 +36,7 @@ public class UrqlParserTests
 
         // Asssert
         questSto.Statements.Should().BeEquivalentTo([
-            new PrintStatementSto("Привет!", false)
+            new PrintStatementSto("Привет!", false){ Location = ((1, 1), (1, 9)) }
         ]);
     }
 
@@ -55,8 +55,8 @@ public class UrqlParserTests
 
         // Asssert
         questSto.Statements.Should().BeEquivalentTo([
-            new PrintStatementSto("Привет!", false),
-            new PrintStatementSto("Пока!", false)
+            new PrintStatementSto("Привет!", false) { Location = ((1, 1), (1, 9)) },
+            new PrintStatementSto("Пока!", false) { Location = ((1, 1), (1, 7)) }
         ]);
     }
 }

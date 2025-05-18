@@ -6,11 +6,14 @@ public record Location(Position Start, Position End)
 
     public Location EndAt(Position position) => this with { End = position };
 
-    public static Location Create((int Line, int Column) start, (int Line, int Column) end)
-        => new(new Position(start.Line, start.Column), new Position(end.Line, end.Column));
+    public static implicit operator Location(((int Line, int Column) Start, (int Line, int Column) End) coordinates)
+        => new(new Position(coordinates.Start.Line, coordinates.Start.Column), new Position(coordinates.End.Line, coordinates.End.Column));
 
-    public static implicit operator Location(((int Line, int Column) start, (int Line, int Column) end) coordinates)
-        => Create(coordinates.start, coordinates.end);
+    public static implicit operator Location((Position Start, Position End) coordinates)
+        => new(coordinates.Start, coordinates.End);
+
+    public static implicit operator Location((Location Start, Location End) coordinates)
+        => new(coordinates.Start.Start, coordinates.End.End);
 
     public override string? ToString() => $"{Start}–{End}";
 }
