@@ -31,7 +31,7 @@ public class UrqlLexer(IEnumerable<char> input)
                     uncompletedMonad = uncompleted;
                     break;
                 case UnknownLexemeMonad unknown:
-                    throw new LexingException($"Неизвестная лексема \"{unknown.Lexeme}\" на {unknown.Location}.");
+                    throw new LexingException($"Неизвестная лексема \"{unknown.Lexeme}\" на {unknown.Location}{GetErrorMessageAppendix(unknown.ErrorMessage)}");
             }
         }
 
@@ -47,7 +47,13 @@ public class UrqlLexer(IEnumerable<char> input)
             case UncompletedLexemeMonad uncompleted and not RootMonad:
                 throw new LexingException($"После финализации монада не завершена: {uncompleted}.");
             case UnknownLexemeMonad unknown:
-                throw new LexingException($"Неизвестная лексема \"{unknown.Lexeme}\" на {unknown.Location}.");
+                throw new LexingException($"Неизвестная лексема \"{unknown.Lexeme}\" на {unknown.Location}{GetErrorMessageAppendix(unknown.ErrorMessage)}");
         }
     }
+
+    private static string GetErrorMessageAppendix(string? errorMessage) => errorMessage switch
+    {
+        not null => $": {errorMessage}",
+        _ => string.Empty
+    };
 }

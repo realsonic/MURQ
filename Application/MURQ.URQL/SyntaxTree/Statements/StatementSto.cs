@@ -1,3 +1,8 @@
-﻿namespace MURQ.URQL.SyntaxTree.Statements;
+﻿using MURQ.URQL.Locations;
 
-public abstract record StatementSto;
+namespace MURQ.URQL.SyntaxTree.Statements;
+
+public abstract record StatementSto
+{
+    public required Location Location { get; init; }
+}

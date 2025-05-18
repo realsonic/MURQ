@@ -2,6 +2,7 @@
 
 using MURQ.Application;
 using MURQ.Domain.Games;
+using MURQ.Domain.Games.Variables;
 using MURQ.Domain.Quests;
 using MURQ.Domain.Quests.Statements;
 
@@ -169,5 +170,29 @@ public class QstTests
         sut.CurrentLocation.Text.Should().BeEmpty();
         sut.CurrentLocation.Buttons.Should().BeEmpty();
         eventWasFired.Should().BeTrue();
+    }
+
+    [Fact(DisplayName = "Переменным присваиваются числа")]
+    public async Task Number_set_to_variable()
+    {
+        // Arrange
+        string questSource = await File.ReadAllTextAsync(@"Quests/Numeric_var.qst");
+        UrqLoader urqLoader = new(questSource);
+        Quest quest = urqLoader.LoadQuest();
+        Game sut = new(quest);
+
+        // Act
+        sut.Start();
+
+        // Assert
+        var variable1 = sut.GetVariable("bT");
+        variable1.Should().BeOfType<DecimalVariable>();
+        variable1.As<DecimalVariable>().Value.Should().Be(4);
+        var variable2 = sut.GetVariable("_under");
+        variable2.Should().BeOfType<DecimalVariable>();
+        variable2.As<DecimalVariable>().Value.Should().Be(5);
+        var variable3 = sut.GetVariable("und_er");
+        variable3.Should().BeOfType<DecimalVariable>();
+        variable3.As<DecimalVariable>().Value.Should().Be(10);
     }
 }

@@ -17,7 +17,11 @@ public record MaybePrintMonad(PrintLexemeProgress LexemeProgress, string Lexeme,
             _ => new UnknownLexemeMonad(Lexeme + character, Location.EndAt(position))
         },
 
-        PrintLexemeProgress.PL when character is 'n' or 'N' => new MaybePrintMonad(PrintLexemeProgress.PLN, Lexeme + character, Location.EndAt(position)),
+        PrintLexemeProgress.PL => character switch
+        {
+            'n' or 'N' => new MaybePrintMonad(PrintLexemeProgress.PLN, Lexeme + character, Location.EndAt(position)),
+            _ => new UnknownLexemeMonad(Lexeme + character, Location.EndAt(position))
+        },
 
         PrintLexemeProgress.PLN => character switch
         {
@@ -26,7 +30,7 @@ public record MaybePrintMonad(PrintLexemeProgress LexemeProgress, string Lexeme,
             _ => new UnknownLexemeMonad(Lexeme + character, Location.EndAt(position))
         },
 
-        _ => new UnknownLexemeMonad(Lexeme + character, Location.EndAt(position))
+        _ => throw new LexingException($"Неожиданное состояние монады лексемы печати: {nameof(LexemeProgress)} = {LexemeProgress}")
     };
 
     public override LexemeMonad Finalize() => LexemeProgress switch
