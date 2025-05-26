@@ -9,8 +9,8 @@ public record UncompletedWordMonad(string Lexeme, Location Location) : Uncomplet
 
     public override LexemeMonad Append(char character, Position position) => character switch
     {
-        '_' => new MaybeVariableMonad(Lexeme + character, Location.EndAt(position)),
-        _ when char.IsLetterOrDigit(character) => new UncompletedWordMonad(Lexeme + character, Location.EndAt(position)),
+        '_' or _ when char.IsDigit(character) => new UncompletedVariableMonad(Lexeme + character, Location.EndAt(position)),
+        _ when char.IsLetter(character) => new UncompletedWordMonad(Lexeme + character, Location.EndAt(position)),
         _ => SpecifyMonad() + (character, position)
     };
 
@@ -23,6 +23,6 @@ public record UncompletedWordMonad(string Lexeme, Location Location) : Uncomplet
         "btn" => UncompletedButtonMonad.StartAfterBtn(Lexeme, Location),
         "end" => new MaybeEndMonad(MaybeEndMonad.EndLexemeProgress.END, Lexeme, Location),
         "cls" => new MaybeClearScreenMonad(MaybeClearScreenMonad.ClearScreenLexemeProgress.CLS, Lexeme, Location),
-        _ => new MaybeVariableMonad(Lexeme, Location)
+        _ => new UncompletedVariableMonad(Lexeme, Location)
     };
 }
