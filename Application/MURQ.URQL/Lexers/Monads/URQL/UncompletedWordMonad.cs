@@ -18,8 +18,8 @@ public record UncompletedWordMonad(string Lexeme, Location Location) : Uncomplet
 
     private UncompletedLexemeMonad SpecifyMonad() => Lexeme.ToLower() switch
     {
-        "p" => new MaybePrintMonad(MaybePrintMonad.PrintLexemeProgress.P, Lexeme, Location),
-        "pln" => new MaybePrintMonad(MaybePrintMonad.PrintLexemeProgress.PLN, Lexeme, Location),
+        "p" => UncompletedPrintMonad.StartAfterKeyword(UncompletedPrintMonad.PrintStatementVariant.P, Lexeme, Location),
+        "pln" => UncompletedPrintMonad.StartAfterKeyword(UncompletedPrintMonad.PrintStatementVariant.PLN, Lexeme, Location),
         "btn" => UncompletedButtonMonad.StartAfterBtn(Lexeme, Location),
         "end" => new MaybeEndMonad(MaybeEndMonad.EndLexemeProgress.END, Lexeme, Location),
         "cls" => new MaybeClearScreenMonad(MaybeClearScreenMonad.ClearScreenLexemeProgress.CLS, Lexeme, Location),
