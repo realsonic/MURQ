@@ -6,7 +6,7 @@ public record NumberMonad(string Lexeme, Location Location) : UncompletedLexemeM
 {
     public override LexemeMonad Append(char character, Position position) => character switch
     {
-        _ when char.IsNumber(character) => new NumberMonad(Lexeme + character, Location.EndAt(position)),
+        _ when char.IsNumber(character) => Proceed(character, position),
         _ => new CompletedLexemeMonad(new NumberToken(decimal.Parse(Lexeme), Lexeme, Location), RootMonad.Remain(character, position))
     };
 

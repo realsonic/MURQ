@@ -7,7 +7,7 @@ public record CommentMonad(string Lexeme, Location Location) : UncompletedLexeme
     public override LexemeMonad Append(char character, Position position) => character switch
     {
         '\n' => RootMonad.Remain(character, position),
-        _ => new CommentMonad(Lexeme + character, Location.EndAt(position))
+        _ => Proceed(character, position)
     };
 
     public override LexemeMonad Finalize() => new RootMonad(Location.End);

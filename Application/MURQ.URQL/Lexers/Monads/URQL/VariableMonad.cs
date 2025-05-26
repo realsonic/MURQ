@@ -9,7 +9,8 @@ public record VariableMonad(string Lexeme, Location Location) : UncompletedLexem
 
     public override LexemeMonad Append(char character, Position position) => character switch
     {
-        _ when char.IsLetterOrDigit(character) || character is '_' => new VariableMonad(Lexeme + character, Location.EndAt(position)),
+        '_' => Proceed(character, position),
+        _ when char.IsLetterOrDigit(character) => Proceed(character, position),
         _ => new CompletedLexemeMonad(new VariableToken(Lexeme, Lexeme, Location), RootMonad.Remain(character, position))
     };
 

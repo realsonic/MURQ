@@ -8,8 +8,9 @@ public record WordMonad(string Lexeme, Location Location) : UncompletedLexemeMon
 
     public override LexemeMonad Append(char character, Position position) => character switch
     {
-        '_' or _ when char.IsDigit(character) => new VariableMonad(Lexeme + character, Location.EndAt(position)),
-        _ when char.IsLetter(character) => new WordMonad(Lexeme + character, Location.EndAt(position)),
+        '_' => new VariableMonad(Lexeme + character, Location.EndAt(position)),
+        _ when char.IsDigit(character) => new VariableMonad(Lexeme + character, Location.EndAt(position)),
+        _ when char.IsLetter(character) => Proceed(character, position),
         _ => SpecifyMonad() + (character, position)
     };
 
