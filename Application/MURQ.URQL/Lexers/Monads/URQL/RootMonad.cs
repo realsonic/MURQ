@@ -8,10 +8,10 @@ public record RootMonad(Position Position) : UncompletedLexemeMonad(string.Empty
     public override LexemeMonad Append(char character, Position position) => character switch
     {
         ' ' or '\t' or '\r' => new RootMonad(position),
-        '\n' => new CompletedLexemeMonad(new NewLineToken(character.ToString(), Location.StartAt(position)), null),
+        '\n' => new NewLineToken(character, position).AsMonad(),
         ';' => new UncompletedCommentMonad(character.ToString(), Location.StartAt(position)),
         ':' => new UncompletedLabelMonad(string.Empty, character.ToString(), Location.StartAt(position)),
-        '=' => new CompletedLexemeMonad(new EqualityToken(Lexeme, Location.StartAt(position)), null),
+        '=' => new EqualityToken(character, position).AsMonad(),
         '_' => UncompletedVariableMonad.Start(character, position),
         _ when char.IsLetter(character) => UncompletedWordMonad.Start(character, position),
         _ when char.IsDigit(character) => new UncompletedNumberMonad(character.ToString(), Location.StartAt(position)),
