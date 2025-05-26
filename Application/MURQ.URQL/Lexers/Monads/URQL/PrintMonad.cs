@@ -1,20 +1,20 @@
 ﻿using MURQ.URQL.Locations;
 using MURQ.URQL.Tokens.Statements;
 
-using static MURQ.URQL.Lexers.Monads.URQL.UncompletedPrintMonad;
+using static MURQ.URQL.Lexers.Monads.URQL.PrintMonad;
 
 namespace MURQ.URQL.Lexers.Monads.URQL;
 
-public record UncompletedPrintMonad(PrintLexemeProgress LexemeProgress, PrintStatementVariant StatementVariant, string Text, string Lexeme, Location Location) : UncompletedLexemeMonad(Lexeme, Location)
+public record PrintMonad(PrintLexemeProgress LexemeProgress, PrintStatementVariant StatementVariant, string Text, string Lexeme, Location Location) : UncompletedLexemeMonad(Lexeme, Location)
 {
-    public static UncompletedPrintMonad StartAfterKeyword(PrintStatementVariant StatementVariant, string Lexeme, Location Location)
+    public static PrintMonad StartAfterKeyword(PrintStatementVariant StatementVariant, string Lexeme, Location Location)
         => new(PrintLexemeProgress.JustAfterKeyword, StatementVariant, string.Empty, Lexeme, Location);
 
     public override LexemeMonad Append(char character, Position position) => LexemeProgress switch
     {
         PrintLexemeProgress.JustAfterKeyword => character switch
         {
-            ' ' or '\t' => new UncompletedPrintMonad(PrintLexemeProgress.Text, StatementVariant, string.Empty, Lexeme + character, Location.EndAt(position)),
+            ' ' or '\t' => new PrintMonad(PrintLexemeProgress.Text, StatementVariant, string.Empty, Lexeme + character, Location.EndAt(position)),
             '\n' or ';' => new PrintToken(string.Empty, IsNewLineAtEnd(), Lexeme, Location).AsMonadWithRemain(character, position),
             _ => new UnknownLexemeMonad(Lexeme + character, Location.EndAt(position), WhitespaceExpected)
         },
@@ -22,7 +22,7 @@ public record UncompletedPrintMonad(PrintLexemeProgress LexemeProgress, PrintSta
         PrintLexemeProgress.Text => character switch
         {
             '\n' or ';' => new PrintToken(Text, IsNewLineAtEnd(), Lexeme, Location).AsMonadWithRemain(character, position),
-            _ => new UncompletedPrintMonad(PrintLexemeProgress.Text, StatementVariant, Text + character, Lexeme + character, Location.EndAt(position))
+            _ => new PrintMonad(PrintLexemeProgress.Text, StatementVariant, Text + character, Lexeme + character, Location.EndAt(position))
         },
 
         _ => throw new LexingException($"Неожиданное состояние монады лексемы печати: {nameof(LexemeProgress)} = {LexemeProgress}")

@@ -9,12 +9,12 @@ public record RootMonad(Position Position) : UncompletedLexemeMonad(string.Empty
     {
         ' ' or '\t' or '\r' => new RootMonad(position),
         '\n' => new NewLineToken(character, position).AsMonad(),
-        ';' => new UncompletedCommentMonad(character.ToString(), Location.StartAt(position)),
-        ':' => new UncompletedLabelMonad(string.Empty, character.ToString(), Location.StartAt(position)),
+        ';' => new CommentMonad(character.ToString(), Location.StartAt(position)),
+        ':' => new LabelMonad(string.Empty, character.ToString(), Location.StartAt(position)),
         '=' => new EqualityToken(character, position).AsMonad(),
-        '_' => UncompletedVariableMonad.Start(character, position),
-        _ when char.IsLetter(character) => UncompletedWordMonad.Start(character, position),
-        _ when char.IsDigit(character) => new UncompletedNumberMonad(character.ToString(), Location.StartAt(position)),
+        '_' => VariableMonad.Start(character, position),
+        _ when char.IsLetter(character) => WordMonad.Start(character, position),
+        _ when char.IsDigit(character) => new NumberMonad(character.ToString(), Location.StartAt(position)),
         _ => new UnknownLexemeMonad(character.ToString(), Location.StartAt(position))
     };
 

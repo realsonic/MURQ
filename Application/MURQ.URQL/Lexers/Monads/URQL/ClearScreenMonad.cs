@@ -2,7 +2,7 @@
 using MURQ.URQL.Tokens.Statements;
 
 namespace MURQ.URQL.Lexers.Monads.URQL;
-public record UncompletedClearScreenMonad(string Lexeme, Location Location) : UncompletedLexemeMonad(Lexeme, Location)
+public record ClearScreenMonad(string Lexeme, Location Location) : UncompletedLexemeMonad(Lexeme, Location)
 {
     public override LexemeMonad Append(char character, Position position) => character switch
     {

@@ -3,7 +3,7 @@ using MURQ.URQL.Tokens.Statements;
 
 namespace MURQ.URQL.Lexers.Monads.URQL;
 
-public record UncompletedEndMonad(string Lexeme, Location Location) : UncompletedLexemeMonad(Lexeme, Location)
+public record EndMonad(string Lexeme, Location Location) : UncompletedLexemeMonad(Lexeme, Location)
 {
     public override LexemeMonad Append(char character, Position position) => character switch
     {
