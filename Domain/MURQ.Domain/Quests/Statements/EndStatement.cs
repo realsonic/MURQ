@@ -6,6 +6,6 @@ public class EndStatement : Statement
 {
     public override void Run(IGameContext gameContext)
     {
-        gameContext.End();
+        gameContext.EndLocation();
     }
 }
