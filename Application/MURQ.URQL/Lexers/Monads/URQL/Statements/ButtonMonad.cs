@@ -1,13 +1,13 @@
 ﻿using MURQ.URQL.Locations;
 using MURQ.URQL.Tokens.Statements;
 
-using static MURQ.URQL.Lexers.Monads.URQL.ButtonMonad;
+using static MURQ.URQL.Lexers.Monads.URQL.Statements.ButtonMonad;
 
-namespace MURQ.URQL.Lexers.Monads.URQL;
+namespace MURQ.URQL.Lexers.Monads.URQL.Statements;
 
 public record ButtonMonad(ButtonLexemeProgress LexemeProgress, string Label, string Caption, string Lexeme, Location Location) : UncompletedLexemeMonad(Lexeme, Location)
 {
-    public static ButtonMonad StartAfterBtn(string lexeme, Location location) 
+    public static ButtonMonad StartAfterBtn(string lexeme, Location location)
         => new(ButtonLexemeProgress.JustAfterBtn, string.Empty, string.Empty, lexeme, location);
 
     public override LexemeMonad Append(char character, Position position) => LexemeProgress switch

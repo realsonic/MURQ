@@ -1,9 +1,9 @@
 ﻿using MURQ.URQL.Locations;
 using MURQ.URQL.Tokens.Statements;
 
-using static MURQ.URQL.Lexers.Monads.URQL.PrintMonad;
+using static MURQ.URQL.Lexers.Monads.URQL.Statements.PrintMonad;
 
-namespace MURQ.URQL.Lexers.Monads.URQL;
+namespace MURQ.URQL.Lexers.Monads.URQL.Statements;
 
 public record PrintMonad(PrintLexemeProgress LexemeProgress, PrintStatementVariant StatementVariant, string Text, string Lexeme, Location Location) : UncompletedLexemeMonad(Lexeme, Location)
 {

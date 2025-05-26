@@ -12,7 +12,7 @@ public record CompletedLexemeMonad(Token Token, LexemeMonad? Remain) : LexemeMon
 public static class TokenExtensions
 {
     public static CompletedLexemeMonad AsMonad(this Token token) => new(token, null);
-    
-    public static CompletedLexemeMonad AsMonadWithRemain(this Token token, char character, Position position) 
+
+    public static CompletedLexemeMonad AsMonadWithRemain(this Token token, char character, Position position)
         => new(token, RootMonad.Remain(character, position));
 }
