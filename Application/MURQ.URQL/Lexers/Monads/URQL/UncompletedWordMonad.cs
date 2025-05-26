@@ -1,4 +1,3 @@
-﻿using MURQ.URQL.Lexers.Monads.URQL.Button;
 using MURQ.URQL.Lexers.Monads.URQL.Print;
 using MURQ.URQL.Locations;
 
@@ -6,7 +5,7 @@ namespace MURQ.URQL.Lexers.Monads.URQL;
 
 public record UncompletedWordMonad(string Lexeme, Location Location) : UncompletedLexemeMonad(Lexeme, Location)
 {
-    public UncompletedWordMonad(char startCharacter, Position startPosition) : this(startCharacter.ToString(), Location.StartAt(startPosition)) { }
+    public static UncompletedWordMonad Start(char startCharacter, Position startPosition) => new(startCharacter.ToString(), Location.StartAt(startPosition));
 
     public override LexemeMonad Append(char character, Position position) => character switch
     {
@@ -21,7 +20,7 @@ public record UncompletedWordMonad(string Lexeme, Location Location) : Uncomplet
     {
         "p" => new MaybePrintMonad(MaybePrintMonad.PrintLexemeProgress.P, Lexeme, Location),
         "pln" => new MaybePrintMonad(MaybePrintMonad.PrintLexemeProgress.PLN, Lexeme, Location),
-        "btn" => new MaybeButtonMonad(MaybeButtonMonad.MaybeButtonLexemeProgress.BTN, Lexeme, Location),
+        "btn" => UncompletedButtonMonad.StartAfterBtn(Lexeme, Location),
         "end" => new MaybeEndMonad(MaybeEndMonad.EndLexemeProgress.END, Lexeme, Location),
         "cls" => new MaybeClearScreenMonad(MaybeClearScreenMonad.ClearScreenLexemeProgress.CLS, Lexeme, Location),
         _ => new MaybeVariableMonad(Lexeme, Location)
