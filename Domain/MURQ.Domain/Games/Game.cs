@@ -7,20 +7,12 @@ using System.Text;
 
 namespace MURQ.Domain.Games;
 
-public class Game
+public class Game(Quest quest) : IGameContext
 {
-    public Game(Quest quest)
-    {
-        Quest = quest;
-
-        _globalGameContext = new GameContext();
-        SubscribeToRunningContextEvents();
-    }
-
     public event Action? OnLocationEntered;
     public event Action? OnScreenCleared;
 
-    public Quest Quest { get; }
+    public Quest Quest { get; } = quest;
 
     public CurrentLocationView CurrentLocation => new()
     {
@@ -40,31 +32,26 @@ public class Game
 
     public Variable? GetVariable(string name) => _variables.TryGetValue(name, out Variable? variable) ? variable : null;
 
-    private void SubscribeToRunningContextEvents()
+    void IGameContext.PrintText(string? text) => _currentScreenText.Append(text);
+
+    void IGameContext.AddButton(string caption, LabelStatement? labelStatement) => _currentScreenButtons.Add(new Button
     {
-        _globalGameContext.OnLocationEntered += locationName =>
-        {
-            _currentLocationName = locationName;
-            OnLocationEntered?.Invoke();
-        };
+        Caption = caption,
+        OnButtonPressed = () => GoToNewLocation(labelStatement)
+    });
 
-        _globalGameContext.OnTextPrinted += text => _currentScreenText.Append(text);
+    void IGameContext.EnterLocation(string locationName)
+    {
+        _currentLocationName = locationName;
+        OnLocationEntered?.Invoke();
+    }
 
-        _globalGameContext.OnButtonAdded += (caption, labelStatement) => _currentScreenButtons.Add(new Button
-        {
-            Caption = caption,
-            OnButtonPressed = () => GoToNewLocation(labelStatement)
-        });
+    void IGameContext.EndLocation() => StopAndWaitUser();
 
-        _globalGameContext.OnEnd += StopAndWaitUser;
-
-        _globalGameContext.OnClearScreen += () =>
-        {
-            ClearCurrentView();
-            OnScreenCleared?.Invoke();
-        };
-
-        _globalGameContext.OnVariableAssignment += AssignVariable;
+    void IGameContext.ClearScreen()
+    {
+        ClearCurrentView();
+        OnScreenCleared?.Invoke();
     }
 
     private void GoToNewLocation(LabelStatement? labelStatement)
@@ -105,7 +92,7 @@ public class Game
             return;
         }
 
-        _currentStatement.Run(_globalGameContext);
+        _currentStatement.Run(this);
     }
 
     private void GoToLabel(LabelStatement? labelStatement)
@@ -146,9 +133,10 @@ public class Game
         public void Press() => OnButtonPressed();
     }
 
+    void IGameContext.AssignVariable(string VariableName, decimal Value) => AssignVariable(VariableName, Value);
+
     private GameState _gameState = GameState.InitialState;
     private Statement? _currentStatement;
-    private readonly GameContext _globalGameContext;
     private readonly StringBuilder _currentScreenText = new();
     private readonly List<Button> _currentScreenButtons = [];
     private string? _currentLocationName;
