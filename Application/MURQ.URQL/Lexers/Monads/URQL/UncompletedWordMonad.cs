@@ -1,7 +1,6 @@
 ﻿using MURQ.URQL.Locations;
 
 using static MURQ.URQL.Lexers.Monads.URQL.MaybeClearScreenMonad;
-using static MURQ.URQL.Lexers.Monads.URQL.MaybeEndMonad;
 
 namespace MURQ.URQL.Lexers.Monads.URQL;
 
@@ -23,7 +22,7 @@ public record UncompletedWordMonad(string Lexeme, Location Location) : Uncomplet
         "p" => UncompletedPrintMonad.StartAfterKeyword(UncompletedPrintMonad.PrintStatementVariant.P, Lexeme, Location),
         "pln" => UncompletedPrintMonad.StartAfterKeyword(UncompletedPrintMonad.PrintStatementVariant.PLN, Lexeme, Location),
         "btn" => UncompletedButtonMonad.StartAfterBtn(Lexeme, Location),
-        "end" => new MaybeEndMonad(EndLexemeProgress.END, Lexeme, Location),
+        "end" => new UncompletedEndMonad(Lexeme, Location),
         "cls" => new MaybeClearScreenMonad(ClearScreenLexemeProgress.CLS, Lexeme, Location),
         _ => new UncompletedVariableMonad(Lexeme, Location)
     };
