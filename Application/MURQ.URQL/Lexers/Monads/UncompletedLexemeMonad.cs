@@ -10,4 +10,7 @@ public abstract record UncompletedLexemeMonad(string Lexeme, Location Location) 
     public abstract LexemeMonad Append(char character, Position position);
 
     public abstract LexemeMonad Finalize();
+
+    protected UncompletedLexemeMonad Proceed(char newCharacter, Position endPosition) 
+        => this with { Lexeme = Lexeme + newCharacter, Location = Location.EndAt(endPosition) };
 }

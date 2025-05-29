@@ -1,4 +1,5 @@
-﻿using MURQ.URQL.Locations;
+﻿using MURQ.URQL.Lexers.Monads.URQL.Statements;
+using MURQ.URQL.Locations;
 using MURQ.URQL.Tokens;
 
 namespace MURQ.URQL.Lexers.Monads.URQL;
@@ -8,13 +9,13 @@ public record RootMonad(Position Position) : UncompletedLexemeMonad(string.Empty
     public override LexemeMonad Append(char character, Position position) => character switch
     {
         ' ' or '\t' or '\r' => new RootMonad(position),
-        '\n' => new CompletedLexemeMonad(new NewLineToken(character.ToString(), Location.StartAt(position)), null),
-        ';' => new UncompletedCommentMonad(character.ToString(), Location.StartAt(position)),
-        ':' => new UncompletedLabelMonad(string.Empty, character.ToString(), Location.StartAt(position)),
-        '=' => new CompletedLexemeMonad(new EqualityToken(Lexeme, Location.StartAt(position)), null),
-        '_' => new MaybeVariableMonad(character, position),
-        _ when char.IsLetter(character) => new UncompletedWordMonad(character, position),
-        _ when char.IsDigit(character) => new UncompletedNumberMonad(character.ToString(), Location.StartAt(position)),
+        '\n' => new NewLineToken(character, position).AsMonad(),
+        ';' => CommentMonad.Start(character, position),
+        ':' => LabelMonad.Start(character, position),
+        '=' => new EqualityToken(character, position).AsMonad(),
+        '_' => VariableMonad.Start(character, position),
+        _ when char.IsLetter(character) => WordMonad.Start(character, position),
+        _ when char.IsDigit(character) => NumberMonad.Start(character, position),
         _ => new UnknownLexemeMonad(character.ToString(), Location.StartAt(position))
     };
 

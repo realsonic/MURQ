@@ -2,12 +2,14 @@
 
 namespace MURQ.URQL.Lexers.Monads.URQL;
 
-public record UncompletedCommentMonad(string Lexeme, Location Location) : UncompletedLexemeMonad(Lexeme, Location)
+public record CommentMonad(string Lexeme, Location Location) : UncompletedLexemeMonad(Lexeme, Location)
 {
+    public static CommentMonad Start(char startCharacter, Position startPosition) => new(startCharacter.ToString(), Location.StartAt(startPosition));
+
     public override LexemeMonad Append(char character, Position position) => character switch
     {
         '\n' => RootMonad.Remain(character, position),
-        _ => new UncompletedCommentMonad(Lexeme + character, Location.EndAt(position))
+        _ => Proceed(character, position)
     };
 
     public override LexemeMonad Finalize() => new RootMonad(Location.End);
