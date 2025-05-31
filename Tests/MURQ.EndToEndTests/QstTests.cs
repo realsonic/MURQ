@@ -2,7 +2,7 @@
 
 using MURQ.Application;
 using MURQ.Domain.Games;
-using MURQ.Domain.Games.Variables;
+using MURQ.Domain.Games.Values;
 using MURQ.Domain.Quests;
 using MURQ.Domain.Quests.Statements;
 
@@ -186,13 +186,10 @@ public class QstTests
 
         // Assert
         var variable1 = sut.GetVariable("bT");
-        variable1.Should().BeOfType<DecimalVariable>();
-        variable1.As<DecimalVariable>().Value.Should().Be(4);
+        variable1!.Value.As<DecimalValue>().Value.Should().Be(4);
         var variable2 = sut.GetVariable("_under");
-        variable2.Should().BeOfType<DecimalVariable>();
-        variable2.As<DecimalVariable>().Value.Should().Be(5);
+        variable2!.Value.As<DecimalValue>().Value.Should().Be(5);
         var variable3 = sut.GetVariable("und_er");
-        variable3.Should().BeOfType<DecimalVariable>();
-        variable3.As<DecimalVariable>().Value.Should().Be(10);
+        variable3!.Value.As<DecimalValue>().Value.Should().Be(10);
     }
 }

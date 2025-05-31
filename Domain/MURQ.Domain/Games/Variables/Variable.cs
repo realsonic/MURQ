@@ -1,4 +1,5 @@
-﻿namespace MURQ.Domain.Games.Variables;
+﻿using MURQ.Domain.Games.Values;
 
-public abstract record Variable(string Name);
+namespace MURQ.Domain.Games.Variables;
 
+public record Variable(string Name, Value Value);

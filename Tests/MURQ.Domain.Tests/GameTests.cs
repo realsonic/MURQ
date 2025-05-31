@@ -1,5 +1,6 @@
 using MURQ.Domain.Games;
 using MURQ.Domain.Quests;
+using MURQ.Domain.Quests.Expressions;
 using MURQ.Domain.Quests.Statements;
 
 namespace MURQ.Domain.Tests;
@@ -86,5 +87,28 @@ public class GameTests
 
         // Assert
         game.CurrentLocation.Name.Should().Be("ѕерва€ локаци€");
+    }
+
+    [Fact(DisplayName = "If провер€ет простое условие сравнени€ переменной с числом и выполн€ет команду")]
+    public void If_checks_relation_and_runs_statement()
+    {
+        // Arrange
+        var quest = new Quest([
+            new AssignVariableStatement { VariableName = "a", Value = 4 },
+            new IfStatement {
+                Condition = new RelationExpression {
+                    LeftExpression = new VariableExpression { VariableName = "A" },
+                    RightExpression = new DecimalConstantExpression { Value = 4 }
+                },
+                ThenStatement = new PrintStatement { Text = "¬сего хорошего!", IsNewLineAtEnd = true }
+            }
+        ]);
+        var game = new Game(quest);
+
+        // Act
+        game.Start();
+
+        // Assert
+        game.CurrentLocation.Text.Should().Be("¬сего хорошего!\n");
     }
 }

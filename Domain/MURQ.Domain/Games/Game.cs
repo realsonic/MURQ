@@ -30,7 +30,7 @@ public class Game(Quest quest) : IGameContext
         RunStatements();
     }
 
-    public Variable? GetVariable(string name) => _variables.TryGetValue(name, out Variable? variable) ? variable : null;
+    public Variable? GetVariable(string variableName) => _variables.TryGetValue(variableName, out Variable? variable) ? variable : null;
 
     void IGameContext.PrintText(string? text) => _currentScreenText.Append(text);
 
@@ -105,7 +105,7 @@ public class Game(Quest quest) : IGameContext
 
     private void AssignVariable(string name, decimal value)
     {
-        _variables[name] = new DecimalVariable(name, value);
+        _variables[name] = new Variable(name, value);
     }
 
     private void PromoteNextStatement() => _currentStatement = Quest.GetNextStatement(_currentStatement);
