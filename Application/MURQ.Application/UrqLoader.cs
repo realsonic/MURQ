@@ -1,9 +1,11 @@
 ﻿using MURQ.Common.Exceptions;
 using MURQ.Domain.Quests;
+using MURQ.Domain.Quests.Expressions;
 using MURQ.Domain.Quests.Statements;
 using MURQ.URQL.Lexers;
 using MURQ.URQL.Parsers;
 using MURQ.URQL.SyntaxTree;
+using MURQ.URQL.SyntaxTree.Expressions;
 using MURQ.URQL.SyntaxTree.Statements;
 
 namespace MURQ.Application;
@@ -39,7 +41,7 @@ public class UrqLoader(IEnumerable<char> source)
         EndStatementSto => new EndStatement(),
         ClearScreenStatementSto => new ClearScreenStatement(),
         AssignVariableStatementSto assignVariableStatementSto => ProduceAssignVariableStatement(assignVariableStatementSto),
-        _ => throw new MurqException($"Неизвестный тип инструкции {statementSto}.")
+        IfStatementSto ifStatementSto => ProduceIfStatement(ifStatementSto),
         _ => throw new NotImplementedException($"Инструкция ({statementSto}) ещё не реализована.")
     };
 
@@ -61,6 +63,25 @@ public class UrqLoader(IEnumerable<char> source)
         Value = assignVariableStatementSto.Value
     };
 
+    private IfStatement ProduceIfStatement(IfStatementSto ifStatementSto) => new()
+    {
+        Condition = ProduceExpression(ifStatementSto.Condition),
+        ThenStatement = ProduceStatement(ifStatementSto.ThenStatement)
+    };
+
+    private Expression ProduceExpression(ExpressionSto expressionSto) => expressionSto switch
+    {
+        RelationExpressionSto relationExpressionSto => ProduceRelationExpression(relationExpressionSto),
+        VariableExpressionSto variableExpressionSto => new VariableExpression { VariableName = variableExpressionSto.VariableName },
+        DecimalConstantExpressionSto decimalConstantExpressionSto => new DecimalConstantExpression { Value = decimalConstantExpressionSto.Value },
+        _ => throw new NotImplementedException($"Выражение типа ({expressionSto}) ещё не реализовано.")
+    };
+
+    private RelationExpression ProduceRelationExpression(RelationExpressionSto relationExpressionSto) => new()
+    {
+        LeftExpression = ProduceExpression(relationExpressionSto.LeftExpression),
+        RightExpression = ProduceExpression(relationExpressionSto.RightExpression)
+    };
 
     private LabelStatement? GetLabelStatementByLabel(string label)
     {
@@ -75,7 +96,7 @@ public class UrqLoader(IEnumerable<char> source)
         LabelStatementSto? labelStatementSto = _questSto.Statements
             .OfType<LabelStatementSto>()
             .FirstOrDefault(labelStatement => labelStatement.Label.Equals(label, StringComparison.InvariantCultureIgnoreCase));
-        
+
         if (labelStatementSto is not null)
         {
             LabelStatement labelStatement = new() { Label = labelStatementSto.Label };
