@@ -1,9 +1,9 @@
 ﻿using MURQ.URQL.Locations;
 using MURQ.URQL.Tokens.Statements;
 
-using static MURQ.URQL.Lexers.Monads.URQL.Statements.ButtonMonad;
+using static MURQ.URQL.Lexing.Monads.URQL.Statements.ButtonMonad;
 
-namespace MURQ.URQL.Lexers.Monads.URQL.Statements;
+namespace MURQ.URQL.Lexing.Monads.URQL.Statements;
 
 public record ButtonMonad(ButtonLexemeProgress LexemeProgress, string Label, string Caption, string Lexeme, Location Location) : UncompletedLexemeMonad(Lexeme, Location)
 {

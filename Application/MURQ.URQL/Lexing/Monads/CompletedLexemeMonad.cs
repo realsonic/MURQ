@@ -1,8 +1,8 @@
-﻿using MURQ.URQL.Lexers.Monads.URQL;
+﻿using MURQ.URQL.Lexing.Monads.URQL;
 using MURQ.URQL.Locations;
 using MURQ.URQL.Tokens;
 
-namespace MURQ.URQL.Lexers.Monads;
+namespace MURQ.URQL.Lexing.Monads;
 
 public record CompletedLexemeMonad(Token Token, LexemeMonad? Remain) : LexemeMonad(Token.Lexeme, Token.Location)
 {

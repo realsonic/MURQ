@@ -3,7 +3,7 @@ using MURQ.URQL.SyntaxTree.Statements;
 using MURQ.URQL.Tokens;
 using MURQ.URQL.Tokens.Statements;
 
-namespace MURQ.URQL.Parsers;
+namespace MURQ.URQL.Parsing;
 
 /// <summary>
 /// Парсер URQL по методу рекурсивного спуска.
@@ -105,13 +105,13 @@ public class UrqlParser
             throw new ParseException($"Метка пустая: {labelToken}");
         }
 
-        return new LabelStatementSto(label, labelToken.Location );
+        return new LabelStatementSto(label, labelToken.Location);
     }
 
     private PrintStatementSto ParsePrint()
     {
         PrintToken printToken = Match<PrintToken>();
-        return new PrintStatementSto(printToken.Text, printToken.IsNewLineAtEnd, printToken.Location );
+        return new PrintStatementSto(printToken.Text, printToken.IsNewLineAtEnd, printToken.Location);
     }
 
     private ButtonStatementSto ParseButton()

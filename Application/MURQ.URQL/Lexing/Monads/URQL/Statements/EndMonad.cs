@@ -1,7 +1,7 @@
 ﻿using MURQ.URQL.Locations;
 using MURQ.URQL.Tokens.Statements;
 
-namespace MURQ.URQL.Lexers.Monads.URQL.Statements;
+namespace MURQ.URQL.Lexing.Monads.URQL.Statements;
 
 public record EndMonad(string Lexeme, Location Location) : UncompletedLexemeMonad(Lexeme, Location)
 {

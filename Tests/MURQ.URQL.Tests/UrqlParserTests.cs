@@ -1,6 +1,6 @@
 ﻿using FluentAssertions;
 
-using MURQ.URQL.Parsers;
+using MURQ.URQL.Parsing;
 using MURQ.URQL.SyntaxTree;
 using MURQ.URQL.SyntaxTree.Statements;
 using MURQ.URQL.Tokens;

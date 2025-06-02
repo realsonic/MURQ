@@ -1,6 +1,6 @@
 ﻿using MURQ.URQL.Locations;
 
-namespace MURQ.URQL.Lexers.Monads;
+namespace MURQ.URQL.Lexing.Monads;
 
 public abstract record UncompletedLexemeMonad(string Lexeme, Location Location) : LexemeMonad(Lexeme, Location)
 {

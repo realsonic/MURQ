@@ -1,4 +1,4 @@
-﻿namespace MURQ.URQL.Parsers;
+﻿namespace MURQ.URQL.Parsing;
 
 [Serializable]
 public class ParseException : UrqlException

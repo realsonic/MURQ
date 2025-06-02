@@ -1,9 +1,9 @@
-﻿using MURQ.URQL.Lexers.Monads;
-using MURQ.URQL.Lexers.Monads.URQL;
+﻿using MURQ.URQL.Lexing.Monads;
+using MURQ.URQL.Lexing.Monads.URQL;
 using MURQ.URQL.Locations;
 using MURQ.URQL.Tokens;
 
-namespace MURQ.URQL.Lexers;
+namespace MURQ.URQL.Lexing;
 
 public class UrqlLexer(IEnumerable<char> input)
 {

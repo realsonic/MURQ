@@ -1,8 +1,8 @@
-﻿using MURQ.URQL.Lexers.Monads.URQL.Statements;
+﻿using MURQ.URQL.Lexing.Monads.URQL.Statements;
 using MURQ.URQL.Locations;
 using MURQ.URQL.Tokens;
 
-namespace MURQ.URQL.Lexers.Monads.URQL;
+namespace MURQ.URQL.Lexing.Monads.URQL;
 
 public record RootMonad(Position Position) : UncompletedLexemeMonad(string.Empty, Location.StartAt(Position))
 {

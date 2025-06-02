@@ -1,7 +1,7 @@
-﻿using MURQ.URQL.Lexers.Monads.URQL.Statements;
+﻿using MURQ.URQL.Lexing.Monads.URQL.Statements;
 using MURQ.URQL.Locations;
 
-namespace MURQ.URQL.Lexers.Monads.URQL;
+namespace MURQ.URQL.Lexing.Monads.URQL;
 
 public record WordMonad(string Lexeme, Location Location) : UncompletedLexemeMonad(Lexeme, Location)
 {

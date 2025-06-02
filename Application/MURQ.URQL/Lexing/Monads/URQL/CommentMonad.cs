@@ -1,6 +1,6 @@
 ﻿using MURQ.URQL.Locations;
 
-namespace MURQ.URQL.Lexers.Monads.URQL;
+namespace MURQ.URQL.Lexing.Monads.URQL;
 
 public record CommentMonad(string Lexeme, Location Location) : UncompletedLexemeMonad(Lexeme, Location)
 {

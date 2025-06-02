@@ -2,8 +2,8 @@
 using MURQ.Domain.Quests;
 using MURQ.Domain.Quests.Expressions;
 using MURQ.Domain.Quests.Statements;
-using MURQ.URQL.Lexers;
-using MURQ.URQL.Parsers;
+using MURQ.URQL.Lexing;
+using MURQ.URQL.Parsing;
 using MURQ.URQL.SyntaxTree;
 using MURQ.URQL.SyntaxTree.Expressions;
 using MURQ.URQL.SyntaxTree.Statements;

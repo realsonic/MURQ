@@ -1,7 +1,8 @@
-﻿using MURQ.URQL.Locations;
+﻿using MURQ.URQL.Lexing.Monads.URQL;
+using MURQ.URQL.Locations;
 using MURQ.URQL.Tokens.Statements;
 
-namespace MURQ.URQL.Lexers.Monads.URQL.Statements;
+namespace MURQ.URQL.Lexing.Monads.URQL.Statements;
 
 public record LabelMonad(string Label, string Lexeme, Location Location) : UncompletedLexemeMonad(Lexeme, Location)
 {

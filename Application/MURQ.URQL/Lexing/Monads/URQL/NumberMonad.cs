@@ -1,7 +1,8 @@
-﻿using MURQ.URQL.Locations;
+﻿using MURQ.URQL.Lexing.Monads;
+using MURQ.URQL.Locations;
 using MURQ.URQL.Tokens;
 
-namespace MURQ.URQL.Lexers.Monads.URQL;
+namespace MURQ.URQL.Lexing.Monads.URQL;
 public record NumberMonad(string Lexeme, Location Location) : UncompletedLexemeMonad(Lexeme, Location)
 {
     public static NumberMonad Start(char startCharacter, Position startPosition) => new(startCharacter.ToString(), Location.StartAt(startPosition));
