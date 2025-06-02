@@ -19,6 +19,7 @@ public class UrqLoader(IEnumerable<char> source)
 
         _questSto = parser.ParseQuest();
 
+        _labelStatementsByLabel.Clear();
         Quest quest = ProduceQuest();
         return quest;
     }
@@ -35,7 +36,7 @@ public class UrqLoader(IEnumerable<char> source)
 
     private Statement ProduceStatement(StatementSto statementSto) => statementSto switch
     {
-        LabelStatementSto labelStatementSto => GetLabelStatementByLabel(labelStatementSto.Label) ?? throw new MurqException("Не найдена инструкция метки"),
+        LabelStatementSto labelStatementSto => GetOrCreateLabelStatementByLabel(labelStatementSto.Label) ?? throw new MurqException("Не найдена инструкция метки"),
         PrintStatementSto printStatementSto => ProducePrintStatement(printStatementSto),
         ButtonStatementSto buttonStatementSto => ProduceButtonStatement(buttonStatementSto),
         EndStatementSto => new EndStatement(),
@@ -53,7 +54,7 @@ public class UrqLoader(IEnumerable<char> source)
 
     private ButtonStatement ProduceButtonStatement(ButtonStatementSto buttonStatementSto) => new()
     {
-        LabelStatement = GetLabelStatementByLabel(buttonStatementSto.Label),
+        LabelStatement = GetOrCreateLabelStatementByLabel(buttonStatementSto.Label),
         Caption = buttonStatementSto.Caption
     };
 
@@ -83,7 +84,7 @@ public class UrqLoader(IEnumerable<char> source)
         RightExpression = ProduceExpression(relationExpressionSto.RightExpression)
     };
 
-    private LabelStatement? GetLabelStatementByLabel(string label)
+    private LabelStatement? GetOrCreateLabelStatementByLabel(string label)
     {
         if (_labelStatementsByLabel.TryGetValue(label, out LabelStatement? foundLabelStatement))
         {
@@ -108,5 +109,5 @@ public class UrqLoader(IEnumerable<char> source)
     }
 
     private QuestSto? _questSto;
-    private Dictionary<string, LabelStatement> _labelStatementsByLabel = new(StringComparer.InvariantCultureIgnoreCase);
+    private readonly Dictionary<string, LabelStatement> _labelStatementsByLabel = new(StringComparer.InvariantCultureIgnoreCase);
 }
