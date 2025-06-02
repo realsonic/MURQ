@@ -1,4 +1,5 @@
 ﻿using MURQ.URQL.Lexing.Monads.URQL.Statements;
+using MURQ.URQL.Lexing.Monads.URQL.Statements.If;
 using MURQ.URQL.Locations;
 
 namespace MURQ.URQL.Lexing.Monads.URQL;
@@ -24,6 +25,8 @@ public record WordMonad(string Lexeme, Location Location) : UncompletedLexemeMon
         "btn" => ButtonMonad.StartAfterBtn(Lexeme, Location),
         "end" => new EndMonad(Lexeme, Location),
         "cls" => new ClearScreenMonad(Lexeme, Location),
+        "if" => new IfMonad(Lexeme, Location),
+        "then" => new ThenMonad(Lexeme, Location),
         _ => new VariableMonad(Lexeme, Location)
     };
 }

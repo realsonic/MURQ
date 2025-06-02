@@ -192,4 +192,20 @@ public class QstTests
         var variable3 = sut.GetVariable("und_er");
         variable3!.Value.As<DecimalValue>().Value.Should().Be(10);
     }
+
+    [Fact(DisplayName = "if проверяет значение числа")]
+    public async Task If_checks_var()
+    {
+        // Arrange
+        string questSource = await File.ReadAllTextAsync(@"Quests/If_a_4_then_pln.qst");
+        UrqLoader urqLoader = new(questSource);
+        Quest quest = urqLoader.LoadQuest();
+        Game sut = new(quest);
+
+        // Act
+        sut.Start();
+
+        // Assert
+        sut.CurrentLocation.Text.Should().Be("Всего хорошего!\n");
+    }
 }
