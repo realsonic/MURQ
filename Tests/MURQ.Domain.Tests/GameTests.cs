@@ -1,4 +1,4 @@
-using MURQ.Domain.Games;
+п»їusing MURQ.Domain.Games;
 using MURQ.Domain.Quests;
 using MURQ.Domain.Quests.Expressions;
 using MURQ.Domain.Quests.Statements;
@@ -7,7 +7,7 @@ namespace MURQ.Domain.Tests;
 
 public class GameTests
 {
-    [Fact(DisplayName = "Пустой квест запускается")]
+    [Fact(DisplayName = "РџСѓСЃС‚РѕР№ РєРІРµСЃС‚ Р·Р°РїСѓСЃРєР°РµС‚СЃСЏ")]
     public void Empty_quest_starts()
     {
         // Arrange
@@ -18,7 +18,7 @@ public class GameTests
         game.Start();
     }
 
-    [Fact(DisplayName = "Print выводит текст")]
+    [Fact(DisplayName = "Print РІС‹РІРѕРґРёС‚ С‚РµРєСЃС‚")]
     public void Print_shows_text()
     {
         // Arrange
@@ -33,7 +33,7 @@ public class GameTests
         game.CurrentLocation.Text.Should().Be("Hello World!");
     }
 
-    [Fact(DisplayName = "Button добавляет кнопку")]
+    [Fact(DisplayName = "Button РґРѕР±Р°РІР»СЏРµС‚ РєРЅРѕРїРєСѓ")]
     public void ButtonInstruction_adds_button()
     {
         // Arrange
@@ -48,11 +48,11 @@ public class GameTests
         game.CurrentLocation.Buttons![0].Caption.Should().Be("Push me");
     }
 
-    [Fact(DisplayName = "Кнопка переходит на метку")]
+    [Fact(DisplayName = "РљРЅРѕРїРєР° РїРµСЂРµС…РѕРґРёС‚ РЅР° РјРµС‚РєСѓ")]
     public void Button_goes_to_label()
     {
         // Arrange
-        var labelStatement = new LabelStatement { Label = "Начало" };
+        var labelStatement = new LabelStatement { Label = "РќР°С‡Р°Р»Рѕ" };
         var quest = new Quest([
             labelStatement,
             new PrintStatement { Text = "Text" },
@@ -71,14 +71,14 @@ public class GameTests
         game.CurrentLocation.Buttons![0].Caption.Should().Be("Push me");
     }
 
-    [Fact(DisplayName = "End останавливает выполнение")]
+    [Fact(DisplayName = "End РѕСЃС‚Р°РЅР°РІР»РёРІР°РµС‚ РІС‹РїРѕР»РЅРµРЅРёРµ")]
     public void End_stops()
     {
         // Arrange
         var quest = new Quest([
-            new LabelStatement { Label = "Первая локация" },
+            new LabelStatement { Label = "РџРµСЂРІР°СЏ Р»РѕРєР°С†РёСЏ" },
             new EndStatement(),
-            new LabelStatement { Label = "Вторая локация" }
+            new LabelStatement { Label = "Р’С‚РѕСЂР°СЏ Р»РѕРєР°С†РёСЏ" }
         ]);
         var game = new Game(quest);
 
@@ -86,10 +86,10 @@ public class GameTests
         game.Start();
 
         // Assert
-        game.CurrentLocation.Name.Should().Be("Первая локация");
+        game.CurrentLocation.Name.Should().Be("РџРµСЂРІР°СЏ Р»РѕРєР°С†РёСЏ");
     }
 
-    [Fact(DisplayName = "If проверяет простое условие сравнения переменной с числом и выполняет команду")]
+    [Fact(DisplayName = "If РїСЂРѕРІРµСЂСЏРµС‚ РїСЂРѕСЃС‚РѕРµ СѓСЃР»РѕРІРёРµ СЃСЂР°РІРЅРµРЅРёСЏ РїРµСЂРµРјРµРЅРЅРѕР№ СЃ С‡РёСЃР»РѕРј Рё РІС‹РїРѕР»РЅСЏРµС‚ РєРѕРјР°РЅРґСѓ")]
     public void If_checks_relation_and_runs_statement()
     {
         // Arrange
@@ -100,7 +100,7 @@ public class GameTests
                     LeftExpression = new VariableExpression { VariableName = "A" },
                     RightExpression = new DecimalConstantExpression { Value = 4 }
                 },
-                ThenStatement = new PrintStatement { Text = "Всего хорошего!", IsNewLineAtEnd = true }
+                ThenStatement = new PrintStatement { Text = "Р’СЃРµРіРѕ С…РѕСЂРѕС€РµРіРѕ!", IsNewLineAtEnd = true }
             }
         ]);
         var game = new Game(quest);
@@ -109,6 +109,6 @@ public class GameTests
         game.Start();
 
         // Assert
-        game.CurrentLocation.Text.Should().Be("Всего хорошего!\n");
+        game.CurrentLocation.Text.Should().Be("Р’СЃРµРіРѕ С…РѕСЂРѕС€РµРіРѕ!\n");
     }
 }
