@@ -1,6 +1,8 @@
 ﻿using MURQ.URQL.SyntaxTree;
+using MURQ.URQL.SyntaxTree.Expressions;
 using MURQ.URQL.SyntaxTree.Statements;
 using MURQ.URQL.Tokens;
+using MURQ.URQL.Tokens.Keywords;
 using MURQ.URQL.Tokens.Statements;
 
 namespace MURQ.URQL.Parsing;
@@ -83,6 +85,13 @@ public class UrqlParser
         }
     }
 
+    /// <summary>
+    /// Грамматика:
+    /// <code>
+    /// statement = assignVariableStatement | ifStatement | ? Label ? | ? Print ? | ? Button ? | ? End ? | ? ClearScreen ?;
+    /// </code>
+    /// </summary>
+    /// <returns>Инструкция</returns>
     private StatementSto ParseStatement() => lookahead switch
     {
         LabelToken => ParseLabel(),
@@ -90,8 +99,9 @@ public class UrqlParser
         ButtonToken => ParseButton(),
         EndToken => ParseEnd(),
         ClearScreenToken => ParseClearScreen(),
-        VariableToken => ParseAssignVariableStatement(),
-        _ => throw new ParseException($"Ожидалась инструкция, а встретился {lookahead}."),
+        _ when lookahead.IsStartOfAssignVariableStatement() => ParseAssignVariableStatement(),
+        _ when lookahead.IsStartOfIfStatement() => ParseIf(),
+        _ => throw new ParseException($"Ожидалась инструкция, а встретился {lookahead}.")
     };
 
     private LabelStatementSto ParseLabel()
@@ -141,6 +151,13 @@ public class UrqlParser
         return new ClearScreenStatementSto(clearScreenToken.Location);
     }
 
+    /// <summary>
+    /// Грамматика:
+    /// <code>
+    /// assignVariableStatement = ? Variable ?,  ? Equality ? (*""=""*), ? Number ?;
+    /// </code>
+    /// </summary>
+    /// <returns>Присвение значения переменной</returns>
     private AssignVariableStatementSto ParseAssignVariableStatement()
     {
         VariableToken variableToken = Match<VariableToken>();
@@ -148,6 +165,65 @@ public class UrqlParser
         NumberToken numberToken = Match<NumberToken>();
 
         return new AssignVariableStatementSto(variableToken.Name, numberToken.Value, (variableToken.Location, numberToken.Location));
+    }
+
+    /// <summary>
+    /// Грамматика:
+    /// <code>
+    /// ifStatement = ? If ?, relationExpression, ? Then ?, statement;
+    /// </code>
+    /// </summary>
+    /// <returns>Условный оператор <c>if-else</c></returns>
+    private IfStatementSto ParseIf()
+    {
+        IfToken ifToken = Match<IfToken>();
+        RelationExpressionSto relationExpressionSto = ParseRelationExpression();
+        Match<ThenToken>();
+        StatementSto thenStatementSto = ParseStatement();
+
+        return new IfStatementSto(relationExpressionSto, thenStatementSto, ifToken.Location.Start);
+    }
+    
+    /// <summary>
+    /// Грамматика:
+    /// <code>
+    /// relationExpression = valueExpression, ? Equality ? (*""=""*), valueExpression;
+    /// </code>
+    /// </summary>
+    /// <returns>Выражение сравнения</returns>
+    private RelationExpressionSto ParseRelationExpression()
+    {
+        ExpressionSto leftExpression = ParseValueExpression();
+        Match<EqualityToken>();
+        ExpressionSto rightExpression = ParseValueExpression();
+
+        return new RelationExpressionSto(leftExpression, rightExpression);
+    }
+        
+    /// <summary>
+    /// Грамматика:
+    /// <code>
+    /// valueExpression = ? Variable ? | ? Number ?;
+    /// </code>
+    /// </summary>
+    /// <returns>Выражение-значение (переменна или число)</returns>
+    private ExpressionSto ParseValueExpression() => lookahead switch
+    {
+        VariableToken => ParseVariableExpression(),
+        NumberToken => ParseNumberExpression(),
+        _ => throw new ParseException($"Ожидались переменная или число, а встретился {lookahead}.")
+    };
+
+    private VariableExpressionSto ParseVariableExpression()
+    {
+        VariableToken variableToken = Match<VariableToken>();
+        return new VariableExpressionSto(variableToken.Name, variableToken.Location);
+    }
+
+    private DecimalConstantExpressionSto ParseNumberExpression()
+    {
+        NumberToken numberToken = Match<NumberToken>();
+        return new DecimalConstantExpressionSto(numberToken.Value, numberToken.Location);
     }
 
     private TToken Match<TToken>()
@@ -170,7 +246,9 @@ public static class TerminalStartExtensions
 {
     public static bool IsStartOfStatement(this Token? token)
         => token.IsStartOfAssignVariableStatement()
+        || token.IsStartOfIfStatement()
         || token is StatementToken;
 
     public static bool IsStartOfAssignVariableStatement(this Token? token) => token is VariableToken;
+    public static bool IsStartOfIfStatement(this Token? token) => token is IfToken;
 }
