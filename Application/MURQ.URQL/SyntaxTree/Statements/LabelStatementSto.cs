@@ -1,3 +1,8 @@
-﻿namespace MURQ.URQL.SyntaxTree.Statements;
+﻿using MURQ.URQL.Locations;
 
-public record LabelStatementSto(string Label) : StatementSto;
+namespace MURQ.URQL.SyntaxTree.Statements;
+
+public record LabelStatementSto(string Label, Location Location) : StatementSto
+{
+    public override Location Location { get; } = Location;
+}

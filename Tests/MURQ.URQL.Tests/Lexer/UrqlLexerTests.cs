@@ -1,6 +1,6 @@
 ﻿using FluentAssertions;
 
-using MURQ.URQL.Lexers;
+using MURQ.URQL.Lexing;
 using MURQ.URQL.Tokens;
 
 namespace MURQ.URQL.Tests.Lexer;

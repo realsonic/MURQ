@@ -1,6 +1,6 @@
 ﻿using FluentAssertions;
 
-using MURQ.URQL.Lexers;
+using MURQ.URQL.Lexing;
 using MURQ.URQL.Tokens;
 using MURQ.URQL.Tokens.Statements;
 
@@ -22,7 +22,7 @@ public class PrintTests
             new NewLineToken("\n", ((1, 3), (1, 3)))
         ]);
     }
-    
+
     [Fact(DisplayName = "p с текстом даёт токен Print с текстом")]
     public void P_with_text_gives_PrintToken_with_text()
     {
@@ -37,7 +37,7 @@ public class PrintTests
             new PrintToken("Привет!", false, "p Привет!", ((1, 1), (1, 9)))
         ]);
     }
-    
+
     [Fact(DisplayName = "Два p с текстом дают два токена Print с текстом")]
     public void Two_p_with_text_gives_two_PrintToken_with_text()
     {

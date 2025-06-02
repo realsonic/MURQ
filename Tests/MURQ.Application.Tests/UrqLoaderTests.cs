@@ -1,10 +1,9 @@
 using FluentAssertions;
 
-using MURQ.Application;
 using MURQ.Domain.Quests;
 using MURQ.Domain.Quests.Statements;
 
-namespace MURQ.ApplicationTests;
+namespace MURQ.Application.Tests;
 
 public class UrqLoaderTests
 {
