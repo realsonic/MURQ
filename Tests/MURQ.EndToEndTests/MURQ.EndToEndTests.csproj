@@ -19,6 +19,7 @@
     <PackageReference Include="coverlet.collector" Version="6.0.0" />
     <PackageReference Include="FluentAssertions" Version="8.1.1" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.8.0" />
+    <PackageReference Include="Moq" Version="4.20.72" />
     <PackageReference Include="xunit" Version="2.5.3" />
     <PackageReference Include="xunit.runner.visualstudio" Version="2.5.3" />
   </ItemGroup>
@@ -26,6 +27,7 @@
   <ItemGroup>
     <ProjectReference Include="..\..\Application\MURQ.Application\MURQ.Application.csproj" />
     <ProjectReference Include="..\..\Domain\MURQ.Domain\MURQ.Domain.csproj" />
+    <ProjectReference Include="..\..\Infrastructure\MURQ.Infrastructure.QuestLoaders\MURQ.Infrastructure.QuestLoaders.csproj" />
   </ItemGroup>
 
   <ItemGroup>
