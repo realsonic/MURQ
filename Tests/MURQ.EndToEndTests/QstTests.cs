@@ -189,7 +189,38 @@ public class QstTests
         sut.CurrentLocation.Buttons[0].Press();
         sut.CurrentLocation.Buttons[0].Press();
         sut.CurrentLocation.Text.Should().Be("Метка1\n");
+    }
 
+    [Fact(DisplayName = "Однострочные комментарии вырезаются из кнопок")]
+    public async Task Singleline_comments_cut_from_btn()
+    {
+        // Arrange
+        Game sut = await LoadQuestIntoGame(@"Quests/Comments_in_btn.qst");
+
+        // Act
+        sut.Start();
+
+        // Assert
+        sut.CurrentLocation.Text.Should().Be("Тест комментариев \n");
+        IEnumerable<string> buttonCaptions = sut.CurrentLocation.Buttons.Select(button => button.Caption);
+        buttonCaptions.Should().BeEquivalentTo([
+            "тест кнопки без комментария",
+            ""
+        ]);
+    }
+
+    [Fact(DisplayName = "Многострочные комментарии вырезаются")]
+    public async Task Multiline_comments_cut()
+    {
+        
+        // Arrange
+        Game sut = await LoadQuestIntoGame(@"Quests/Multiline_comments.qst");
+
+        // Act
+        sut.Start();
+
+        // Assert
+        sut.CurrentLocation.Text.Should().Be("1&pln 2");
     }
 
     private static async Task<Game> LoadQuestIntoGame(string filePath)
