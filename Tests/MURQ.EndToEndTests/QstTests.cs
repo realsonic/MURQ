@@ -14,10 +14,7 @@ public class QstTests
     public async Task Two_p_shows_one_line()
     {
         // Arrange
-        string questSource = await File.ReadAllTextAsync(@"Quests/Two_P.qst");
-        UrqLoader urqLoader = new(questSource);
-        Quest quest = urqLoader.LoadQuest();
-        Game sut = new(quest);
+        Game sut = await LoadQuestIntoGame(@"Quests/Two_P.qst");
 
         // Act
         sut.Start();
@@ -30,10 +27,7 @@ public class QstTests
     public async Task P_with_no_space_gives_no_text()
     {
         // Arrange
-        string questSource = await File.ReadAllTextAsync(@"Quests/P_wo_text.qst");
-        UrqLoader urqLoader = new(questSource);
-        Quest quest = urqLoader.LoadQuest();
-        Game sut = new(quest);
+        Game sut = await LoadQuestIntoGame(@"Quests/P_wo_text.qst");
 
         // Act
         sut.Start();
@@ -46,10 +40,7 @@ public class QstTests
     public async Task Pln_shows_one_line_with_new_line()
     {
         // Arrange
-        string questSource = await File.ReadAllTextAsync(@"Quests/Pln.qst");
-        UrqLoader urqLoader = new(questSource);
-        Quest quest = urqLoader.LoadQuest();
-        Game sut = new(quest);
+        Game sut = await LoadQuestIntoGame(@"Quests/Pln.qst");
 
         // Act
         sut.Start();
@@ -62,10 +53,7 @@ public class QstTests
     public async Task Labels_loaded()
     {
         // Arrange
-        string questSource = await File.ReadAllTextAsync(@"Quests/Labels.qst");
-        UrqLoader urqLoader = new(questSource);
-        Quest quest = urqLoader.LoadQuest();
-        Game sut = new(quest);
+        Game sut = await LoadQuestIntoGame(@"Quests/Labels.qst");
 
         // Act
         sut.Start();
@@ -83,10 +71,7 @@ public class QstTests
     public async Task Button_works()
     {
         // Arrange
-        string questSource = await File.ReadAllTextAsync(@"Quests/Location_and_btn.qst");
-        UrqLoader urqLoader = new(questSource);
-        Quest quest = urqLoader.LoadQuest();
-        Game sut = new(quest);
+        Game sut = await LoadQuestIntoGame(@"Quests/Location_and_btn.qst");
 
         // Act
         sut.Start();
@@ -101,10 +86,7 @@ public class QstTests
     public async Task Can_go_from_first_location_to_second_and_third()
     {
         // Arrange
-        string questSource = await File.ReadAllTextAsync(@"Quests/Three_locations.qst");
-        UrqLoader urqLoader = new(questSource);
-        Quest quest = urqLoader.LoadQuest();
-        Game sut = new(quest);
+        Game sut = await LoadQuestIntoGame(@"Quests/Three_locations.qst");
 
         // Act
         sut.Start();
@@ -121,10 +103,7 @@ public class QstTests
     public async Task Comments_ignored()
     {
         // Arrange
-        string questSource = await File.ReadAllTextAsync(@"Quests/Pln_and_single_comments_on_separate_lines.qst");
-        UrqLoader urqLoader = new(questSource);
-        Quest quest = urqLoader.LoadQuest();
-        Game sut = new(quest);
+        Game sut = await LoadQuestIntoGame(@"Quests/Pln_and_single_comments_on_separate_lines.qst");
 
         // Act
         sut.Start();
@@ -137,10 +116,7 @@ public class QstTests
     public async Task Comments_everywhere_ignored()
     {
         // Arrange
-        string questSource = await File.ReadAllTextAsync(@"Quests/Pln_and_single_comments_everywhere.qst");
-        UrqLoader urqLoader = new(questSource);
-        Quest quest = urqLoader.LoadQuest();
-        Game sut = new(quest);
+        Game sut = await LoadQuestIntoGame(@"Quests/Pln_and_single_comments_everywhere.qst");
 
         // Act
         sut.Start();
@@ -156,10 +132,7 @@ public class QstTests
     public async Task Cls_clears_text_and_buttons_and_fires_OnScreenCleared()
     {
         // Arrange
-        string questSource = await File.ReadAllTextAsync(@"Quests/Loc_Cls.qst");
-        UrqLoader urqLoader = new(questSource);
-        Quest quest = urqLoader.LoadQuest();
-        Game sut = new(quest);
+        Game sut = await LoadQuestIntoGame(@"Quests/Loc_Cls.qst");
         bool eventWasFired = false;
         sut.OnScreenCleared += () => eventWasFired = true;
 
@@ -176,10 +149,7 @@ public class QstTests
     public async Task Number_set_to_variable()
     {
         // Arrange
-        string questSource = await File.ReadAllTextAsync(@"Quests/Numeric_var.qst");
-        UrqLoader urqLoader = new(questSource);
-        Quest quest = urqLoader.LoadQuest();
-        Game sut = new(quest);
+        Game sut = await LoadQuestIntoGame(@"Quests/Numeric_var.qst");
 
         // Act
         sut.Start();
@@ -197,15 +167,37 @@ public class QstTests
     public async Task If_checks_var()
     {
         // Arrange
-        string questSource = await File.ReadAllTextAsync(@"Quests/If_a_4_then_pln.qst");
-        UrqLoader urqLoader = new(questSource);
-        Quest quest = urqLoader.LoadQuest();
-        Game sut = new(quest);
+        Game sut = await LoadQuestIntoGame(@"Quests/If_a_4_then_pln.qst");
 
         // Act
         sut.Start();
 
         // Assert
         sut.CurrentLocation.Text.Should().Be("Всего хорошего!\n");
+    }
+
+    [Fact(DisplayName = "Из меток-дублей выбирается первая")]
+    public async Task First_label_double_wins()
+    {
+        // Arrange
+        Game sut = await LoadQuestIntoGame(@"Quests/Duplicate_labels.qst");
+
+        // Act
+        sut.Start();
+
+        // Assert
+        sut.CurrentLocation.Buttons[0].Press();
+        sut.CurrentLocation.Buttons[0].Press();
+        sut.CurrentLocation.Text.Should().Be("Метка1\n");
+
+    }
+
+    private static async Task<Game> LoadQuestIntoGame(string filePath)
+    {
+        string questSource = await File.ReadAllTextAsync(filePath);
+        UrqLoader urqLoader = new(questSource);
+        Quest quest = urqLoader.LoadQuest();
+        Game game = new(quest);
+        return game;
     }
 }
