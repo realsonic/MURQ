@@ -1,5 +1,4 @@
-﻿using MURQ.URQL.Lexing.Monads.URQL;
-using MURQ.URQL.Locations;
+﻿using MURQ.URQL.Locations;
 using MURQ.URQL.Tokens.Statements;
 
 namespace MURQ.URQL.Lexing.Monads.URQL.Statements;
@@ -11,7 +10,7 @@ public record LabelMonad(string Label, string Lexeme, Location Location) : Uncom
 
     public override LexemeMonad Append(char character, Position position) => character switch
     {
-        '\n' or ';' => new CompletedLexemeMonad(new LabelToken(Label, Lexeme, Location), RootMonad.Remain(character, position)),
+        '\n' => new CompletedLexemeMonad(new LabelToken(Label, Lexeme, Location), RootMonad.Remain(character, position)),
         _ => new LabelMonad(Label + character, Lexeme + character, Location.EndAt(position))
     };
 

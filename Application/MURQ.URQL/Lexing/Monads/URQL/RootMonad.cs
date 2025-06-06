@@ -10,7 +10,6 @@ public record RootMonad(Position Position) : UncompletedLexemeMonad(string.Empty
     {
         ' ' or '\t' or '\r' => new RootMonad(position),
         '\n' => new NewLineToken(character, position).AsMonad(),
-        ';' => CommentMonad.Start(character, position),
         ':' => LabelMonad.Start(character, position),
         '=' => new EqualityToken(character, position).AsMonad(),
         '_' => VariableMonad.Start(character, position),

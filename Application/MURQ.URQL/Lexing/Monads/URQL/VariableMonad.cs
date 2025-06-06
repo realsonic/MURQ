@@ -1,5 +1,4 @@
-﻿using MURQ.URQL.Lexing.Monads;
-using MURQ.URQL.Locations;
+﻿using MURQ.URQL.Locations;
 using MURQ.URQL.Tokens;
 
 namespace MURQ.URQL.Lexing.Monads.URQL;

@@ -27,7 +27,7 @@ public record ButtonMonad(ButtonLexemeProgress LexemeProgress, string Label, str
 
         ButtonLexemeProgress.Caption => character switch
         {
-            '\n' or ';' => new CompletedLexemeMonad(new ButtonToken(Label, Caption, Lexeme, Location), RootMonad.Remain(character, position)),
+            '\n' => new CompletedLexemeMonad(new ButtonToken(Label, Caption, Lexeme, Location), RootMonad.Remain(character, position)),
             _ => new ButtonMonad(ButtonLexemeProgress.Caption, Label, Caption + character, Lexeme + character, Location.EndAt(position))
         },
 
