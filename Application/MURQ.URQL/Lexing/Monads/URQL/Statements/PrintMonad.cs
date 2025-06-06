@@ -1,5 +1,4 @@
-﻿using MURQ.URQL.Lexing.Monads;
-using MURQ.URQL.Locations;
+﻿using MURQ.URQL.Locations;
 using MURQ.URQL.Tokens.Statements;
 
 using static MURQ.URQL.Lexing.Monads.URQL.Statements.PrintMonad;
@@ -16,13 +15,13 @@ public record PrintMonad(PrintLexemeProgress LexemeProgress, PrintStatementVaria
         PrintLexemeProgress.JustAfterKeyword => character switch
         {
             ' ' or '\t' => new PrintMonad(PrintLexemeProgress.Text, StatementVariant, string.Empty, Lexeme + character, Location.EndAt(position)),
-            '\n' or ';' => new PrintToken(string.Empty, IsNewLineAtEnd(), Lexeme, Location).AsMonadWithRemain(character, position),
+            '\n' => new PrintToken(string.Empty, IsNewLineAtEnd(), Lexeme, Location).AsMonadWithRemain(character, position),
             _ => new UnknownLexemeMonad(Lexeme + character, Location.EndAt(position), WhitespaceExpected)
         },
 
         PrintLexemeProgress.Text => character switch
         {
-            '\n' or ';' => new PrintToken(Text, IsNewLineAtEnd(), Lexeme, Location).AsMonadWithRemain(character, position),
+            '\n' => new PrintToken(Text, IsNewLineAtEnd(), Lexeme, Location).AsMonadWithRemain(character, position),
             _ => new PrintMonad(PrintLexemeProgress.Text, StatementVariant, Text + character, Lexeme + character, Location.EndAt(position))
         },
 

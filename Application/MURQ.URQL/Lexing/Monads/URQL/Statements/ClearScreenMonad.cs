@@ -6,7 +6,7 @@ public record ClearScreenMonad(string Lexeme, Location Location) : UncompletedLe
 {
     public override LexemeMonad Append(char character, Position position) => character switch
     {
-        ' ' or '\t' or '\n' or ';' => new ClearScreenToken(Lexeme, Location).AsMonadWithRemain(character, position),
+        ' ' or '\t' or '\n' => new ClearScreenToken(Lexeme, Location).AsMonadWithRemain(character, position),
         _ => new UnknownLexemeMonad(Lexeme + character, Location.EndAt(position), "После cls ожидался пробел, табуляция, новая строка или комментарий")
     };
 
