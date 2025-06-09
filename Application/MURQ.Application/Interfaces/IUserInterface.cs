@@ -32,7 +32,7 @@ public interface IUserInterface
     void WaitAnyKey();
 
     public abstract record UserChoice();
-    public record ButtonChosen(Game.Button Button) : UserChoice;
+    public record ButtonChosen(Game.Button Button, int ButtonNumber) : UserChoice;
     public record ReloadChosen : UserChoice;
     public record QuitChosen : UserChoice;
 }
