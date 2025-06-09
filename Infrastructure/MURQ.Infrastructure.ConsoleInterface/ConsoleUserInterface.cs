@@ -109,7 +109,7 @@ public class ConsoleUserInterface : IUserInterface
             {
                 int pressedNumber = userInput.GetButtonNumber();
                 if (pressedNumber >= minNumber && pressedNumber <= maxNumber)
-                    return new ButtonChosen(numberedButtons[pressedNumber]);
+                    return new ButtonChosen(numberedButtons[pressedNumber], pressedNumber);
             }
 
             if (userInput.IsReload())
