@@ -20,6 +20,7 @@ public class UrqPlayer(IQuestLoader questLoader, IUserInterface userInterface, I
 
             SayGoodbye();
             PromptAnyKey();
+            FinishWork();
         }
         catch (Exception ex)
         {
@@ -100,6 +101,8 @@ public class UrqPlayer(IQuestLoader questLoader, IUserInterface userInterface, I
         userInterface.WriteLineHighlighted(" Вы нажали выход. До свидания! ");
         userInterface.WriteLine();
     }
+
+    private void FinishWork() => userInterface.FinishWork();
 
     private void PromptAnyKey()
     {
