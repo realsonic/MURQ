@@ -189,5 +189,13 @@ public class ConsoleUserInterface : IUserInterface
         }
     }
 
+    public void FinishWork()
+    {
+        if (!Console.IsOutputRedirected)
+        {
+            Console.CursorVisible = true; // возвращаем курсор на место
+        }
+    }
+
     private string? lastWrittenText = null;
 }

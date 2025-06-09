@@ -31,6 +31,11 @@ public interface IUserInterface
     UserChoice ShowButtonsAndGetChoice(IEnumerable<Game.Button> buttons);
     void WaitAnyKey();
 
+    /// <summary>
+    /// Завершение работы. Вызывать перед выходом из приложения.
+    /// </summary>
+    void FinishWork();
+
     public abstract record UserChoice();
     public record ButtonChosen(Game.Button Button, int ButtonNumber) : UserChoice;
     public record ReloadChosen : UserChoice;
