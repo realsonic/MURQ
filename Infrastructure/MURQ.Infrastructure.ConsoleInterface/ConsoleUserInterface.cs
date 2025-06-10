@@ -109,7 +109,7 @@ public class ConsoleUserInterface : IUserInterface
             {
                 int pressedNumber = userInput.GetButtonNumber();
                 if (pressedNumber >= minNumber && pressedNumber <= maxNumber)
-                    return new ButtonChosen(numberedButtons[pressedNumber]);
+                    return new ButtonChosen(numberedButtons[pressedNumber], pressedNumber);
             }
 
             if (userInput.IsReload())
@@ -186,6 +186,14 @@ public class ConsoleUserInterface : IUserInterface
         {
             Console.ForegroundColor = previousForegroundColor;
             Console.BackgroundColor = previousBackgroundColor;
+        }
+    }
+
+    public void FinishWork()
+    {
+        if (!Console.IsOutputRedirected)
+        {
+            Console.CursorVisible = true; // возвращаем курсор на место
         }
     }
 

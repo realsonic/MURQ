@@ -1,0 +1,5 @@
+<Project>
+  <ItemGroup>
+    <TrimmerRootAssembly Include="Microsoft.Extensions.DependencyInjection" />
+  </ItemGroup>
+</Project>

@@ -1,3 +1,8 @@
-﻿namespace MURQ.URQL.SyntaxTree.Statements;
+﻿using MURQ.URQL.Locations;
 
-public record EndStatementSto : StatementSto;
+namespace MURQ.URQL.SyntaxTree.Statements;
+
+public record EndStatementSto(Location Location) : StatementSto
+{
+    public override Location Location { get; } = Location;
+}

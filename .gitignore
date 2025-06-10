@@ -396,7 +396,8 @@ FodyWeavers.xsd
 
 # JetBrains Rider
 *.sln.iml
+
 *.bak
 /.vscode
 **/launchSettings.json
-*.qst
+/Presentation/MURQ.Console/*.qst

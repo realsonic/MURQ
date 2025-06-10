@@ -20,6 +20,7 @@ public class UrqPlayer(IQuestLoader questLoader, IUserInterface userInterface, I
 
             SayGoodbye();
             PromptAnyKey();
+            FinishWork();
         }
         catch (Exception ex)
         {
@@ -55,6 +56,7 @@ public class UrqPlayer(IQuestLoader questLoader, IUserInterface userInterface, I
             switch (userChoice)
             {
                 case ButtonChosen buttonChosen:
+                    ReportPressedButton(buttonChosen);
                     buttonChosen.Button.Press();
                     break;
                 case ReloadChosen:
@@ -88,12 +90,19 @@ public class UrqPlayer(IQuestLoader questLoader, IUserInterface userInterface, I
 
     private void ShowQuestName(string? questName) => userInterface.WriteLine($"{questName}\n");
 
+    private void ReportPressedButton(ButtonChosen buttonChosen)
+    {
+        userInterface.WriteLine($"> [{buttonChosen.ButtonNumber}] {buttonChosen.Button.Caption}\n");
+    }
+
     private void SayGoodbye()
     {
         userInterface.WriteLine();
         userInterface.WriteLineHighlighted(" Вы нажали выход. До свидания! ");
         userInterface.WriteLine();
     }
+
+    private void FinishWork() => userInterface.FinishWork();
 
     private void PromptAnyKey()
     {
