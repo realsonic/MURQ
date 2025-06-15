@@ -23,6 +23,13 @@ public class UrqlParser
         lookahead = NextTerminal();
     }
 
+    /// <summary>
+    /// Грамматика:
+    /// <code>
+    /// quest = statements;
+    /// </code>
+    /// </summary>
+    /// <returns>Квест</returns>
     public QuestSto ParseQuest()
     {
         List<StatementSto> statements = [.. ParseStatementsAdapted()];
@@ -95,17 +102,17 @@ public class UrqlParser
     /// <returns>Инструкция</returns>
     private StatementSto ParseStatement() => lookahead switch
     {
-        LabelToken => ParseLabel(),
-        PrintToken => ParsePrint(),
-        ButtonToken => ParseButton(),
-        EndToken => ParseEnd(),
-        ClearScreenToken => ParseClearScreen(),
+        LabelToken => ParseLabelTerminal(),
+        PrintToken => ParsePrintTerminal(),
+        ButtonToken => ParseButtonTerminal(),
+        EndToken => ParseEndTerminal(),
+        ClearScreenToken => ParseClearScreenTerminal(),
         _ when lookahead.IsStartOfAssignVariableStatement() => ParseAssignVariableStatement(),
-        _ when lookahead.IsStartOfIfStatement() => ParseIf(),
+        _ when lookahead.IsStartOfIfStatement() => ParseIfThenStatement(),
         _ => throw new ParseException($"Ожидалась инструкция, а встретился {lookahead}.")
     };
 
-    private LabelStatementSto ParseLabel()
+    private LabelStatementSto ParseLabelTerminal()
     {
         LabelToken labelToken = Match<LabelToken>();
 
@@ -119,13 +126,13 @@ public class UrqlParser
         return new LabelStatementSto(label, labelToken.Location);
     }
 
-    private PrintStatementSto ParsePrint()
+    private PrintStatementSto ParsePrintTerminal()
     {
         PrintToken printToken = Match<PrintToken>();
         return new PrintStatementSto(printToken.Text, printToken.IsNewLineAtEnd, printToken.Location);
     }
 
-    private ButtonStatementSto ParseButton()
+    private ButtonStatementSto ParseButtonTerminal()
     {
         ButtonToken buttonToken = Match<ButtonToken>();
 
@@ -140,13 +147,13 @@ public class UrqlParser
         return new ButtonStatementSto(label, caption, buttonToken.Location);
     }
 
-    private EndStatementSto ParseEnd()
+    private EndStatementSto ParseEndTerminal()
     {
         EndToken endToken = Match<EndToken>();
         return new EndStatementSto(endToken.Location);
     }
 
-    private ClearScreenStatementSto ParseClearScreen()
+    private ClearScreenStatementSto ParseClearScreenTerminal()
     {
         ClearScreenToken clearScreenToken = Match<ClearScreenToken>();
         return new ClearScreenStatementSto(clearScreenToken.Location);
@@ -155,7 +162,7 @@ public class UrqlParser
     /// <summary>
     /// Грамматика:
     /// <code>
-    /// assignVariableStatement = ? Variable ?,  ? Equality ? (*""=""*), ? Number ?;
+    /// assignVariableStatement = ? Variable ?,  ? Equality ? (*""=""*), valueExpression;
     /// </code>
     /// </summary>
     /// <returns>Присвение значения переменной</returns>
@@ -175,7 +182,7 @@ public class UrqlParser
     /// </code>
     /// </summary>
     /// <returns>Условный оператор <c>if-else</c></returns>
-    private IfStatementSto ParseIf()
+    private IfStatementSto ParseIfThenStatement()
     {
         IfToken ifToken = Match<IfToken>();
         RelationExpressionSto relationExpressionSto = ParseRelationExpression();
@@ -204,31 +211,31 @@ public class UrqlParser
     /// <summary>
     /// Грамматика:
     /// <code>
-    /// valueExpression = ? Variable ? | ? Number ?;
+    /// valueExpression = ? Variable ? | ? Number ? | ? StringLiteral ?;
     /// </code>
     /// </summary>
     /// <returns>Выражение-значение (переменна или число)</returns>
     private ExpressionSto ParseValueExpression() => lookahead switch
     {
-        VariableToken => ParseVariableExpression(),
-        NumberToken => ParseNumberExpression(),
-        StringLiteralToken => ParseStringLiteralExpression(),
+        VariableToken => ParseVariableExpressionTerminal(),
+        NumberToken => ParseNumberExpressionTerminal(),
+        StringLiteralToken => ParseStringLiteralExpressionTerminal(),
         _ => throw new ParseException($"Ожидались переменная или число, а встретился {lookahead}.")
     };
 
-    private VariableExpressionSto ParseVariableExpression()
+    private VariableExpressionSto ParseVariableExpressionTerminal()
     {
         VariableToken variableToken = Match<VariableToken>();
         return new VariableExpressionSto(variableToken.Name, variableToken.Location);
     }
 
-    private DecimalConstantExpressionSto ParseNumberExpression()
+    private DecimalConstantExpressionSto ParseNumberExpressionTerminal()
     {
         NumberToken numberToken = Match<NumberToken>();
         return new DecimalConstantExpressionSto(numberToken.Value, numberToken.Location);
     }
 
-    private StringLiteralExpressionSto ParseStringLiteralExpression()
+    private StringLiteralExpressionSto ParseStringLiteralExpressionTerminal()
     {
         StringLiteralToken stringLiteralToken = Match<StringLiteralToken>();
         return new StringLiteralExpressionSto(stringLiteralToken.Text, stringLiteralToken.Location);

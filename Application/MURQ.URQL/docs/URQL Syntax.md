@@ -17,7 +17,7 @@ statement =
     | ? End ?
     | ? ClearScreen ?;
 
-assignVariableStatement = ? Variable ?,  ? Equality ? (*""=""*), ? Number ?;
+assignVariableStatement = ? Variable ?,  ? Equality ? (*""=""*), valueExpression;
 
 ifStatement = ? If ?, relationExpression, ? Then ?, statement;
 
