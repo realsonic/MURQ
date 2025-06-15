@@ -1,5 +1,5 @@
 ﻿using MURQ.URQL.Locations;
-using MURQ.URQL.Tokens.Statements.If;
+using MURQ.URQL.Tokens.If;
 
 namespace MURQ.URQL.Lexing.Monads.URQL.Statements.If;
 public record ThenMonad(string Lexeme, Location Location) : UncompletedLexemeMonad(Lexeme, Location)

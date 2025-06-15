@@ -1,9 +1,9 @@
 ﻿using MURQ.URQL.Locations;
+using MURQ.URQL.SyntaxTree.Expressions;
 
 namespace MURQ.URQL.SyntaxTree.Statements;
 
-// Пока простая структура: имя переменной и числовой литерал
-public record AssignVariableStatementSto(string VariableName, decimal Value, Location Location) : StatementSto
+public record AssignVariableStatementSto(string VariableName, ExpressionSto ExpressionSto, Location VariableLocation) : StatementSto
 {
-    public override Location Location { get; } = Location;
+    public override Location Location => (VariableLocation, ExpressionSto.Location);
 }

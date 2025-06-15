@@ -13,6 +13,7 @@ public record RootMonad(Position Position) : UncompletedLexemeMonad(string.Empty
         ':' => LabelMonad.Start(character, position),
         '=' => new EqualityToken(character, position).AsMonad(),
         '_' => VariableMonad.Start(character, position),
+        '"' => StringLiteralMonad.StartAfterOpeningQuote(character, position),
         _ when char.IsLetter(character) => WordMonad.Start(character, position),
         _ when char.IsDigit(character) => NumberMonad.Start(character, position),
         _ => new UnknownLexemeMonad(character.ToString(), Location.StartAt(position))

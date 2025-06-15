@@ -2,7 +2,7 @@
 
 using System.ComponentModel;
 
-namespace MURQ.URQL.Tokens.Statements.If;
+namespace MURQ.URQL.Tokens.If;
 
 [Description("ветвление (then)")]
 public record ThenToken(string Lexeme, Location Location) : Token(Lexeme, Location)

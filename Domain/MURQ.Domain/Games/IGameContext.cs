@@ -1,4 +1,5 @@
-﻿using MURQ.Domain.Games.Variables;
+﻿using MURQ.Domain.Games.Values;
+using MURQ.Domain.Games.Variables;
 using MURQ.Domain.Quests.Statements;
 
 namespace MURQ.Domain.Games;
@@ -10,6 +11,6 @@ public interface IGameContext
     void EnterLocation(string locationName);
     void EndLocation();
     void ClearScreen();
-    void AssignVariable(string variableName, decimal value);
+    void AssignVariable(string variableName, Value value);
     Variable? GetVariable(string variableName);
 }

@@ -12,7 +12,7 @@ public class IfStatement : Statement
     public override void Run(IGameContext gameContext)
     {
         Value value = Condition.Calculate(gameContext);
-        if (value != 0)
+        if (value.DecimalValue != 0)
         {
             ThenStatement.Run(gameContext);
         }

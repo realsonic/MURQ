@@ -58,10 +58,10 @@ public class UrqLoader(IEnumerable<char> source)
         Caption = buttonStatementSto.Caption
     };
 
-    private static AssignVariableStatement ProduceAssignVariableStatement(AssignVariableStatementSto assignVariableStatementSto) => new()
+    private AssignVariableStatement ProduceAssignVariableStatement(AssignVariableStatementSto assignVariableStatementSto) => new()
     {
         VariableName = assignVariableStatementSto.VariableName,
-        Value = assignVariableStatementSto.Value
+        Expression = ProduceExpression(assignVariableStatementSto.ExpressionSto)
     };
 
     private IfStatement ProduceIfStatement(IfStatementSto ifStatementSto) => new()
@@ -75,6 +75,7 @@ public class UrqLoader(IEnumerable<char> source)
         RelationExpressionSto relationExpressionSto => ProduceRelationExpression(relationExpressionSto),
         VariableExpressionSto variableExpressionSto => new VariableExpression { VariableName = variableExpressionSto.VariableName },
         DecimalConstantExpressionSto decimalConstantExpressionSto => new DecimalConstantExpression { Value = decimalConstantExpressionSto.Value },
+        StringLiteralExpressionSto stringLiteralExpressionSto => new StringLiteralExpression { Text = stringLiteralExpressionSto.Text },
         _ => throw new NotImplementedException($"Выражение типа ({expressionSto}) ещё не реализовано.")
     };
 

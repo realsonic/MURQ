@@ -3,8 +3,8 @@ using MURQ.URQL.SyntaxTree;
 using MURQ.URQL.SyntaxTree.Expressions;
 using MURQ.URQL.SyntaxTree.Statements;
 using MURQ.URQL.Tokens;
+using MURQ.URQL.Tokens.If;
 using MURQ.URQL.Tokens.Statements;
-using MURQ.URQL.Tokens.Statements.If;
 
 namespace MURQ.URQL.Parsing;
 
@@ -163,9 +163,9 @@ public class UrqlParser
     {
         VariableToken variableToken = Match<VariableToken>("в левой части присвоения значения переменной");
         Match<EqualityToken>($"при присвоении значения переменной {variableToken.Name}");
-        NumberToken numberToken = Match<NumberToken>($"в правой части присвоения значения переменной {variableToken.Name}");
+        ExpressionSto expressionSto = ParseValueExpression();
 
-        return new AssignVariableStatementSto(variableToken.Name, numberToken.Value, (variableToken.Location, numberToken.Location));
+        return new AssignVariableStatementSto(variableToken.Name, expressionSto, variableToken.Location);
     }
 
     /// <summary>
@@ -212,6 +212,7 @@ public class UrqlParser
     {
         VariableToken => ParseVariableExpression(),
         NumberToken => ParseNumberExpression(),
+        StringLiteralToken => ParseStringLiteralExpression(),
         _ => throw new ParseException($"Ожидались переменная или число, а встретился {lookahead}.")
     };
 
@@ -225,6 +226,12 @@ public class UrqlParser
     {
         NumberToken numberToken = Match<NumberToken>();
         return new DecimalConstantExpressionSto(numberToken.Value, numberToken.Location);
+    }
+
+    private StringLiteralExpressionSto ParseStringLiteralExpression()
+    {
+        StringLiteralToken stringLiteralToken = Match<StringLiteralToken>();
+        return new StringLiteralExpressionSto(stringLiteralToken.Text, stringLiteralToken.Location);
     }
 
     private TToken Match<TToken>(string? context = null) where TToken : Token
