@@ -61,8 +61,8 @@ public class QstTests
         // Assert
         List<string> labelList = [.. sut.Quest.Statements.OfType<LabelStatement>().Select(labelStatement => labelStatement.Label)];
         labelList.Should().BeEquivalentTo([
-            "Метка1", 
-            "Метка2", 
+            "Метка1",
+            "Метка2",
             "Метка3"
         ]);
     }
@@ -156,11 +156,11 @@ public class QstTests
 
         // Assert
         var variable1 = sut.GetVariable("bT");
-        variable1!.Value.As<DecimalValue>().Value.Should().Be(4);
+        variable1!.Value.As<NumberValue>().Value.Should().Be(4);
         var variable2 = sut.GetVariable("_under");
-        variable2!.Value.As<DecimalValue>().Value.Should().Be(5);
+        variable2!.Value.As<NumberValue>().Value.Should().Be(5);
         var variable3 = sut.GetVariable("und_er");
-        variable3!.Value.As<DecimalValue>().Value.Should().Be(10);
+        variable3!.Value.As<NumberValue>().Value.Should().Be(10);
     }
 
     [Fact(DisplayName = "if проверяет значение числа")]
@@ -212,7 +212,7 @@ public class QstTests
     [Fact(DisplayName = "Многострочные комментарии вырезаются")]
     public async Task Multiline_comments_cut()
     {
-        
+
         // Arrange
         Game sut = await LoadQuestIntoGame(@"Quests/Multiline_comments.qst");
 
@@ -221,6 +221,19 @@ public class QstTests
 
         // Assert
         sut.CurrentLocation.Text.Should().Be("1&pln 2");
+    }
+
+    [Fact(DisplayName = "Строковая переменная сравнивается со строковым литералом")]
+    public async Task String_variable_related_to_string_literal()
+    {
+        // Arrange
+        Game sut = await LoadQuestIntoGame(@"Quests/String_variables.qst");
+
+        // Act
+        sut.Start();
+
+        // Assert
+        sut.CurrentLocation.Text.Should().Be("Привет!");
     }
 
     private static async Task<Game> LoadQuestIntoGame(string filePath)

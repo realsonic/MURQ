@@ -94,7 +94,7 @@ public class GameTests
     {
         // Arrange
         var quest = new Quest([
-            new AssignVariableStatement { VariableName = "a", Value = 4 },
+            new AssignVariableStatement { VariableName = "a", Expression = new DecimalConstantExpression { Value = 4 } },
             new IfStatement {
                 Condition = new RelationExpression {
                     LeftExpression = new VariableExpression { VariableName = "A" },

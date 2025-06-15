@@ -1,4 +1,5 @@
 ﻿using MURQ.Common.Exceptions;
+using MURQ.Domain.Games.Values;
 using MURQ.Domain.Games.Variables;
 using MURQ.Domain.Quests;
 using MURQ.Domain.Quests.Statements;
@@ -103,7 +104,7 @@ public class Game(Quest quest) : IGameContext
         }
     }
 
-    private void AssignVariable(string name, decimal value)
+    private void AssignVariable(string name, Value value)
     {
         _variables[name] = new Variable(name, value);
     }
@@ -133,7 +134,7 @@ public class Game(Quest quest) : IGameContext
         public void Press() => OnButtonPressed();
     }
 
-    void IGameContext.AssignVariable(string VariableName, decimal Value) => AssignVariable(VariableName, Value);
+    void IGameContext.AssignVariable(string VariableName, Value Value) => AssignVariable(VariableName, Value);
 
     private GameState _gameState = GameState.InitialState;
     private Statement? _currentStatement;

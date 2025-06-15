@@ -7,5 +7,5 @@ public class DecimalConstantExpression : Expression
 {
     public required decimal Value { get; init; }
 
-    public override Value Calculate(IGameContext gameContext) => new DecimalValue(Value);
+    public override Value Calculate(IGameContext gameContext) => new NumberValue(Value);
 }

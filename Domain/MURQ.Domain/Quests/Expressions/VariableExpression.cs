@@ -12,6 +12,6 @@ public class VariableExpression : Expression
     {
         Variable? variable = gameContext.GetVariable(VariableName);
 
-        return variable?.Value ?? new DecimalValue(0);
+        return variable?.Value ?? new NumberValue(0);
     }
 }
