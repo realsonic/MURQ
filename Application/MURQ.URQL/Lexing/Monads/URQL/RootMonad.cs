@@ -8,7 +8,7 @@ public record RootMonad(Position Position) : UncompletedLexemeMonad(string.Empty
 {
     public override LexemeMonad Append(char character, Position position) => character switch
     {
-        ' ' or '\t' or '\r' => new RootMonad(position),
+        ' ' or '\t' => new RootMonad(position),
         '\n' => new NewLineToken(character, position).AsMonad(),
         ':' => LabelMonad.Start(character, position),
         '=' => new EqualityToken(character, position).AsMonad(),

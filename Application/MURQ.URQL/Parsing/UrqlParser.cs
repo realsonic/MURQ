@@ -1,4 +1,5 @@
-﻿using MURQ.URQL.SyntaxTree;
+﻿using MURQ.URQL.Parsing.Exceptions;
+using MURQ.URQL.SyntaxTree;
 using MURQ.URQL.SyntaxTree.Expressions;
 using MURQ.URQL.SyntaxTree.Statements;
 using MURQ.URQL.Tokens;
@@ -160,9 +161,9 @@ public class UrqlParser
     /// <returns>Присвение значения переменной</returns>
     private AssignVariableStatementSto ParseAssignVariableStatement()
     {
-        VariableToken variableToken = Match<VariableToken>();
-        Match<EqualityToken>();
-        NumberToken numberToken = Match<NumberToken>();
+        VariableToken variableToken = Match<VariableToken>("в левой части присвоения значения переменной");
+        Match<EqualityToken>($"при присвоении значения переменной {variableToken.Name}");
+        NumberToken numberToken = Match<NumberToken>($"в правой части присвоения значения переменной {variableToken.Name}");
 
         return new AssignVariableStatementSto(variableToken.Name, numberToken.Value, (variableToken.Location, numberToken.Location));
     }
@@ -178,7 +179,7 @@ public class UrqlParser
     {
         IfToken ifToken = Match<IfToken>();
         RelationExpressionSto relationExpressionSto = ParseRelationExpression();
-        Match<ThenToken>();
+        Match<ThenToken>("в ветвлении if-then");
         StatementSto thenStatementSto = ParseStatement();
 
         return new IfStatementSto(relationExpressionSto, thenStatementSto, ifToken.Location.Start);
@@ -194,7 +195,7 @@ public class UrqlParser
     private RelationExpressionSto ParseRelationExpression()
     {
         ExpressionSto leftExpression = ParseValueExpression();
-        Match<EqualityToken>();
+        Match<EqualityToken>("в выражении сравнения значений");
         ExpressionSto rightExpression = ParseValueExpression();
 
         return new RelationExpressionSto(leftExpression, rightExpression);
@@ -226,14 +227,14 @@ public class UrqlParser
         return new DecimalConstantExpressionSto(numberToken.Value, numberToken.Location);
     }
 
-    private TToken Match<TToken>()
+    private TToken Match<TToken>(string? context = null) where TToken : Token
     {
         if (lookahead is TToken token)
         {
             lookahead = NextTerminal();
             return token;
         }
-        else throw new ParseException($"Ожидался токен {typeof(TToken)}, а встретился {lookahead}");
+        else throw new UnexpectedTokenException<TToken>(lookahead, context);
     }
 
     private Token? NextTerminal() => enumerator.MoveNext() ? enumerator.Current : null;
