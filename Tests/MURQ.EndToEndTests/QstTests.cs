@@ -236,6 +236,28 @@ public class QstTests
         sut.CurrentLocation.Text.Should().Be("Привет!");
     }
 
+    [Fact(DisplayName = "Системные переменные current_loc и previous_loc работают")]
+    public async Task Current_loc_and_previous_loc_vars_works()
+    {
+        // Arrange
+        Game sut = await LoadQuestIntoGame(@"Quests/Prev_and_curr_locs.qst");
+
+        // Act
+        sut.Start();
+        
+        // Act Ⅰ
+        sut.CurrentLocation.Buttons.Single(button => button.Caption == "В лес").Press();
+        sut.CurrentLocation.Buttons.Single(button => button.Caption == "В пещеру").Press();
+        // Assert Ⅰ
+        sut.CurrentLocation.Text.Should().Be("Вы пришли из лесу в пещеру.");
+
+        // Act Ⅱ        
+        sut.CurrentLocation.Buttons.Single(button => button.Caption == "На озеро").Press();
+        sut.CurrentLocation.Buttons.Single(button => button.Caption == "На поляну").Press();
+        // Assert Ⅱ
+        sut.CurrentLocation.Text.Should().Be("Вы пришли с озера на поляну.");
+    }    
+
     private static async Task<Game> LoadQuestIntoGame(string filePath)
     {
         string questSource = await File.ReadAllTextAsync(filePath);
