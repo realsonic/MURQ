@@ -31,8 +31,6 @@ public class Game(Quest quest) : IGameContext
         RunStatements();
     }
 
-    public Variable? GetVariable(string variableName) => _variables.TryGetValue(variableName, out Variable? variable) ? variable : null;
-
     void IGameContext.PrintText(string? text) => _currentScreenText.Append(text);
 
     void IGameContext.AddButton(string caption, LabelStatement? labelStatement) => _currentScreenButtons.Add(new Button
@@ -43,17 +41,25 @@ public class Game(Quest quest) : IGameContext
 
     void IGameContext.EnterLocation(string locationName)
     {
+        _previousLocationName = _currentLocationName;
         _currentLocationName = locationName;
         OnLocationEntered?.Invoke();
     }
 
-    void IGameContext.EndLocation() => StopAndWaitUser();
+    void IGameContext.EndLocation() => SetModeWaitingUserInput();
 
     void IGameContext.ClearScreen()
     {
         ClearCurrentView();
         OnScreenCleared?.Invoke();
     }
+
+    void IGameContext.AssignVariable(string VariableName, Value Value)
+    {
+        _variables[VariableName] = new Variable(VariableName, Value);
+    }
+
+    public Variable? GetVariable(string variableName) => GetSystemVariable(variableName) ?? GetGameVariable(variableName);
 
     private void GoToNewLocation(LabelStatement? labelStatement)
     {
@@ -62,11 +68,6 @@ public class Game(Quest quest) : IGameContext
         ClearCurrentView();
         GoToLabel(labelStatement);
         RunStatements();
-    }
-
-    private void StopAndWaitUser()
-    {
-        SetModeWaitingUserInput();
     }
 
     private void ClearCurrentView()
@@ -104,10 +105,14 @@ public class Game(Quest quest) : IGameContext
         }
     }
 
-    private void AssignVariable(string name, Value value)
+    private Variable? GetSystemVariable(string variableName) => variableName.ToLower() switch
     {
-        _variables[name] = new Variable(name, value);
-    }
+        "current_loc" => new Variable("current_loc", new StringValue(_currentLocationName ?? string.Empty)),
+        "previous_loc" => new Variable("previous_loc", new StringValue(_previousLocationName ?? string.Empty)),
+        _ => null
+    };
+
+    private Variable? GetGameVariable(string variableName) => _variables.TryGetValue(variableName, out Variable? variable) ? variable : null;
 
     private void PromoteNextStatement() => _currentStatement = Quest.GetNextStatement(_currentStatement);
 
@@ -134,12 +139,11 @@ public class Game(Quest quest) : IGameContext
         public void Press() => OnButtonPressed();
     }
 
-    void IGameContext.AssignVariable(string VariableName, Value Value) => AssignVariable(VariableName, Value);
-
     private GameState _gameState = GameState.InitialState;
     private Statement? _currentStatement;
     private readonly StringBuilder _currentScreenText = new();
     private readonly List<Button> _currentScreenButtons = [];
     private string? _currentLocationName;
+    private string? _previousLocationName;
     private readonly Dictionary<string, Variable> _variables = new(StringComparer.InvariantCultureIgnoreCase);
 }
