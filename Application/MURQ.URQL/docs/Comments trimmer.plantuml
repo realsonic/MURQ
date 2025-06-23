@@ -1,0 +1,30 @@
+@startuml Резалка комментов
+hide empty description
+
+state NotInComment
+state InSinglelineComment
+state MaybeMultilineCommentStarting
+state InMultilineComment
+state MaybeMultilineCommentEnding
+
+[*] --> NotInComment
+
+NotInComment --> InSinglelineComment : "";""
+InSinglelineComment --> NotInComment : ""\\n""
+note on link: Отдать текущий символ
+
+NotInComment --> MaybeMultilineCommentStarting : ""/""
+note on link: Сохранить символ
+
+MaybeMultilineCommentStarting --> NotInComment
+note on link: Отдать сохранённый символ\nCтереть сохранённый символ\nОтдать текущий символ
+MaybeMultilineCommentStarting --> InMultilineComment : ""*""
+note on link: Стереть сохранённый символ
+
+InMultilineComment --> MaybeMultilineCommentEnding : ""*""
+
+MaybeMultilineCommentEnding --> NotInComment : ""/""
+
+NotInComment --> NotInComment
+note on link: Отдать текущий символ
+@enduml
