@@ -258,6 +258,19 @@ public class QstTests
         sut.CurrentLocation.Text.Should().Be("Вы пришли с озера на поляну.");
     }    
 
+    [Fact(DisplayName = "Слэш без звезды не вырезается как многострочный комментарий")]
+    public async Task Slash_wo_asterisk_not_cut()
+    {
+        // Arrange
+        Game sut = await LoadQuestIntoGame(@"Quests/slash_in_pln.qst");
+
+        // Act
+        sut.Start();
+
+        // Assert
+        sut.CurrentLocation.Text.Should().Be("  |\n/ |\n");
+    }
+
     private static async Task<Game> LoadQuestIntoGame(string filePath)
     {
         string questSource = await File.ReadAllTextAsync(filePath);

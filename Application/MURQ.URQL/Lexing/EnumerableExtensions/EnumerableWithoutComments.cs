@@ -23,13 +23,11 @@ public class EnumerableWithoutComments(IEnumerable<(char, Position)> enumerable)
                     if (character is ';')
                     {
                         commentState = CommentState.InSinglelineComment;
-                        continue;
                     }
                     else if (character is '/')
                     {
                         commentState = CommentState.MaybeMultilineCommentStarting;
                         postponedCharacter = (character, position);
-                        continue;
                     }
                     else
                     {
@@ -43,10 +41,6 @@ public class EnumerableWithoutComments(IEnumerable<(char, Position)> enumerable)
                         commentState = CommentState.NotInComment;
                         yield return (character, position);
                     }
-                    else
-                    {
-                        continue;
-                    }
                     break;
 
                 case CommentState.MaybeMultilineCommentStarting:
@@ -54,13 +48,13 @@ public class EnumerableWithoutComments(IEnumerable<(char, Position)> enumerable)
                     {
                         commentState = CommentState.InMultilineComment;
                         postponedCharacter = null;
-                        continue;
                     }
                     else
                     {
                         commentState = CommentState.NotInComment;
                         yield return postponedCharacter ?? throw new LexingException($"Неожиданно не задан отложенный символ в состоянии {commentState}");
                         postponedCharacter = null;
+                        yield return (character, position);
                     }
                     break;
 
@@ -68,23 +62,15 @@ public class EnumerableWithoutComments(IEnumerable<(char, Position)> enumerable)
                     if (character is '*')
                     {
                         commentState = CommentState.MaybeMultilineCommentEnding;
-                        continue;
                     }
-                    else
-                    {
-                        continue;
-                    }
+                    break;
 
                 case CommentState.MaybeMultilineCommentEnding:
                     if (character is '/')
                     {
                         commentState = CommentState.NotInComment;
-                        continue;
                     }
-                    else
-                    {
-                        continue;
-                    }
+                    break;
 
                 default:
                     throw new NotImplementedException($"Неизвестное состояние: {commentState}");
