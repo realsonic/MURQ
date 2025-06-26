@@ -6,8 +6,8 @@ using MURQ.URQL.SyntaxTree;
 using MURQ.URQL.SyntaxTree.Expressions;
 using MURQ.URQL.SyntaxTree.Statements;
 using MURQ.URQL.Tokens;
+using MURQ.URQL.Tokens.If;
 using MURQ.URQL.Tokens.Statements;
-using MURQ.URQL.Tokens.Statements.If;
 
 namespace MURQ.URQL.Tests;
 

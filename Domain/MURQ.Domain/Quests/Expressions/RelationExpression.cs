@@ -14,6 +14,6 @@ public class RelationExpression : Expression
         Value leftValue = LeftExpression.Calculate(gameContext);
         Value rightValue = RightExpression.Calculate(gameContext);
 
-        return new DecimalValue(leftValue == rightValue ? 1 : 0);
+        return new NumberValue(leftValue == rightValue ? 1 : 0);
     }
 }

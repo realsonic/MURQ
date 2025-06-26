@@ -1,5 +1,11 @@
 ﻿using MURQ.URQL.Locations;
 
+using System.ComponentModel;
+
 namespace MURQ.URQL.Tokens.Statements;
 
-public record EndToken(string Lexeme, Location Location) : StatementToken(Lexeme, Location);
+[Description("конец локации (end)")]
+public record EndToken(string Lexeme, Location Location) : StatementToken(Lexeme, Location)
+{
+    public override string GetDescription() => "конец локации (end)";
+}

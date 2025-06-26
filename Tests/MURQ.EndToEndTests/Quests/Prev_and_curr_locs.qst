@@ -1,0 +1,35 @@
+﻿btn лес,В лес
+btn озеро,На озеро
+end
+
+:лес
+btn пещера,В пещеру
+btn поляна,На поляну
+end
+
+:озеро
+btn пещера,В пещеру
+btn поляна,На поляну
+end
+
+:пещера
+p Вы пришли 
+if previous_loc="лес" then p из лесу 
+if previous_loc="озеро" then p с озера 
+if current_loc="пещера" then p в пещеру
+if current_loc="поляна" then p на поляну
+p .
+btn лес,В лес
+btn озеро,На озеро
+end
+
+:поляна
+p Вы пришли 
+if previous_loc="лес" then p из лесу 
+if previous_loc="озеро" then p с озера 
+if current_loc="пещера" then p в пещеру
+if current_loc="поляна" then p на поляну
+p .
+btn лес,В лес
+btn озеро,На озеро
+end
