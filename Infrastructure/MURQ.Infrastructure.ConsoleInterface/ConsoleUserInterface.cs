@@ -42,10 +42,10 @@ public class ConsoleUserInterface : IUserInterface
 
     public UserChoice ShowButtonsAndGetChoice(IEnumerable<Game.Button> buttons)
     {
-        var numberedButtons = MapButtonToNumbers(buttons);
+        var buttonMap = MapButtonsToCharacters(buttons);
 
-        ShowButtons(numberedButtons);
-        UserChoice userChoice = GetValidChoice(numberedButtons);
+        ShowButtons(buttonMap);
+        UserChoice userChoice = GetValidChoice(buttonMap);
 
         WriteLine();
         return userChoice;
@@ -78,38 +78,42 @@ public class ConsoleUserInterface : IUserInterface
         WriteLine();
     }
 
-    private static Dictionary<int, Game.Button> MapButtonToNumbers(IEnumerable<Game.Button> buttons) => buttons
-        .Select((button, index) => (Number: index + 1, Button: button))
-        .ToDictionary(keySelector: map => map.Number, elementSelector: map => map.Button);
+    private static Dictionary<char, Game.Button> MapButtonsToCharacters(IEnumerable<Game.Button> buttons) => buttons
+        .Select((button, index) => (Character: GetButtonCharacterByNumber(index + 1), Button: button))
+        .ToDictionary(map => map.Character, map => map.Button);
 
-    private void ShowButtons(Dictionary<int, Game.Button> numberedButtons)
+    private static char GetButtonCharacterByNumber(int number) => number switch
+    {
+        >= 1 and <= 9 => Convert.ToChar('1' + number - 1),
+        >= 10 and <= 35 => Convert.ToChar('a' + number - 10),
+        _ => '❌'
+    };
+
+    private void ShowButtons(Dictionary<char, Game.Button> buttonMap)
     {
         if (lastWrittenText?[^1] is not '\n')
             WriteLine(); // если текст локации не кончается новой строкой, то перед кнопками нужно добавить
 
         DoInColors(ConsoleColor.Cyan, null, () =>
         {
-            foreach (var numberedButton in numberedButtons)
+            foreach (var mappedButton in buttonMap)
             {
-                WriteLine($"[{numberedButton.Key}] {numberedButton.Value.Caption}");
+                WriteLine($"[{mappedButton.Key}] {mappedButton.Value.Caption}");
             }
         });
     }
 
-    private static UserChoice GetValidChoice(Dictionary<int, Game.Button> numberedButtons)
+    private static UserChoice GetValidChoice(Dictionary<char, Game.Button> buttonMap)
     {
-        int? minNumber = numberedButtons.Count > 0 ? numberedButtons.Keys.Min() : null;
-        int? maxNumber = numberedButtons.Count > 0 ? numberedButtons.Keys.Max() : null;
-
         while (true)
         {
             UserInput userInput = UserInput.GetInput();
 
-            if (userInput.IsButtonNumber())
+            if (userInput.IsButtonCharacter())
             {
-                int pressedNumber = userInput.GetButtonNumber();
-                if (pressedNumber >= minNumber && pressedNumber <= maxNumber)
-                    return new ButtonChosen(numberedButtons[pressedNumber], pressedNumber);
+                char pressedButtonCharacter = userInput.GetButtonCharacter();
+                if (buttonMap.TryGetValue(pressedButtonCharacter, out Game.Button? button))
+                    return new ButtonChosen(button, pressedButtonCharacter);
             }
 
             if (userInput.IsReload())
@@ -135,24 +139,24 @@ public class ConsoleUserInterface : IUserInterface
             }
         }
 
-        public abstract bool IsButtonNumber();
-        public abstract int GetButtonNumber();
+        public abstract bool IsButtonCharacter();
+        public abstract char GetButtonCharacter();
         public abstract bool IsReload();
         public abstract bool IsQuit();
     }
 
     private record KeyInfoInput(ConsoleKeyInfo ConsoleKeyInfo) : UserInput
     {
-        public override bool IsButtonNumber() => char.IsDigit(ConsoleKeyInfo.KeyChar);
-        public override int GetButtonNumber() => Convert.ToInt32(ConsoleKeyInfo.KeyChar.ToString());
+        public override bool IsButtonCharacter() => char.IsAsciiLetterOrDigit(ConsoleKeyInfo.KeyChar);
+        public override char GetButtonCharacter() => ConsoleKeyInfo.KeyChar;
         public override bool IsReload() => ConsoleKeyInfo.Key is ConsoleKey.R && ConsoleKeyInfo.Modifiers is ConsoleModifiers.Control;
         public override bool IsQuit() => ConsoleKeyInfo.Key is ConsoleKey.Q && ConsoleKeyInfo.Modifiers is ConsoleModifiers.Control;
     }
 
     private record CharInput(char? Char) : UserInput
     {
-        public override bool IsButtonNumber() => Char is not null && char.IsDigit(Char.Value);
-        public override int GetButtonNumber() => Convert.ToInt32(Char.ToString());
+        public override bool IsButtonCharacter() => Char is not null && char.IsAsciiLetterOrDigit(Char.Value);
+        public override char GetButtonCharacter() => Char ?? throw new MurqException("Неожиданное обращение к символу при ненажатой кнопке");
         public override bool IsReload() => Char is 'r' or 'R';
         public override bool IsQuit() => Char is null or 'q' or 'Q';
     }

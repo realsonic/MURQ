@@ -92,7 +92,7 @@ public class UrqPlayer(IQuestLoader questLoader, IUserInterface userInterface, I
 
     private void ReportPressedButton(ButtonChosen buttonChosen)
     {
-        userInterface.WriteLine($"> [{buttonChosen.ButtonNumber}] {buttonChosen.Button.Caption}\n");
+        userInterface.WriteLine($"> [{buttonChosen.ButtonCharacter}] {buttonChosen.Button.Caption}\n");
     }
 
     private void SayGoodbye()

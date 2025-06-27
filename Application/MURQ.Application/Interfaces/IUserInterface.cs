@@ -37,7 +37,7 @@ public interface IUserInterface
     void FinishWork();
 
     public abstract record UserChoice();
-    public record ButtonChosen(Game.Button Button, int ButtonNumber) : UserChoice;
+    public record ButtonChosen(Game.Button Button, char ButtonCharacter) : UserChoice;
     public record ReloadChosen : UserChoice;
     public record QuitChosen : UserChoice;
 }
