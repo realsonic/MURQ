@@ -18,25 +18,35 @@ public class UrqLoader(IEnumerable<char> source)
         UrqlParser parser = new(lexer.Scan());
 
         _questSto = parser.ParseQuest();
+        ProduceAndCacheLabelStatements();
 
-        _labelStatementsByLabel.Clear();
         Quest quest = ProduceQuest();
         return quest;
     }
 
+    private void ProduceAndCacheLabelStatements()
+    {
+        _labelStatementPairs.Clear();
+
+        var labelStatementStos = _questSto!.Statements.OfType<LabelStatementSto>();
+
+        foreach (LabelStatementSto labelStatementSto in labelStatementStos)
+        {
+            LabelStatement labelStatement = new() { Label = labelStatementSto.Label };
+            _labelStatementPairs.Add((labelStatementSto, labelStatement));
+        }
+    }
+
     private Quest ProduceQuest()
     {
-        if (_questSto is null)
-            throw new MurqException("Не загружено синтаксическое дерево квеста.");
-
-        IEnumerable<Statement> statements = _questSto.Statements.Select(ProduceStatement);
+        IEnumerable<Statement> statements = _questSto!.Statements.Select(ProduceStatement);
         Quest quest = new(statements);
         return quest;
     }
 
     private Statement ProduceStatement(StatementSto statementSto) => statementSto switch
     {
-        LabelStatementSto labelStatementSto => GetOrCreateLabelStatementByLabel(labelStatementSto.Label) ?? throw new MurqException("Не найдена инструкция метки"),
+        LabelStatementSto labelStatementSto => GetLabelStatement(labelStatementSto),
         PrintStatementSto printStatementSto => ProducePrintStatement(printStatementSto),
         ButtonStatementSto buttonStatementSto => ProduceButtonStatement(buttonStatementSto),
         EndStatementSto => new EndStatement(),
@@ -46,6 +56,11 @@ public class UrqLoader(IEnumerable<char> source)
         _ => throw new NotImplementedException($"Инструкция ({statementSto}) ещё не реализована.")
     };
 
+    private LabelStatement GetLabelStatement(LabelStatementSto labelStatementSto)
+        => _labelStatementPairs.Exists(p => p.LabelStatementSto == labelStatementSto)
+            ? _labelStatementPairs.Find(p => p.LabelStatementSto == labelStatementSto).LabelStatement
+            : throw new MurqException($"Неожиданно в списке закэшированных меток не оказалось метки для {labelStatementSto}");
+
     private static PrintStatement ProducePrintStatement(PrintStatementSto printStatementSto) => new()
     {
         Text = printStatementSto.Text,
@@ -54,7 +69,7 @@ public class UrqLoader(IEnumerable<char> source)
 
     private ButtonStatement ProduceButtonStatement(ButtonStatementSto buttonStatementSto) => new()
     {
-        LabelStatement = GetOrCreateLabelStatementByLabel(buttonStatementSto.Label),
+        LabelStatement = TryGetLabelStatementByLabel(buttonStatementSto.Label),
         Caption = buttonStatementSto.Caption
     };
 
@@ -85,30 +100,11 @@ public class UrqLoader(IEnumerable<char> source)
         RightExpression = ProduceExpression(relationExpressionSto.RightExpression)
     };
 
-    private LabelStatement? GetOrCreateLabelStatementByLabel(string label)
-    {
-        if (_labelStatementsByLabel.TryGetValue(label, out LabelStatement? foundLabelStatement))
-        {
-            return foundLabelStatement;
-        }
-
-        if (_questSto is null)
-            throw new MurqException("Не загружено синтаксическое дерево квеста.");
-
-        LabelStatementSto? labelStatementSto = _questSto.Statements
-            .OfType<LabelStatementSto>()
-            .FirstOrDefault(labelStatement => labelStatement.Label.Equals(label, StringComparison.InvariantCultureIgnoreCase));
-
-        if (labelStatementSto is not null)
-        {
-            LabelStatement labelStatement = new() { Label = labelStatementSto.Label };
-            _labelStatementsByLabel[labelStatement.Label] = labelStatement;
-            return labelStatement;
-        }
-
-        return null;
-    }
+    private LabelStatement? TryGetLabelStatementByLabel(string label)
+        => _labelStatementPairs.Exists(p => label.Equals(p.LabelStatement.Label, StringComparison.InvariantCultureIgnoreCase))
+            ? _labelStatementPairs.Find(p => label.Equals(p.LabelStatement.Label, StringComparison.InvariantCultureIgnoreCase)).LabelStatement
+            : null;
 
     private QuestSto? _questSto;
-    private readonly Dictionary<string, LabelStatement> _labelStatementsByLabel = new(StringComparer.InvariantCultureIgnoreCase);
+    private readonly List<(LabelStatementSto LabelStatementSto, LabelStatement LabelStatement)> _labelStatementPairs = [];
 }

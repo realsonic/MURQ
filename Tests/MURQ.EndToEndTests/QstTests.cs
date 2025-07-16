@@ -271,6 +271,20 @@ public class QstTests
         sut.CurrentLocation.Text.Should().Be("  |\n/ |\n");
     }
 
+    [Fact(DisplayName = "При проходе дублирующей метки не происходит переброс на оригинальную метку")]
+    public async Task Running_double_label_doesnt_jump_to_original()
+    {
+        // Arrange
+        Game sut = await LoadQuestIntoGame(@"Quests/Double_sniff.qst");
+
+        // Act
+        sut.Start();
+        sut.CurrentLocation.Buttons.Single().Press();
+
+        // Assert
+        sut.CurrentLocation.Text.Should().Be("\nя опустил морду - четкий запах манит мен¤ вперед.\n");
+    }
+
     private static async Task<Game> LoadQuestIntoGame(string filePath)
     {
         string questSource = await File.ReadAllTextAsync(filePath);
