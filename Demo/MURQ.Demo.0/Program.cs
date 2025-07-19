@@ -9,7 +9,7 @@ Console.Title = "Мурка. Демо 0";
 
 var quest = new Quest([
     new PrintStatement
-        { Text = "Привет! Это самое простое демо MURQ: квест, в котором только эта строчка текста. Пока!" }
+        { UrqString = "Привет! Это самое простое демо MURQ: квест, в котором только эта строчка текста. Пока!" }
 ]);
 
 var game = new Game(quest);

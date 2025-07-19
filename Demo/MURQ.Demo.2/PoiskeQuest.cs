@@ -125,7 +125,7 @@ internal class PoiskeQuestBuilder
 
     private LabelStatement Label(int label) => LabelDictionary[label];
 
-    private static PrintStatement Pln(string text) => new() { Text = text + "\n" };
+    private static PrintStatement Pln(string text) => new() { UrqString = text, IsNewLineAtEnd = true };
 
     private ButtonStatement Btn(int label, string caption) =>
         new() { Caption = caption, LabelStatement = LabelDictionary[label] };

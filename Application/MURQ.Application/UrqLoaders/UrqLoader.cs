@@ -63,7 +63,7 @@ public class UrqLoader(IEnumerable<char> source)
 
     private static PrintStatement ProducePrintStatement(PrintStatementSto printStatementSto) => new()
     {
-        Text = printStatementSto.Text,
+        UrqString = UrqStringLoader.Load(printStatementSto.Text),
         IsNewLineAtEnd = printStatementSto.IsNewLineAtEnd
     };
 

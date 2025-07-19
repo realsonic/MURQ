@@ -22,8 +22,8 @@ public class UrqLoaderTests
 
         // Assert
         quest.Statements.Should().BeEquivalentTo([
-            new PrintStatement{ Text = "Привет, " },
-            new PrintStatement{ Text = "мир!"}
+            new PrintStatement{ UrqString = "Привет, " },
+            new PrintStatement{ UrqString = "мир!"}
         ]);
     }
 }

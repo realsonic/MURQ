@@ -22,7 +22,7 @@ public class GameTests
     public void Print_shows_text()
     {
         // Arrange
-        var printStatement = new PrintStatement { Text = "Hello World!" };
+        var printStatement = new PrintStatement { UrqString = "Hello World!" };
         var quest = new Quest([printStatement]);
         var game = new Game(quest);
 
@@ -55,7 +55,7 @@ public class GameTests
         var labelStatement = new LabelStatement { Label = "Начало" };
         var quest = new Quest([
             labelStatement,
-            new PrintStatement { Text = "Text" },
+            new PrintStatement { UrqString = "Text" },
             new ButtonStatement { Caption = "Push me", LabelStatement = labelStatement }
         ]);
         var game = new Game(quest);
@@ -100,7 +100,7 @@ public class GameTests
                     LeftExpression = new VariableExpression { VariableName = "A" },
                     RightExpression = new DecimalConstantExpression { Value = 4 }
                 },
-                ThenStatement = new PrintStatement { Text = "Всего хорошего!", IsNewLineAtEnd = true }
+                ThenStatement = new PrintStatement { UrqString = "Всего хорошего!", IsNewLineAtEnd = true }
             }
         ]);
         var game = new Game(quest);
