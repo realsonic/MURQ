@@ -8,7 +8,7 @@ using MURQ.URQL.SyntaxTree;
 using MURQ.URQL.SyntaxTree.Expressions;
 using MURQ.URQL.SyntaxTree.Statements;
 
-namespace MURQ.Application;
+namespace MURQ.Application.UrqLoaders;
 
 public class UrqLoader(IEnumerable<char> source)
 {

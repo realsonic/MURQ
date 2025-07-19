@@ -1,5 +1,5 @@
-﻿using MURQ.Application;
-using MURQ.Application.Interfaces;
+﻿using MURQ.Application.Interfaces;
+using MURQ.Application.UrqLoaders;
 using MURQ.Common.Exceptions;
 using MURQ.Domain.Quests;
 

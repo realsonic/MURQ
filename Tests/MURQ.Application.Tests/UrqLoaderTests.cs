@@ -1,5 +1,6 @@
 using FluentAssertions;
 
+using MURQ.Application.UrqLoaders;
 using MURQ.Domain.Quests;
 using MURQ.Domain.Quests.Statements;
 

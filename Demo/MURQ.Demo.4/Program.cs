@@ -1,4 +1,4 @@
-﻿using MURQ.Application;
+﻿using MURQ.Application.UrqLoaders;
 using MURQ.Domain.Games;
 using MURQ.Domain.Quests;
 
