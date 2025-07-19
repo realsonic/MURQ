@@ -4,7 +4,7 @@ using System.Diagnostics;
 
 namespace MURQ.Domain.Quests.Statements;
 
-[DebuggerDisplay("Print {Text,nq}, \\n = {IsNewLineAtEnd}")]
+[DebuggerDisplay("{DebuggerDisplay,nq}")]
 public class PrintStatement : Statement
 {
     public string? Text { get; init; }
@@ -13,6 +13,8 @@ public class PrintStatement : Statement
 
     public override void Run(IGameContext gameContext)
     {
-        gameContext.PrintText(Text + (IsNewLineAtEnd ? "\n" : string.Empty));
+        gameContext.PrintText($"{Text}{(IsNewLineAtEnd ? "\n" : string.Empty)}");
     }
+
+    private string DebuggerDisplay => $"{(IsNewLineAtEnd ? "pln" : "p")} {Text}";
 }
