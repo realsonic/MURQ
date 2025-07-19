@@ -12,13 +12,14 @@ public class UrqLoaderTests
     public void Quest_of_2p_loads()
     {
         // Arrange
-        UrqLoader sut = new("""
+        const string questSource = """
             p Привет, 
             p мир!
-            """);
+            """;
+        UrqLoader sut = new();
 
         // Act
-        Quest quest = sut.LoadQuest();
+        Quest quest = sut.LoadQuest(questSource);
 
         // Assert
         quest.Statements.Should().BeEquivalentTo([

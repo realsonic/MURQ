@@ -10,9 +10,9 @@ using MURQ.URQL.SyntaxTree.Statements;
 
 namespace MURQ.Application.UrqLoaders;
 
-public class UrqLoader(IEnumerable<char> source)
+public class UrqLoader
 {
-    public Quest LoadQuest()
+    public Quest LoadQuest(IEnumerable<char> source)
     {
         UrqlLexer lexer = new(source);
         UrqlParser parser = new(lexer.Scan());
