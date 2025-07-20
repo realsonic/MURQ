@@ -2,6 +2,7 @@
 
 using MURQ.Application.Interfaces;
 using MURQ.Application.Services;
+using MURQ.Application.UrqLoaders;
 using MURQ.Infrastructure.ConsoleInterface;
 using MURQ.Infrastructure.QuestLoaders;
 
@@ -12,6 +13,9 @@ internal class ServiceConfiguration
         .AddTransient<IVersionProvider, MurqConsoleVersionProvider>()
         .AddTransient<IUrqPlayer, UrqPlayer>()
         .AddTransient<IUserInterface, ConsoleUserInterface>()
-        .AddTransient<IQuestLoader, FileQuestLoader>(serviceProvider => new FileQuestLoader(args is [string qstFilePath, ..] ? qstFilePath : null))
+        .AddTransient<UrqLoader>()
+        .AddTransient<IQuestLoader, FileQuestLoader>(serviceProvider => new FileQuestLoader(
+            urqLoader: serviceProvider.GetRequiredService<UrqLoader>(),
+            qstFilePath: args is [string qstFilePath, ..] ? qstFilePath : null))
         .BuildServiceProvider();
 }

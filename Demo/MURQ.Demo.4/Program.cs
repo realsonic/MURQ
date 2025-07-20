@@ -1,4 +1,4 @@
-﻿using MURQ.Application;
+﻿using MURQ.Application.UrqLoaders;
 using MURQ.Domain.Games;
 using MURQ.Domain.Quests;
 
@@ -10,8 +10,8 @@ Console.Title = "Мурка. Демо 4: poiske.qst";
 Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
 
 string questSource = await File.ReadAllTextAsync(@"poiske.qst", Encoding.GetEncoding("Windows-1251"));
-UrqLoader urqLoader = new(questSource);
-Quest quest = urqLoader.LoadQuest();
+UrqLoader urqLoader = new();
+Quest quest = urqLoader.LoadQuest(questSource);
 
 var game = new Game(quest);
 game.Start();

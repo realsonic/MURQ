@@ -1,6 +1,6 @@
 ﻿using FluentAssertions;
 
-using MURQ.Application;
+using MURQ.Application.UrqLoaders;
 using MURQ.Domain.Games;
 using MURQ.Domain.Games.Values;
 using MURQ.Domain.Quests;
@@ -244,7 +244,7 @@ public class QstTests
 
         // Act
         sut.Start();
-        
+
         // Act Ⅰ
         sut.CurrentLocation.Buttons.Single(button => button.Caption == "В лес").Press();
         sut.CurrentLocation.Buttons.Single(button => button.Caption == "В пещеру").Press();
@@ -256,7 +256,7 @@ public class QstTests
         sut.CurrentLocation.Buttons.Single(button => button.Caption == "На поляну").Press();
         // Assert Ⅱ
         sut.CurrentLocation.Text.Should().Be("Вы пришли с озера на поляну.");
-    }    
+    }
 
     [Fact(DisplayName = "Слэш без звезды не вырезается как многострочный комментарий")]
     public async Task Slash_wo_asterisk_not_cut()
@@ -285,11 +285,24 @@ public class QstTests
         sut.CurrentLocation.Text.Should().Be("\nя опустил морду - четкий запах манит мен¤ вперед.\n");
     }
 
+    [Fact(DisplayName = "Подстановка с переменной вставляет значение")]
+    public async Task Interpolated_var_puts_value()
+    {
+        // Arrange
+        Game sut = await LoadQuestIntoGame(@"Quests/Interpolated_var.qst");
+
+        // Act
+        sut.Start();
+
+        // Assert
+        sut.CurrentLocation.Text.Should().Be("У меня 4 рубля!\n");
+    }
+
     private static async Task<Game> LoadQuestIntoGame(string filePath)
     {
         string questSource = await File.ReadAllTextAsync(filePath);
-        UrqLoader urqLoader = new(questSource);
-        Quest quest = urqLoader.LoadQuest();
+        UrqLoader urqLoader = new();
+        Quest quest = urqLoader.LoadQuest(questSource);
         Game game = new(quest);
         return game;
     }

@@ -1,4 +1,5 @@
-﻿using MURQ.Common.Exceptions;
+﻿using MURQ.Application.UrqLoaders.UrqStrings;
+using MURQ.Common.Exceptions;
 using MURQ.Domain.Quests;
 using MURQ.Domain.Quests.Expressions;
 using MURQ.Domain.Quests.Statements;
@@ -8,11 +9,11 @@ using MURQ.URQL.SyntaxTree;
 using MURQ.URQL.SyntaxTree.Expressions;
 using MURQ.URQL.SyntaxTree.Statements;
 
-namespace MURQ.Application;
+namespace MURQ.Application.UrqLoaders;
 
-public class UrqLoader(IEnumerable<char> source)
+public class UrqLoader
 {
-    public Quest LoadQuest()
+    public Quest LoadQuest(IEnumerable<char> source)
     {
         UrqlLexer lexer = new(source);
         UrqlParser parser = new(lexer.Scan());
@@ -63,7 +64,7 @@ public class UrqLoader(IEnumerable<char> source)
 
     private static PrintStatement ProducePrintStatement(PrintStatementSto printStatementSto) => new()
     {
-        Text = printStatementSto.Text,
+        UrqString = UrqStringLoader.Load(printStatementSto.Text),
         IsNewLineAtEnd = printStatementSto.IsNewLineAtEnd
     };
 

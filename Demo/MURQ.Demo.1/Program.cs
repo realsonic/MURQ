@@ -14,13 +14,13 @@ var quest = new Quest([
     hereLabel,
     new PrintStatement
     {
-        Text =
-            "Привет! Это простое демо MURQ: квест, в котором есть пара локаций да пара кнопок, чтобы ходить туда-сюда.\n"
+        UrqString = "Привет! Это простое демо MURQ: квест, в котором есть пара локаций да пара кнопок, чтобы ходить туда-сюда.",
+        IsNewLineAtEnd = true
     },
     new ButtonStatement { Caption = "Туда", LabelStatement = thereLabel },
     new EndStatement(),
     thereLabel,
-    new PrintStatement { Text = "Вы попали туда!\n" },
+    new PrintStatement { UrqString = "Вы попали туда!", IsNewLineAtEnd = true },
     new ButtonStatement { Caption = "Сюда", LabelStatement = hereLabel }
 ]);
 
