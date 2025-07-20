@@ -285,11 +285,24 @@ public class QstTests
         sut.CurrentLocation.Text.Should().Be("\nя опустил морду - четкий запах манит мен¤ вперед.\n");
     }
 
+    [Fact(DisplayName = "Подстановка с переменной вставляет значение")]
+    public async Task Interpolated_var_puts_value()
+    {
+        // Arrange
+        Game sut = await LoadQuestIntoGame(@"Quests/Interpolated_var.qst");
+
+        // Act
+        sut.Start();
+
+        // Assert
+        sut.CurrentLocation.Text.Should().Be("У меня 4 рубля!\n");
+    }
+
     private static async Task<Game> LoadQuestIntoGame(string filePath)
     {
         string questSource = await File.ReadAllTextAsync(filePath);
-        UrqLoader urqLoader = new(questSource);
-        Quest quest = urqLoader.LoadQuest();
+        UrqLoader urqLoader = new();
+        Quest quest = urqLoader.LoadQuest(questSource);
         Game game = new(quest);
         return game;
     }
