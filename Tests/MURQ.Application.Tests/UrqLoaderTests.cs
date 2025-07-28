@@ -1,4 +1,4 @@
-using FluentAssertions;
+п»їusing FluentAssertions;
 
 using MURQ.Application.UrqLoaders;
 using MURQ.Application.UrqLoaders.UrqStrings;
@@ -9,13 +9,13 @@ namespace MURQ.Application.Tests;
 
 public class UrqLoaderTests
 {
-    [Fact(DisplayName = "Квест из двух p загружается")]
+    [Fact(DisplayName = "РљРІРµСЃС‚ РёР· РґРІСѓС… p Р·Р°РіСЂСѓР¶Р°РµС‚СЃСЏ")]
     public void Quest_of_2p_loads()
     {
         // Arrange
         const string questSource = """
-            p Привет, 
-            p мир!
+            p РџСЂРёРІРµС‚, 
+            p РјРёСЂ!
             """;
         UrqLoader sut = new(new UrqStringLoader(new UrqStringLexer()));
 
@@ -24,8 +24,8 @@ public class UrqLoaderTests
 
         // Assert
         quest.Statements.Should().BeEquivalentTo([
-            new PrintStatement{ UrqString = "Привет, " },
-            new PrintStatement{ UrqString = "мир!"}
+            new PrintStatement{ UrqString = "РџСЂРёРІРµС‚, " },
+            new PrintStatement{ UrqString = "РјРёСЂ!"}
         ]);
     }
 }
