@@ -1,0 +1,3 @@
+array4=5
+index=4
+pln array[#index$] = #array#index$$

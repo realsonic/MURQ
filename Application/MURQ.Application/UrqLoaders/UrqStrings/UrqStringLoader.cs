@@ -1,10 +1,11 @@
-﻿using MURQ.Domain.Quests.Expressions;
+﻿using MURQ.Application.UrqLoaders.UrqStrings.Tokens;
+using MURQ.Domain.Quests.Expressions;
 using MURQ.Domain.Quests.UrqStrings;
 
 namespace MURQ.Application.UrqLoaders.UrqStrings;
-public class UrqStringLoader
+public class UrqStringLoader(UrqStringLexer urqStringLexer)
 {
-    public static UrqString Load(string sourceString)
+    public UrqString LoadFromString(string sourceString)
     {
         if (!sourceString.Contains('#')) // оптимизация без подстановок
             return new UrqString([new UrqStringTextPart(sourceString)]);
@@ -12,7 +13,7 @@ public class UrqStringLoader
         Stack<Operand> operandStack = new();
         Stack<Operator> operatorStack = new();
 
-        foreach (Token token in UrqStringParser.ParseTokens(sourceString))
+        foreach (Token token in urqStringLexer.Scan(sourceString))
         {
             switch (token)
             {
@@ -20,11 +21,11 @@ public class UrqStringLoader
                     operandStack.Push(new TextOperand(textToken.Text));
                     break;
 
-                case BeginInterpolationToken:
+                case SubstitutionStartToken:
                     operatorStack.Push(new BeginIntepolationOperator());
                     break;
 
-                case EndInterpolationToken:
+                case SubstitutionStopToken:
                     operatorStack.Push(new EndIntepolationOperator());
                     ShrinkStacks();
                     break;

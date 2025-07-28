@@ -1,6 +1,7 @@
 ﻿using FluentAssertions;
 
 using MURQ.Application.UrqLoaders;
+using MURQ.Application.UrqLoaders.UrqStrings;
 using MURQ.Domain.Games;
 using MURQ.Domain.Games.Values;
 using MURQ.Domain.Quests;
@@ -286,10 +287,10 @@ public class QstTests
     }
 
     [Fact(DisplayName = "Подстановка с переменной вставляет значение")]
-    public async Task Interpolated_var_puts_value()
+    public async Task Substitution_inserts_value()
     {
         // Arrange
-        Game sut = await LoadQuestIntoGame(@"Quests/Interpolated_var.qst");
+        Game sut = await LoadQuestIntoGame(@"Quests/Substitution.qst");
 
         // Act
         sut.Start();
@@ -301,7 +302,7 @@ public class QstTests
     private static async Task<Game> LoadQuestIntoGame(string filePath)
     {
         string questSource = await File.ReadAllTextAsync(filePath);
-        UrqLoader urqLoader = new();
+        UrqLoader urqLoader = new(new UrqStringLoader(new UrqStringLexer()));
         Quest quest = urqLoader.LoadQuest(questSource);
         Game game = new(quest);
         return game;
