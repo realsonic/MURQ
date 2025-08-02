@@ -1,9 +1,11 @@
 ﻿using MURQ.Domain.Games;
 
+using System.Text;
+
 namespace MURQ.Domain.Quests.UrqStrings;
 
 /// <summary>
-/// Представляет любую строку URQ, где возможны постановки
+/// Представляет любую строку URQ, где возможны подстановки
 /// </summary>
 public class UrqString(IEnumerable<UrqStringPart> parts)
 {
@@ -11,7 +13,13 @@ public class UrqString(IEnumerable<UrqStringPart> parts)
 
     public string ToString(IGameContext gameContext)
     {
-        IEnumerable<string> partStrings = parts.Select(p => p.ToString(gameContext));
-        return string.Join(string.Empty, partStrings);
+        StringBuilder stringBuilder = new();
+
+        foreach (var part in parts)
+        {
+            stringBuilder.Append(part.ToString(gameContext));
+        }
+        
+        return stringBuilder.ToString();
     }
 }
