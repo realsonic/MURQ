@@ -8,6 +8,6 @@ public class UrqStringExpressionPart(Expression expression) : UrqStringPart
     public override string ToString(IGameContext gameContext)
     {
         var value = expression.Calculate(gameContext);
-        return value.TextValue;
+        return value.AsString;
     }
 }
