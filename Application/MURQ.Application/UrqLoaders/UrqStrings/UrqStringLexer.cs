@@ -15,34 +15,36 @@ public class UrqStringLexer
             switch (character)
             {
                 case '#':
-                    if (textStringBuilder.Length > 0)
-                    {
-                        yield return new TextToken(textStringBuilder.ToString());
-                        textStringBuilder.Clear();
-                    }
+                    if (HasText())
+                        yield return new TextToken(PopText());
                     yield return new SubstitutionStartToken();
                     break;
 
                 case '$':
-                    if (textStringBuilder.Length > 0)
-                    {
-                        yield return new TextToken(textStringBuilder.ToString());
-                        textStringBuilder.Clear();
-                    }
+                    if (HasText())
+                        yield return new TextToken(PopText());
                     yield return new SubstitutionStopToken();
                     break;
 
                 default:
-                    textStringBuilder.Append(character);
+                    PushCharacter(character);
                     break;
             }
         }
 
-        if (textStringBuilder.Length > 0)
-        {
-            yield return new TextToken(textStringBuilder.ToString());
-            textStringBuilder.Clear();
-        }
+        if (HasText())
+            yield return new TextToken(PopText());
+    }
+
+    private bool HasText() => textStringBuilder.Length > 0;
+
+    private void PushCharacter(char character) => textStringBuilder.Append(character);
+
+    private string PopText()
+    {
+        var text = textStringBuilder.ToString();
+        textStringBuilder.Clear();
+        return text;
     }
 
     private readonly StringBuilder textStringBuilder = new();
