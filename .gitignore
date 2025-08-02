@@ -400,4 +400,4 @@ FodyWeavers.xsd
 *.bak
 /.vscode
 **/launchSettings.json
-/Presentation/MURQ.Console/*.qst
+/Presentation/MURQ.Console/Quests/*.qst

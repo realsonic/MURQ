@@ -2,5 +2,7 @@
 
 public abstract record Value
 {
-    public abstract decimal DecimalValue { get; }
+    public abstract decimal AsDecimal { get; }
+
+    public abstract string AsString { get; }
 }

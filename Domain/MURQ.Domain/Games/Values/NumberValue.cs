@@ -2,5 +2,7 @@
 
 public record NumberValue(decimal Value) : Value
 {
-    public override decimal DecimalValue => Value;
+    public override decimal AsDecimal => Value;
+
+    public override string AsString => Value.ToString();
 }

@@ -1,4 +1,5 @@
-﻿using MURQ.Common.Exceptions;
+﻿using MURQ.Application.UrqLoaders.UrqStrings;
+using MURQ.Common.Exceptions;
 using MURQ.Domain.Quests;
 using MURQ.Domain.Quests.Expressions;
 using MURQ.Domain.Quests.Statements;
@@ -8,11 +9,11 @@ using MURQ.URQL.SyntaxTree;
 using MURQ.URQL.SyntaxTree.Expressions;
 using MURQ.URQL.SyntaxTree.Statements;
 
-namespace MURQ.Application;
+namespace MURQ.Application.UrqLoaders;
 
-public class UrqLoader(IEnumerable<char> source)
+public class UrqLoader(UrqStringLoader urqStringLoader)
 {
-    public Quest LoadQuest()
+    public Quest LoadQuest(IEnumerable<char> source)
     {
         UrqlLexer lexer = new(source);
         UrqlParser parser = new(lexer.Scan());
@@ -61,9 +62,9 @@ public class UrqLoader(IEnumerable<char> source)
             ? _labelStatementPairs.Find(p => p.LabelStatementSto == labelStatementSto).LabelStatement
             : throw new MurqException($"Неожиданно в списке закэшированных меток не оказалось метки для {labelStatementSto}");
 
-    private static PrintStatement ProducePrintStatement(PrintStatementSto printStatementSto) => new()
+    private PrintStatement ProducePrintStatement(PrintStatementSto printStatementSto) => new()
     {
-        Text = printStatementSto.Text,
+        UrqString = urqStringLoader.LoadFromString(printStatementSto.Text),
         IsNewLineAtEnd = printStatementSto.IsNewLineAtEnd
     };
 
