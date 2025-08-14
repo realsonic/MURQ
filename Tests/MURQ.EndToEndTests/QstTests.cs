@@ -299,6 +299,19 @@ public class QstTests
         sut.CurrentLocation.Text.Should().Be("У меня 4 рубля!\n");
     }
 
+    [Fact(DisplayName = "Подстановка в подстановке формирует название переменной")]
+    public async Task Substitution_in_substitution_forms_var_name()
+    {
+        // Arrange
+        Game sut = await LoadQuestIntoGame(@"Quests/Double_substitution.qst");
+
+        // Act
+        sut.Start();
+
+        // Assert
+        sut.CurrentLocation.Text.Should().Be("4");
+    }
+
     private static async Task<Game> LoadQuestIntoGame(string filePath)
     {
         string questSource = await File.ReadAllTextAsync(filePath);
