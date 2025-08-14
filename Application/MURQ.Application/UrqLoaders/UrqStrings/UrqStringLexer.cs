@@ -8,7 +8,7 @@ public class UrqStringLexer
 {
     public IEnumerable<Token> Scan(IEnumerable<char> source)
     {
-        textStringBuilder.Clear();
+        ClearText();
 
         foreach (char character in source)
         {
@@ -35,6 +35,8 @@ public class UrqStringLexer
         if (HasText())
             yield return new TextToken(PopText());
     }
+
+    private void ClearText() => textStringBuilder.Clear();
 
     private bool HasText() => textStringBuilder.Length > 0;
 
