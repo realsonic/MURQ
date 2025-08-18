@@ -27,7 +27,7 @@ public record ButtonMonad(ButtonLexemeProgress LexemeProgress, string Label, str
 
         ButtonLexemeProgress.Caption => character switch
         {
-            '\n' => new CompletedLexemeMonad(new ButtonToken(Label, Caption, Lexeme, Location), RootMonad.Remain(character, position)),
+            '\n' => new ButtonToken(Label, Caption, Lexeme, Location).AsMonadWithRemain(character, position),
             _ => new ButtonMonad(ButtonLexemeProgress.Caption, Label, Caption + character, Lexeme + character, Location.EndAt(position))
         },
 
@@ -38,7 +38,7 @@ public record ButtonMonad(ButtonLexemeProgress LexemeProgress, string Label, str
     {
         ButtonLexemeProgress.JustAfterBtn => new UnknownLexemeMonad(Lexeme, Location, WhitespaceExpected),
         ButtonLexemeProgress.Label => new UnknownLexemeMonad(Lexeme, Location, CommaExpected),
-        ButtonLexemeProgress.Caption => new CompletedLexemeMonad(new ButtonToken(Label, Caption, Lexeme, Location), null),
+        ButtonLexemeProgress.Caption => new ButtonToken(Label, Caption, Lexeme, Location).AsMonad(),
         _ => throw new LexingException($"Неожиданное состояние монады лексемы кнопки: {nameof(LexemeProgress)} = {LexemeProgress}")
     };
 
