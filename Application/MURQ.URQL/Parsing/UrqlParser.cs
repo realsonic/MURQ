@@ -107,6 +107,7 @@ public class UrqlParser
         ButtonToken => ParseButtonTerminal(),
         EndToken => ParseEndTerminal(),
         ClearScreenToken => ParseClearScreenTerminal(),
+        GotoToken => ParseGotoTerminal(),
         _ when lookahead.IsStartOfAssignVariableStatement() => ParseAssignVariableStatement(),
         _ when lookahead.IsStartOfIfStatement() => ParseIfThenStatement(),
         _ => throw new ParseException($"Ожидалась инструкция, а встретился {lookahead}.")
@@ -157,6 +158,19 @@ public class UrqlParser
     {
         ClearScreenToken clearScreenToken = Match<ClearScreenToken>();
         return new ClearScreenStatementSto(clearScreenToken.Location);
+    }
+
+    private GotoStatementSto ParseGotoTerminal()
+    {
+        GotoToken gotoToken = Match<GotoToken>();
+
+        string label = gotoToken.Label.Trim();
+        if (label == string.Empty)
+        {
+            throw new ParseException($"Метка безусловного перехода пустая: {gotoToken}");
+        }
+
+        return new GotoStatementSto(label, gotoToken.Location);
     }
 
     /// <summary>

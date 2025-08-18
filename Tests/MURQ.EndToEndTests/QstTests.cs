@@ -299,6 +299,19 @@ public class QstTests
         sut.CurrentLocation.Text.Should().Be("У меня 4 рубля!\n");
     }
 
+    [Fact(DisplayName = "Goto переходит на метку")]
+    public async Task Goto_goes_to_label()
+    {
+        // Arrange
+        Game sut = await LoadQuestIntoGame(@"Quests/Goto.qst");
+
+        // Act
+        sut.Start();
+
+        // Assert
+        sut.CurrentLocation.Text.Should().Be("Привет, мир!");
+    }
+
     private static async Task<Game> LoadQuestIntoGame(string filePath)
     {
         string questSource = await File.ReadAllTextAsync(filePath);

@@ -54,6 +54,7 @@ public class UrqLoader(UrqStringLoader urqStringLoader)
         ClearScreenStatementSto => new ClearScreenStatement(),
         AssignVariableStatementSto assignVariableStatementSto => ProduceAssignVariableStatement(assignVariableStatementSto),
         IfStatementSto ifStatementSto => ProduceIfStatement(ifStatementSto),
+        GotoStatementSto gotoStatementSto => ProduceGotoStatement(gotoStatementSto),
         _ => throw new NotImplementedException($"Инструкция ({statementSto}) ещё не реализована.")
     };
 
@@ -84,6 +85,11 @@ public class UrqLoader(UrqStringLoader urqStringLoader)
     {
         Condition = ProduceExpression(ifStatementSto.Condition),
         ThenStatement = ProduceStatement(ifStatementSto.ThenStatement)
+    };
+
+    private GotoStatement ProduceGotoStatement(GotoStatementSto gotoStatementSto) => new()
+    {
+        LabelStatement = TryGetLabelStatementByLabel(gotoStatementSto.Label)
     };
 
     private Expression ProduceExpression(ExpressionSto expressionSto) => expressionSto switch

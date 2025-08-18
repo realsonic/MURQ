@@ -36,7 +36,7 @@ public class Game(Quest quest) : IGameContext
     void IGameContext.AddButton(string caption, LabelStatement? labelStatement) => _currentScreenButtons.Add(new Button
     {
         Caption = caption,
-        OnButtonPressed = () => GoToNewLocation(labelStatement)
+        OnButtonPressed = () => GoByButton(labelStatement)
     });
 
     void IGameContext.EnterLocation(string locationName)
@@ -61,12 +61,22 @@ public class Game(Quest quest) : IGameContext
 
     public Variable? GetVariable(string variableName) => GetSystemVariable(variableName) ?? GetGameVariable(variableName);
 
-    private void GoToNewLocation(LabelStatement? labelStatement)
+    void IGameContext.GoToLabel(LabelStatement? labelStatement) => GoByGoto(labelStatement);
+
+    private void GoByButton(LabelStatement? labelStatement)
     {
         if (labelStatement is null) return;
 
         ClearCurrentView();
-        GoToLabel(labelStatement);
+        SetCurrentLabel(labelStatement);
+        RunStatements();
+    }
+
+    private void GoByGoto(LabelStatement? labelStatement)
+    {
+        if (labelStatement is null) return;
+
+        SetCurrentLabel(labelStatement);
         RunStatements();
     }
 
@@ -97,7 +107,7 @@ public class Game(Quest quest) : IGameContext
         _currentStatement.Run(this);
     }
 
-    private void GoToLabel(LabelStatement? labelStatement)
+    private void SetCurrentLabel(LabelStatement? labelStatement)
     {
         if (labelStatement is not null)
         {
