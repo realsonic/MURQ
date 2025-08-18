@@ -77,7 +77,6 @@ public class Game(Quest quest) : IGameContext
         if (labelStatement is null) return;
 
         SetCurrentLabel(labelStatement);
-        RunStatements();
     }
 
     private void ClearCurrentView()
