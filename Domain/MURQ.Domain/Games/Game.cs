@@ -5,6 +5,7 @@ using MURQ.Domain.Quests;
 using MURQ.Domain.Quests.Statements;
 
 using System.Text;
+using System.Text.RegularExpressions;
 
 namespace MURQ.Domain.Games;
 
@@ -118,6 +119,7 @@ public class Game(Quest quest) : IGameContext
     {
         "current_loc" => new Variable("current_loc", new StringValue(_currentLocationName ?? string.Empty)),
         "previous_loc" => new Variable("previous_loc", new StringValue(_previousLocationName ?? string.Empty)),
+        _ when rndRegex.IsMatch(variableName) => GetRandom(variableName),
         _ => null
     };
 
@@ -132,6 +134,21 @@ public class Game(Quest quest) : IGameContext
 
     private bool IsStarted => _gameState is not GameState.InitialState;
     private bool IsRunningStatements => _gameState == GameState.RunningStatements;
+
+    private Variable GetRandom(string variableName)
+    {
+        string rndLimitString = rndRegex.Match(variableName).Groups["number"].Value;
+
+        if (rndLimitString == string.Empty)
+        {
+            float randomFloatNumber = random.NextSingle();
+            return new Variable(variableName, new NumberValue(Convert.ToDecimal(randomFloatNumber)));
+        }
+
+        int rndLimit = Convert.ToInt32(rndLimitString);
+        int randomIntNumber = random.Next(1, rndLimit + 1);
+        return new Variable(variableName, new NumberValue(randomIntNumber));
+    }
 
     public class CurrentLocationView
     {
@@ -155,4 +172,6 @@ public class Game(Quest quest) : IGameContext
     private string? _currentLocationName;
     private string? _previousLocationName;
     private readonly Dictionary<string, Variable> _variables = new(StringComparer.InvariantCultureIgnoreCase);
+    private readonly Regex rndRegex = new(@"^rnd(?<number>\d*)$", RegexOptions.Compiled | RegexOptions.IgnoreCase);
+    private readonly Random random = new();
 }
