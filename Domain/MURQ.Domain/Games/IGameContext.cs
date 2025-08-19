@@ -13,4 +13,5 @@ public interface IGameContext
     void ClearScreen();
     void AssignVariable(string variableName, Value value);
     Variable? GetVariable(string variableName);
+    void GoToLabel(LabelStatement? labelStatement);
 }

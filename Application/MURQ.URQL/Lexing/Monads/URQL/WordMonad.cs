@@ -27,6 +27,7 @@ public record WordMonad(string Lexeme, Location Location) : UncompletedLexemeMon
         "cls" => new ClearScreenMonad(Lexeme, Location),
         "if" => new IfMonad(Lexeme, Location),
         "then" => new ThenMonad(Lexeme, Location),
+        "goto" => GotoMonad.StartAfterGoto(Lexeme, Location),
         _ => new VariableMonad(Lexeme, Location)
     };
 }
