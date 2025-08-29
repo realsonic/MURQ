@@ -11,7 +11,6 @@ namespace MURQ.Domain.Games;
 
 public class Game(Quest quest) : IGameContext
 {
-    public event Action? OnLocationEntered;
     public event Action? OnScreenCleared;
 
     public Quest Quest { get; } = quest;
@@ -37,15 +36,8 @@ public class Game(Quest quest) : IGameContext
     void IGameContext.AddButton(string caption, LabelStatement? labelStatement) => _currentScreenButtons.Add(new Button
     {
         Caption = caption,
-        OnButtonPressed = () => GoByButton(labelStatement)
+        OnButtonPressed = () => JumpByButton(labelStatement)
     });
-
-    void IGameContext.EnterLocation(string locationName)
-    {
-        _previousLocationName = _currentLocationName;
-        _currentLocationName = locationName;
-        OnLocationEntered?.Invoke();
-    }
 
     void IGameContext.EndLocation() => SetModeWaitingUserInput();
 
@@ -62,18 +54,20 @@ public class Game(Quest quest) : IGameContext
 
     public Variable? GetVariable(string variableName) => GetSystemVariable(variableName) ?? GetGameVariable(variableName);
 
-    void IGameContext.GoToLabel(LabelStatement? labelStatement) => GoByGoto(labelStatement);
+    void IGameContext.Goto(LabelStatement? labelStatement) => JumpByGoto(labelStatement);
 
-    private void GoByButton(LabelStatement? labelStatement)
+    private void JumpByButton(LabelStatement? labelStatement)
     {
         if (labelStatement is null) return;
 
         ClearCurrentView();
         SetCurrentLabel(labelStatement);
+        UpdateCurrentLocationName(labelStatement.Label);
+
         RunStatements();
     }
 
-    private void GoByGoto(LabelStatement? labelStatement)
+    private void JumpByGoto(LabelStatement? labelStatement)
     {
         if (labelStatement is null) return;
 
@@ -84,6 +78,12 @@ public class Game(Quest quest) : IGameContext
     {
         _currentScreenText.Clear();
         _currentScreenButtons.Clear();
+    }
+
+    private void UpdateCurrentLocationName(string currentLocationName)
+    {
+        _previousLocationName = _currentLocationName;
+        _currentLocationName = currentLocationName;
     }
 
     private void RunStatements()

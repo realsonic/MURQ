@@ -11,6 +11,6 @@ public class GotoStatement : Statement
 
     public override void Run(IGameContext gameContext)
     {
-        gameContext.GoToLabel(LabelStatement);
+        gameContext.Goto(LabelStatement);
     }
 }
