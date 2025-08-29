@@ -121,6 +121,7 @@ public class QstTests
 
         // Act
         sut.Start();
+        sut.CurrentLocation.Buttons[0].Press();
 
         // Assert
         sut.CurrentLocation.Name.Should().Be("1");

@@ -8,10 +8,9 @@ public interface IGameContext
 {
     void PrintText(string? text);
     void AddButton(string caption, LabelStatement? labelStatement);
-    void EnterLocation(string locationName);
     void EndLocation();
     void ClearScreen();
     void AssignVariable(string variableName, Value value);
     Variable? GetVariable(string variableName);
-    void GoToLabel(LabelStatement? labelStatement);
+    void Goto(LabelStatement? labelStatement);
 }

@@ -77,6 +77,7 @@ public class GameTests
         // Arrange
         var quest = new Quest([
             new LabelStatement { Label = "Первая локация" },
+            new PrintStatement { UrqString = "Первая локация" },
             new EndStatement(),
             new LabelStatement { Label = "Вторая локация" }
         ]);
@@ -86,7 +87,7 @@ public class GameTests
         game.Start();
 
         // Assert
-        game.CurrentLocation.Name.Should().Be("Первая локация");
+        game.CurrentLocation.Text.Should().Be("Первая локация");
     }
 
     [Fact(DisplayName = "If проверяет простое условие сравнения переменной с числом и выполняет команду")]
