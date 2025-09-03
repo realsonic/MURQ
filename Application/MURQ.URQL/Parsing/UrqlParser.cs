@@ -38,7 +38,7 @@ public class UrqlParser
 
         if (lookahead is not null)
         {
-            throw new ParseException($"Ожидался конец, а встретился: {lookahead}");
+            throw new UnexpectedElementException("Ожидался конец", lookahead);
         }
 
         return new QuestSto(statements);
@@ -108,9 +108,10 @@ public class UrqlParser
         EndToken => ParseEndTerminal(),
         ClearScreenToken => ParseClearScreenTerminal(),
         GotoToken => ParseGotoTerminal(),
+        PerkillToken => ParsePerkillTerminal(),
         _ when lookahead.IsStartOfAssignVariableStatement() => ParseAssignVariableStatement(),
         _ when lookahead.IsStartOfIfStatement() => ParseIfThenStatement(),
-        _ => throw new ParseException($"Ожидалась инструкция, а встретился {lookahead}.")
+        _ => throw new UnexpectedElementException("Ожидалась инструкция", lookahead)
     };
 
     private LabelStatementSto ParseLabelTerminal()
@@ -173,6 +174,12 @@ public class UrqlParser
         return new GotoStatementSto(label, gotoToken.Location);
     }
 
+    private PerkillStatementSto ParsePerkillTerminal()
+    {
+        PerkillToken perkillToken = Match<PerkillToken>();
+        return new PerkillStatementSto(perkillToken.Location);
+    }
+
     /// <summary>
     /// Грамматика:
     /// <code>
@@ -205,7 +212,7 @@ public class UrqlParser
 
         return new IfStatementSto(relationExpressionSto, thenStatementSto, ifToken.Location.Start);
     }
-    
+
     /// <summary>
     /// Грамматика:
     /// <code>
@@ -221,7 +228,7 @@ public class UrqlParser
 
         return new RelationExpressionSto(leftExpression, rightExpression);
     }
-        
+
     /// <summary>
     /// Грамматика:
     /// <code>
@@ -234,7 +241,7 @@ public class UrqlParser
         VariableToken => ParseVariableExpressionTerminal(),
         NumberToken => ParseNumberExpressionTerminal(),
         StringLiteralToken => ParseStringLiteralExpressionTerminal(),
-        _ => throw new ParseException($"Ожидались переменная или число, а встретился {lookahead}.")
+        _ => throw new UnexpectedElementException("Ожидалась переменная, число или строка в кавычках", lookahead)
     };
 
     private VariableExpressionSto ParseVariableExpressionTerminal()

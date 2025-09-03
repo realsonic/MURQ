@@ -313,6 +313,19 @@ public class QstTests
         sut.CurrentLocation.Text.Should().Be("Привет, мир!");
     }
 
+    [Fact(DisplayName = "perkill стирает переменные")]
+    public async Task Perkill_clears_vars()
+    {
+        // Arrange
+        Game sut = await LoadQuestIntoGame(@"Quests/perkill.qst");
+
+        // Act
+        sut.Start();
+
+        // Assert
+        sut.CurrentLocation.Text.Should().Be("18 0");
+    }
+
     private static async Task<Game> LoadQuestIntoGame(string filePath)
     {
         string questSource = await File.ReadAllTextAsync(filePath);

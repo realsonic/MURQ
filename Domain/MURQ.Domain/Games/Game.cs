@@ -56,6 +56,8 @@ public class Game(Quest quest) : IGameContext
 
     void IGameContext.Goto(LabelStatement? labelStatement) => JumpByGoto(labelStatement);
 
+    void IGameContext.Perkill() => _variables.Clear();
+
     private void JumpByButton(LabelStatement? labelStatement)
     {
         if (labelStatement is null) return;

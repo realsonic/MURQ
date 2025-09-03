@@ -28,6 +28,7 @@ public record WordMonad(string Lexeme, Location Location) : UncompletedLexemeMon
         "if" => new IfMonad(Lexeme, Location),
         "then" => new ThenMonad(Lexeme, Location),
         "goto" => GotoMonad.StartAfterGoto(Lexeme, Location),
+        "perkill" => new PerkillMonad(Lexeme, Location),
         _ => new VariableMonad(Lexeme, Location)
     };
 }

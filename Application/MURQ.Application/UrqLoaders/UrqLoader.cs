@@ -55,6 +55,7 @@ public class UrqLoader(UrqStringLoader urqStringLoader)
         AssignVariableStatementSto assignVariableStatementSto => ProduceAssignVariableStatement(assignVariableStatementSto),
         IfStatementSto ifStatementSto => ProduceIfStatement(ifStatementSto),
         GotoStatementSto gotoStatementSto => ProduceGotoStatement(gotoStatementSto),
+        PerkillStatementSto => new PerkillStatement(),
         _ => throw new NotImplementedException($"Инструкция ({statementSto}) ещё не реализована.")
     };
 

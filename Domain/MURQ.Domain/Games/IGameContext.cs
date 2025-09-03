@@ -13,4 +13,5 @@ public interface IGameContext
     void AssignVariable(string variableName, Value value);
     Variable? GetVariable(string variableName);
     void Goto(LabelStatement? labelStatement);
+    void Perkill();
 }
