@@ -10,7 +10,7 @@ public class UnexpectedTokenException<TExpectedToken>(Token? metToken, string? c
     public Token? MetToken { get; } = metToken;
 
     private static string FormatDefaultMessage(Token? metToken, string? context)
-        => $"Ожидался токен {FormatExpectedToken()}{FormatContext(context)}, а встретился {FormatMetToken(metToken)}";
+        => $"Ожидался токен {FormatExpectedToken()}{FormatContext(context)}, а встретился токен {FormatMetToken(metToken)}";
 
     private static string FormatExpectedToken() => $"<{Token.GetTokenTypeDescription<TExpectedToken>()}>";
 
