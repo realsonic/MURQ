@@ -24,8 +24,7 @@
     <ProjectReference Include="..\..\Application\MURQ.Application\MURQ.Application.csproj" />
     <ProjectReference Include="..\..\Application\MURQ.URQL\MURQ.URQL.csproj" />
     <ProjectReference Include="..\..\Domain\MURQ.Domain\MURQ.Domain.csproj" />
-    <ProjectReference Include="..\..\Infrastructure\MURQ.Infrastructure.ConsoleInterface\MURQ.Infrastructure.ConsoleInterface.csproj" />
-    <ProjectReference Include="..\..\Infrastructure\MURQ.Infrastructure.QuestLoaders\MURQ.Infrastructure.QuestLoaders.csproj" />
+    <ProjectReference Include="..\..\Infrastructure\MURQ.Infrastructure\MURQ.Infrastructure.csproj" />
   </ItemGroup>
 
 </Project>

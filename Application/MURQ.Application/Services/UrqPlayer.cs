@@ -6,7 +6,7 @@ using static MURQ.Application.Interfaces.IUserInterface;
 
 namespace MURQ.Application.Services;
 
-public class UrqPlayer(IQuestLoader questLoader, IUserInterface userInterface, IVersionProvider versionProvider) : IUrqPlayer
+public class UrqPlayer(IQuestSource questSource, IUserInterface userInterface, IVersionProvider versionProvider) : IUrqPlayer
 {
     public async Task Run(CancellationToken stoppingToken)
     {
@@ -31,7 +31,7 @@ public class UrqPlayer(IQuestLoader questLoader, IUserInterface userInterface, I
 
     private async Task<Game> LoadQuestAndStartGame(CancellationToken stoppingToken)
     {
-        (Quest quest, string questName) = await questLoader.LoadQuest(stoppingToken);
+        (Quest quest, string questName) = await questSource.GetQuest(stoppingToken);
 
         var game = new Game(quest);
         game.OnScreenCleared += userInterface.ClearSceen;
