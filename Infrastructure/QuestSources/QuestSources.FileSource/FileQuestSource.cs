@@ -7,20 +7,9 @@ using System.Text;
 
 namespace QuestSources.FileSource;
 
-public class FileQuestSource : IQuestSource
+public class FileQuestSource(string? filePath, UrqLoader urqLoader) : IQuestSource
 {
-    private readonly string? filePath;
-    private readonly UrqLoader urqLoader;
-
-    public FileQuestSource(string? filePath, UrqLoader urqLoader)
-    {
-        this.filePath = filePath;
-        this.urqLoader = urqLoader;
-
-        Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
-    }
-
-    public async Task<(Quest Quest, string SourceName)> GetQuest(CancellationToken stoppingToken)
+    public async Task<(Quest Quest, string SourceName)> GetQuest(CancellationToken cancellationToken)
     {
         if (filePath is null)
             throw new MurqException("Путь к файлу квеста не задан");
@@ -28,11 +17,13 @@ public class FileQuestSource : IQuestSource
         if (!File.Exists(filePath))
             throw new MurqException($"Заданный файл квеста ({filePath}) не найден (ищу по пути: {Path.GetFullPath(filePath)})");
 
-        Encoding encoding = Encoding.GetEncoding("Windows-1251");
-        string questSource = await File.ReadAllTextAsync(filePath, encoding, stoppingToken);
+        Encoding encoding = await fileEncodingDetector.Detect(filePath, cancellationToken);
+        string questSource = await File.ReadAllTextAsync(filePath, encoding, cancellationToken);
 
         Quest quest = urqLoader.LoadQuest(questSource);
 
         return (quest, $"Файл: {Path.GetFileName(filePath)}");
     }
+
+    private readonly FileEncodingDetector fileEncodingDetector = new();
 }
