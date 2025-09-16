@@ -7,7 +7,7 @@ using System.Text;
 
 namespace QuestSources.FileSource;
 
-public class FileQuestSource(string? filePath, UrqLoader urqLoader) : IQuestSource
+public class FileQuestSource(UrqLoader urqLoader, string? filePath, Encoding? encoding) : IQuestSource
 {
     public async Task<(Quest Quest, string SourceName)> GetQuest(CancellationToken cancellationToken)
     {
@@ -17,13 +17,11 @@ public class FileQuestSource(string? filePath, UrqLoader urqLoader) : IQuestSour
         if (!File.Exists(filePath))
             throw new MurqException($"Заданный файл квеста ({filePath}) не найден (ищу по пути: {Path.GetFullPath(filePath)})");
 
-        Encoding encoding = await fileEncodingDetector.Detect(filePath, cancellationToken);
+        encoding ??= await FileEncodingDetector.Detect(filePath, cancellationToken);
         string questSource = await File.ReadAllTextAsync(filePath, encoding, cancellationToken);
 
         Quest quest = urqLoader.LoadQuest(questSource);
 
         return (quest, $"Файл: {Path.GetFileName(filePath)}");
     }
-
-    private readonly FileEncodingDetector fileEncodingDetector = new();
 }
