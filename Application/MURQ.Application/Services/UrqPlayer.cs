@@ -8,15 +8,15 @@ namespace MURQ.Application.Services;
 
 public class UrqPlayer(IQuestSource questSource, IUserInterface userInterface, IVersionProvider versionProvider) : IUrqPlayer
 {
-    public async Task Run(CancellationToken stoppingToken)
+    public async Task Run(CancellationToken cancellationToken)
     {
         ShowTitleAndLogo();
 
         try
         {
-            Game game = await LoadQuestAndStartGame(stoppingToken);
+            game = await LoadQuestAndStartGame(cancellationToken);
 
-            await RunPlayCycle(game, stoppingToken);
+            await RunPlayCycle(cancellationToken);
 
             SayGoodbye();
             PromptAnyKey();
@@ -29,9 +29,9 @@ public class UrqPlayer(IQuestSource questSource, IUserInterface userInterface, I
         }
     }
 
-    private async Task<Game> LoadQuestAndStartGame(CancellationToken stoppingToken)
+    private async Task<Game> LoadQuestAndStartGame(CancellationToken cancellationToken)
     {
-        (Quest quest, string questName) = await questSource.GetQuest(stoppingToken);
+        (Quest quest, string questName) = await questSource.GetQuest(cancellationToken);
 
         var game = new Game(quest);
         game.OnScreenCleared += userInterface.ClearSceen;
@@ -43,8 +43,10 @@ public class UrqPlayer(IQuestSource questSource, IUserInterface userInterface, I
         return game;
     }
 
-    private async Task RunPlayCycle(Game game, CancellationToken stoppingToken)
+    private async Task RunPlayCycle(CancellationToken cancellationToken)
     {
+        ArgumentNullException.ThrowIfNull(game);
+
         while (true)
         {
             userInterface.Write(game.CurrentLocation.Text);
@@ -60,7 +62,7 @@ public class UrqPlayer(IQuestSource questSource, IUserInterface userInterface, I
                     buttonChosen.Button.Press();
                     break;
                 case ReloadChosen:
-                    game = await LoadQuestAndStartGame(stoppingToken);
+                    game = await LoadQuestAndStartGame(cancellationToken);
                     break;
                 case QuitChosen:
                     return;
@@ -90,10 +92,8 @@ public class UrqPlayer(IQuestSource questSource, IUserInterface userInterface, I
 
     private void ShowQuestName(string? questName) => userInterface.WriteLine($"{questName}\n");
 
-    private void ReportPressedButton(ButtonChosen buttonChosen)
-    {
-        userInterface.WriteLine($"> [{buttonChosen.ButtonCharacter}] {buttonChosen.Button.Caption}\n");
-    }
+    private void ReportPressedButton(ButtonChosen buttonChosen) 
+        => userInterface.WriteLine($"> [{buttonChosen.ButtonCharacter}] {buttonChosen.Button.Caption}\n");
 
     private void SayGoodbye()
     {
@@ -111,4 +111,6 @@ public class UrqPlayer(IQuestSource questSource, IUserInterface userInterface, I
     }
 
     private void ReportException(Exception ex) => userInterface.ReportException(ex);
+
+    private Game? game;
 }
