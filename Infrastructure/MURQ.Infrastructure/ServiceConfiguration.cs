@@ -23,6 +23,6 @@ public static class ServiceConfiguration
         Encoding encoding = Encoding.GetEncoding("Windows-1251");
 
         return services
-            .AddTransient<IQuestSource, FileQuestSource>(serviceProvider => new FileQuestSource(serviceProvider.GetRequiredService<UrqLoader>(), filePath, encoding));
+            .AddTransient<IQuestSource, FileQuestSource>(serviceProvider => new FileQuestSource(filePath, serviceProvider.GetRequiredService<UrqLoader>()));
     }
 }
