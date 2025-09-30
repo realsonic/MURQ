@@ -1,3 +1,3 @@
 ﻿namespace MURQ.Application.UrqLoaders.UrqStrings.Tokens;
 
-public record TextToken(string Text) : Token;
+public record StringToken(string Text) : Token;
