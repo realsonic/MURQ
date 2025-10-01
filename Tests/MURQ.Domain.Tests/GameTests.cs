@@ -98,7 +98,7 @@ public class GameTests
             new AssignVariableStatement { VariableName = "a", Expression = new DecimalConstantExpression { Value = 4 } },
             new IfStatement {
                 Condition = new RelationExpression {
-                    LeftExpression = new VariableExpression { VariableName = "A" },
+                    LeftExpression = new VariableExpression { Name = "A" },
                     RightExpression = new DecimalConstantExpression { Value = 4 }
                 },
                 ThenStatement = new PrintStatement { UrqString = "Всего хорошего!", IsNewLineAtEnd = true }

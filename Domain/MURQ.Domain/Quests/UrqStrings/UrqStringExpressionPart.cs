@@ -3,11 +3,12 @@ using MURQ.Domain.Quests.Expressions;
 
 namespace MURQ.Domain.Quests.UrqStrings;
 
-public class UrqStringExpressionPart(Expression expression) : UrqStringPart
+public class UrqStringExpressionPart(Expression expression, bool asString) : UrqStringPart
 {
     public override string ToString(IGameContext gameContext)
     {
         var value = expression.Calculate(gameContext);
-        return value.AsString;
+
+        return asString ? value.AsString : value.AsDecimal.ToString();
     }
 }

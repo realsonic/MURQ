@@ -96,7 +96,7 @@ public class UrqLoader(UrqStringLoader urqStringLoader)
     private Expression ProduceExpression(ExpressionSto expressionSto) => expressionSto switch
     {
         RelationExpressionSto relationExpressionSto => ProduceRelationExpression(relationExpressionSto),
-        VariableExpressionSto variableExpressionSto => new VariableExpression { VariableName = variableExpressionSto.VariableName },
+        VariableExpressionSto variableExpressionSto => new VariableExpression { Name = variableExpressionSto.VariableName },
         DecimalConstantExpressionSto decimalConstantExpressionSto => new DecimalConstantExpression { Value = decimalConstantExpressionSto.Value },
         StringLiteralExpressionSto stringLiteralExpressionSto => new StringLiteralExpression { Text = stringLiteralExpressionSto.Text },
         _ => throw new NotImplementedException($"Выражение типа ({expressionSto}) ещё не реализовано.")

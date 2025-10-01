@@ -17,20 +17,20 @@ public class UrqStringLoader(UrqStringLexer urqStringLexer)
         {
             switch (token)
             {
-                case TextToken textToken:
-                    operandStack.Push(new TextOperand(textToken.Text));
+                case StringToken stringToken:
+                    PushString(stringToken.Text);
                     break;
 
-                case SubstitutionStartToken:
-                    operatorStack.Push(new BeginIntepolationOperator());
+                case SubstitutionStartToken substitutionStartToken:
+                    operatorStack.Push(SubstitutionStartOperator.FromToken(substitutionStartToken));
                     break;
 
                 case SubstitutionStopToken:
-                    operatorStack.Push(new EndIntepolationOperator());
+                    operatorStack.Push(new SubstitutionStopOperator());
                     ShrinkStacks();
                     break;
 
-                default: throw new UrqStringException($"Неожиданное токен в URQ-строке: {token}");
+                default: throw new NotImplementedException($"Токен URQ-строки {token} пока не обрабатывается.");
             }
         }
 
@@ -41,28 +41,26 @@ public class UrqStringLoader(UrqStringLexer urqStringLexer)
         var urqStringParts = ConvertOperandsToUrqStringParts(operands);
         return new UrqString(urqStringParts);
 
+        void PushString(string @string) => operandStack.Push(new StringOperand(@string));
+
         void ShrinkStacks()
         {
-            if (operatorStack.TryPeek(out Operator? lastOperator) && lastOperator is EndIntepolationOperator)
+            if (operatorStack.TryPeek(out Operator? stopOperator) && stopOperator is SubstitutionStopOperator)
             {
                 operatorStack.Pop();
 
-                if (operandStack.TryPop(out Operand? interOperand))
-                {
-                    if (interOperand is TextOperand textOperand)
-                    {
-                        operandStack.Push(new VariableOperand(textOperand.Text));
-                    }
-                    else throw new UrqStringException($"Перед $ ожидалось имя переменной, а встретился {interOperand}");
-                }
-                else throw new UrqStringException("Перед $ ожидалось имя переменной, а там пусто");
+                if (!operandStack.TryPop(out Operand? interOperand))
+                    throw new UrqStringException("Перед $ ожидалось имя переменной, а там пусто");
+                if (interOperand is not StringOperand stringOperand)
+                    throw new UrqStringException($"Перед $ ожидалось имя переменной, а встретился {interOperand}");
 
-                if (operatorStack.TryPop(out Operator? previousOperator))
-                {
-                    if (previousOperator is not BeginIntepolationOperator)
-                        throw new UrqStringException($"Перед именем переменной ожидалось #, а там {previousOperator}");
-                }
-                else throw new UrqStringException("Перед именем переменной ожидалось #, а там пусто");
+                if (!operatorStack.TryPop(out Operator? startOperator))
+                    throw new UrqStringException("Перед именем переменной ожидалось #, а там пусто");
+                if (startOperator is not SubstitutionStartOperator substitutionStartOperator)
+                    throw new UrqStringException($"Перед именем переменной ожидалось #, а там {startOperator}");
+
+                bool asString = substitutionStartOperator.Modifier == SubstitutionStartOperator.ModifierEnum.AsString;
+                operandStack.Push(new VariableOperand(stringOperand.Text, asString));
             }
         }
     }
@@ -73,24 +71,42 @@ public class UrqStringLoader(UrqStringLexer urqStringLexer)
         {
             switch (operand)
             {
-                case TextOperand textOperand:
+                case StringOperand textOperand:
                     yield return new UrqStringTextPart(textOperand.Text);
                     break;
 
                 case VariableOperand variableOperand:
-                    yield return new UrqStringExpressionPart(new VariableExpression { VariableName = variableOperand.Name });
+                    yield return new UrqStringExpressionPart(new VariableExpression { Name = variableOperand.Name }, variableOperand.AsString);
                     break;
 
-                default: throw new UrqStringException($"Неизвестный тип операнда: {operand}");
+                default: throw new NotImplementedException($"Операнд {operand} пока не обратывается.");
             }
         }
     }
 
     private abstract record Operand();
-    private record TextOperand(string Text) : Operand();
-    private record VariableOperand(string Name) : Operand();
+    private record StringOperand(string Text) : Operand();
+    private record VariableOperand(string Name, bool AsString) : Operand();
 
     private abstract record Operator();
-    private record BeginIntepolationOperator() : Operator();
-    private record EndIntepolationOperator() : Operator();
+    private record SubstitutionStartOperator(SubstitutionStartOperator.ModifierEnum Modifier) : Operator()
+    {
+        internal static SubstitutionStartOperator FromToken(SubstitutionStartToken substitutionStartToken)
+        {
+            ModifierEnum substitutionModifier = substitutionStartToken.SubstitutionModifier switch
+            {
+                SubstitutionStartToken.ModifierEnum.None => ModifierEnum.None,
+                SubstitutionStartToken.ModifierEnum.AsString => ModifierEnum.AsString,
+                _ => throw new NotImplementedException($"Модификатор подстановки {substitutionStartToken.SubstitutionModifier} пока не обрабатывается."),
+            };
+            return new SubstitutionStartOperator(substitutionModifier);
+        }
+
+        public enum ModifierEnum
+        {
+            None,
+            AsString
+        }
+    }
+    private record SubstitutionStopOperator() : Operator();
 }

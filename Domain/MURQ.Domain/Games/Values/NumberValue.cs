@@ -4,5 +4,5 @@ public record NumberValue(decimal Value) : Value
 {
     public override decimal AsDecimal => Value;
 
-    public override string AsString => Value.ToString();
+    public override string AsString => string.Empty;
 }

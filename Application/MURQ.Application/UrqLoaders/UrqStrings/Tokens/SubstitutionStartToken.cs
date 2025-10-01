@@ -1,3 +1,12 @@
-﻿namespace MURQ.Application.UrqLoaders.UrqStrings.Tokens;
+﻿using static MURQ.Application.UrqLoaders.UrqStrings.Tokens.SubstitutionStartToken;
 
-public record SubstitutionStartToken() : Token();
+namespace MURQ.Application.UrqLoaders.UrqStrings.Tokens;
+
+public record SubstitutionStartToken(ModifierEnum SubstitutionModifier) : Token()
+{
+    public enum ModifierEnum
+    {
+        None,
+        AsString
+    }
+}

@@ -300,6 +300,19 @@ public class QstTests
         sut.CurrentLocation.Text.Should().Be("У меня 4 рубля!\n");
     }
 
+    [Fact(DisplayName = "Подстановка со строковой переменной вставляет значение")]
+    public async Task String_substitution_inserts_value()
+    {
+        // Arrange
+        Game sut = await LoadQuestIntoGame(@"Quests/String_substitution.qst");
+
+        // Act
+        sut.Start();
+
+        // Assert
+        sut.CurrentLocation.Text.Should().Be("Здравствуй, странник, длина твоя 8!");
+    }
+
     [Fact(DisplayName = "Goto переходит на метку")]
     public async Task Goto_goes_to_label()
     {
