@@ -9,8 +9,22 @@ public record NumberMonad(string Lexeme, Location Location) : UncompletedLexemeM
     public override LexemeMonad Append(char character, Position position) => character switch
     {
         _ when char.IsNumber(character) => Proceed(character, position),
-        _ => new CompletedLexemeMonad(new NumberToken(decimal.Parse(Lexeme), Lexeme, Location), RootMonad.Remain(character, position))
+        _ => CreateTokenMonad((character, position))
     };
 
-    public override LexemeMonad Finalize() => new CompletedLexemeMonad(new NumberToken(decimal.Parse(Lexeme), Lexeme, Location), null);
+    public override LexemeMonad Finalize() => CreateTokenMonad();
+
+    private LexemeMonad CreateTokenMonad((char Character, Position Position)? remain = null)
+    {
+        if (decimal.TryParse(Lexeme, out decimal value))
+        {
+            NumberToken numberToken = new(value, Lexeme, Location);
+
+            return remain is not null
+                ? numberToken.AsMonadWithRemain(remain.Value.Character, remain.Value.Position)
+                : numberToken.AsMonad();
+        }
+
+        return new UnknownLexemeMonad(Lexeme, Location, $"{Lexeme} не подходит как число.");
+    }
 }
