@@ -235,7 +235,7 @@ public class UrqlParser
     /// valueExpression = ? Variable ? | ? Number ? | ? StringLiteral ?;
     /// </code>
     /// </summary>
-    /// <returns>Выражение-значение (переменна или число)</returns>
+    /// <returns>Выражение-значение (переменна, число или строка)</returns>
     private ExpressionSto ParseValueExpression() => lookahead switch
     {
         VariableToken => ParseVariableExpressionTerminal(),
