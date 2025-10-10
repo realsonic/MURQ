@@ -19,8 +19,10 @@ StringBuilder positionedString = new();
 IEnumerable<(char, Position)> positionedSource = trimmedSource.ToPositionedEnumerable().Intercept(@char => positionedString.Append(@char));
 StringBuilder uncommentedString = new();
 IEnumerable<(char, Position)> umcommentedSource = positionedSource.ToEnumerableWithoutComments().Intercept(@char => uncommentedString.Append(@char));
+StringBuilder unbreakedString = new();
+IEnumerable<(char, Position)> unbreakedSource = umcommentedSource.ToEnumerableWithoutLineBreaks().Intercept(@char => unbreakedString.Append(@char));
 
-List<(char, Position)> result = [.. umcommentedSource];
+List<(char, Position)> result = [.. unbreakedSource];
 
 Console.WriteLine($"""
     -- Исходный файл -----------------------------------------------------
@@ -37,6 +39,10 @@ Console.WriteLine($"""
         
     -- Этап 3. Удаление комментариев -------------------------------------
     {uncommentedString}
+    ----------------------------------------------------------------------    
+        
+    -- Этап 4. Схлопывание переносов -------------------------------------
+    {unbreakedString}
     ----------------------------------------------------------------------    
     """);
 
