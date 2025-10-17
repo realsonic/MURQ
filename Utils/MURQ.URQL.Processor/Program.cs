@@ -5,7 +5,7 @@ using System.Diagnostics;
 
 Console.WriteLine("MURQ. Утилита обработки URQL. v.0.1\n");
 
-if (args is not [string urqlFile])
+if (args is not [string urqlFilePath])
 {
     Console.WriteLine("Нет обязательного параметра - пути к URQL-файлу.");
     return;
@@ -14,7 +14,7 @@ if (args is not [string urqlFile])
 TimeSpan totalTime = default;
 Stopwatch stopwatch = Stopwatch.StartNew();
 
-List<char> source = [.. ReadFileAsync(urqlFile)];
+List<char> source = [.. ReadFile(urqlFilePath)];
 stopwatch.Stop();
 totalTime += stopwatch.Elapsed;
 Console.WriteLine($"""
@@ -69,7 +69,7 @@ Console.WriteLine($"""
     """);
 
 stopwatch.Restart();
-List<IEnumerable<(char Character, Position Position)>> lines = [.. uncontinuedSource.ToEnumerableByLineBreakes()];
+List<IEnumerable<(char Character, Position Position)>> lines = [.. uncontinuedSource.ToEnumerableByLineBreaks()];
 stopwatch.Stop();
 totalTime += stopwatch.Elapsed;
 Console.WriteLine($"""
@@ -79,15 +79,21 @@ Console.WriteLine($"""
 
     """);
 
-Console.WriteLine($@"Общее время всех этапов: {totalTime:mm\:ss\.fff}");
+Console.WriteLine($"Общее время всех этапов: \t{totalTime}");
+
+// тест цепочки
+stopwatch.Restart();
+var result = ReadFile(urqlFilePath).ToEnumerableWithoutCarriageReturn().ToPositionedEnumerable().ToEnumerableWithoutComments().ToEnumerableWithoutLineContinuations().ToEnumerableByLineBreaks().ToList();
+stopwatch.Stop();
+Console.WriteLine($"Общее время единой цепочкой: \t{stopwatch.Elapsed}");
 
 
-IEnumerable<char> ReadFileAsync(string filePath)
+static IEnumerable<char> ReadFile(string filePath)
 {
     if (!Path.Exists(filePath))
         throw new InvalidOperationException($"Файл {filePath} не найден.");
 
-    using StreamReader streamReader = File.OpenText(urqlFile);
+    using StreamReader streamReader = File.OpenText(filePath);
 
     char[] chars = new char[1];
 
