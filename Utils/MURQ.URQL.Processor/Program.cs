@@ -58,17 +58,26 @@ Console.WriteLine($"""
     """);
 
 stopwatch.Restart();
-List<(char Character, Position Position)> unbreakedSource = [.. uncommentedSource.ToEnumerableWithoutLineBreaks()];
+List<(char Character, Position Position)> uncontinuedSource = [.. uncommentedSource.ToEnumerableWithoutLineContinuations()];
 stopwatch.Stop();
 totalTime += stopwatch.Elapsed;
 Console.WriteLine($"""
     -- Этап 4. Схлопывание переносов ------------------------- ({stopwatch.Elapsed:mm\:ss\.fff})
-    {unbreakedSource.ToJoinedString()}
+    {uncontinuedSource.ToJoinedString()}
     ----------------------------------------------------------------------
 
     """);
 
-List<(char Character, Position Position)> result = [.. unbreakedSource];
+stopwatch.Restart();
+List<IEnumerable<(char Character, Position Position)>> lines = [.. uncontinuedSource.ToEnumerableByLineBreakes()];
+stopwatch.Stop();
+totalTime += stopwatch.Elapsed;
+Console.WriteLine($"""
+    -- Этап 5. Разбивка на строки ---------------------------- ({stopwatch.Elapsed:mm\:ss\.fff})
+    {string.Join("\n", lines.Select((line, number) => $"[{number + 1}] {line.ToJoinedString()}"))}
+    ----------------------------------------------------------------------
+
+    """);
 
 Console.WriteLine($@"Общее время всех этапов: {totalTime:mm\:ss\.fff}");
 
