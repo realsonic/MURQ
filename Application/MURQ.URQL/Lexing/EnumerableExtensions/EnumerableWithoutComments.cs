@@ -4,16 +4,16 @@ using System.Collections;
 
 namespace MURQ.URQL.Lexing.EnumerableExtensions;
 
-public class EnumerableWithoutComments(IEnumerable<(char, Position)> enumerable) : IEnumerable<(char, Position)>
+public class EnumerableWithoutComments(IEnumerable<(char Character, Position Position)> enumerable) : IEnumerable<(char Character, Position Position)>
 {
-    IEnumerator<(char, Position)> IEnumerable<(char, Position)>.GetEnumerator() => Enumerate().GetEnumerator();
+    IEnumerator<(char Character, Position Position)> IEnumerable<(char Character, Position Position)>.GetEnumerator() => Enumerate().GetEnumerator();
     IEnumerator IEnumerable.GetEnumerator() => Enumerate().GetEnumerator();
 
-    private IEnumerable<(char, Position)> Enumerate()
+    private IEnumerable<(char Character, Position Position)> Enumerate()
     {
         CommentState commentState = CommentState.NotInComment;
 
-        (char, Position)? postponedCharacter = null;
+        (char Character, Position Position)? postponedCharacter = null;
 
         foreach ((char character, Position position) in enumerable)
         {

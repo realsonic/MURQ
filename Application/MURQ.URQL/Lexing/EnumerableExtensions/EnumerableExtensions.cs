@@ -13,6 +13,9 @@ public static class EnumerableExtensions
     public static IEnumerable<(char Character, Position Position)> ToEnumerableWithoutComments(this IEnumerable<(char Character, Position Position)> enumerable)
         => new EnumerableWithoutComments(enumerable);
 
-    public static IEnumerable<(char Character, Position Position)> ToEnumerableWithoutLineBreaks(this IEnumerable<(char Character, Position Position)> enumerable)
-        => new EnumerableWithoutLineBreak(enumerable);
+    public static IEnumerable<(char Character, Position Position)> ToEnumerableWithoutLineContinuations(this IEnumerable<(char Character, Position Position)> enumerable)
+        => new EnumerableWithoutLineContinuation(enumerable);
+
+    public static IEnumerable<IEnumerable<(char Character, Position Position)>> ToEnumerableByLineBreakes(this IEnumerable<(char Character, Position Position)> enumerable)
+        => new EnumerableByLineBreaks(enumerable);
 }

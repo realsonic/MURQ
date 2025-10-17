@@ -3,25 +3,26 @@
 using System.Collections;
 
 namespace MURQ.URQL.Lexing.EnumerableExtensions;
-public class EnumerableWithoutLineBreak(IEnumerable<(char, Position)> enumerable) : IEnumerable<(char, Position)>
+public class EnumerableWithoutLineContinuation(IEnumerable<(char Character, Position Position)> enumerable) : IEnumerable<(char Character, Position Position)>
 {
-    IEnumerator<(char, Position)> IEnumerable<(char, Position)>.GetEnumerator() => Enumerate().GetEnumerator();
+    IEnumerator<(char Character, Position Position)> IEnumerable<(char Character, Position Position)>.GetEnumerator() => Enumerate().GetEnumerator();
     IEnumerator IEnumerable.GetEnumerator() => Enumerate().GetEnumerator();
 
-    private IEnumerable<(char, Position)> Enumerate()
+    private IEnumerable<(char Character, Position Position)> Enumerate()
     {
-        BreakState breakState = BreakState.NotInBreak;
-        Queue<(char, Position)> charQueue = new();
+        ContinuationState breakState = ContinuationState.NotInContinuation;
+
+        Queue<(char Character, Position Position)> charQueue = new();
 
         foreach ((char character, Position position) in enumerable)
         {
             switch (breakState)
             {
-                case BreakState.NotInBreak:
+                case ContinuationState.NotInContinuation:
                     switch (character)
                     {
                         case '\n':
-                            breakState = BreakState.LfMet;
+                            breakState = ContinuationState.NewLineMet;
                             charQueue.Enqueue((character, position));
                             break;
 
@@ -31,7 +32,7 @@ public class EnumerableWithoutLineBreak(IEnumerable<(char, Position)> enumerable
                     }
                     break;
 
-                case BreakState.LfMet:
+                case ContinuationState.NewLineMet:
                     switch (character)
                     {
                         case ' ' or '\t':
@@ -39,49 +40,56 @@ public class EnumerableWithoutLineBreak(IEnumerable<(char, Position)> enumerable
                             break;
 
                         case '_':
-                            breakState = BreakState.UnderscoreMet;
                             charQueue.Enqueue((character, position));
+                            breakState = ContinuationState.UnderscoreMet;
                             break;
-                        
+
                         default:
-                            breakState = BreakState.NotInBreak;
-                            foreach (var @char in charQueue)
+                            charQueue.Enqueue((character, position));
+                            while (charQueue.TryDequeue(out (char, Position) @char))
                             {
                                 yield return @char;
                             }
+                            breakState = ContinuationState.NotInContinuation;
                             break;
                     }
                     break;
 
-                case BreakState.UnderscoreMet:
+                case ContinuationState.UnderscoreMet:
                     switch (character)
                     {
                         case ' ' or '\t':
                             charQueue.Clear();
-                            breakState = BreakState.NotInBreak;
                             yield return (character, position);
+                            breakState = ContinuationState.NotInContinuation;
                             break;
-                        
+
                         default:
-                            breakState = BreakState.NotInBreak;
-                            foreach (var @char in charQueue)
+                            charQueue.Enqueue((character, position));
+                            while (charQueue.TryDequeue(out (char, Position) @char))
                             {
                                 yield return @char;
                             }
+                            breakState = ContinuationState.NotInContinuation;
                             break;
                     }
                     break;
-                
+
                 default:
                     throw new NotImplementedException($"Неизвестное состояние: {breakState}");
             }
         }
+
+        while (charQueue.TryDequeue(out (char, Position) @char))
+        {
+            yield return @char;
+        }
     }
 
-    private enum BreakState
+    private enum ContinuationState
     {
-        NotInBreak,
-        LfMet,
+        NotInContinuation,
+        NewLineMet,
         UnderscoreMet
     }
 }
