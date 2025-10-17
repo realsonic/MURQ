@@ -1,7 +1,7 @@
 ﻿using MURQ.URQL.Lexing.EnumerableExtensions;
 using MURQ.URQL.Locations;
 
-using System.Text;
+using System.Diagnostics;
 
 Console.WriteLine("MURQ. Утилита обработки URQL. v.0.1\n");
 
@@ -11,41 +11,66 @@ if (args is not [string urqlFile])
     return;
 }
 
-StringBuilder sourceString = new();
-IEnumerable<char> sourceChars = ReadFileAsync(urqlFile).Intercept(@char => sourceString.Append(@char));
-StringBuilder trimmedString = new();
-IEnumerable<char> trimmedSource = sourceChars.ToEnumerableWithoutCarriageReturn().Intercept(@char => trimmedString.Append(@char));
-StringBuilder positionedString = new();
-IEnumerable<(char, Position)> positionedSource = trimmedSource.ToPositionedEnumerable().Intercept(@char => positionedString.Append(@char));
-StringBuilder uncommentedString = new();
-IEnumerable<(char, Position)> umcommentedSource = positionedSource.ToEnumerableWithoutComments().Intercept(@char => uncommentedString.Append(@char));
-StringBuilder unbreakedString = new();
-IEnumerable<(char, Position)> unbreakedSource = umcommentedSource.ToEnumerableWithoutLineBreaks().Intercept(@char => unbreakedString.Append(@char));
+TimeSpan totalTime = default;
+Stopwatch stopwatch = Stopwatch.StartNew();
 
-List<(char, Position)> result = [.. unbreakedSource];
-
+List<char> source = [.. ReadFileAsync(urqlFile)];
+stopwatch.Stop();
+totalTime += stopwatch.Elapsed;
 Console.WriteLine($"""
-    -- Исходный файл -----------------------------------------------------
-    {sourceString}
+    -- Исходный файл ----------------------------------------- ({stopwatch.Elapsed:mm\:ss\.fff})
+    {source.ToJoinedString()}
     ----------------------------------------------------------------------
-    
-    -- Этап 1. Удаление ненужных символов --------------------------------
-    {trimmedString}
-    ----------------------------------------------------------------------
-        
-    -- Этап 2. Добавление координат --------------------------------------
-    {positionedString}
-    ----------------------------------------------------------------------    
-        
-    -- Этап 3. Удаление комментариев -------------------------------------
-    {uncommentedString}
-    ----------------------------------------------------------------------    
-        
-    -- Этап 4. Схлопывание переносов -------------------------------------
-    {unbreakedString}
-    ----------------------------------------------------------------------    
+
     """);
 
+stopwatch.Restart();
+List<char> trimmedSource = [.. source.ToEnumerableWithoutCarriageReturn()];
+stopwatch.Stop();
+totalTime += stopwatch.Elapsed;
+Console.WriteLine($"""
+    -- Этап 1. Удаление ненужных символов -------------------- ({stopwatch.Elapsed:mm\:ss\.fff})
+    {trimmedSource.ToJoinedString()}
+    ----------------------------------------------------------------------
+        
+    """);
+
+stopwatch.Restart();
+List<(char Character, Position Position)> positionedSource = [.. trimmedSource.ToPositionedEnumerable()];
+stopwatch.Stop();
+totalTime += stopwatch.Elapsed;
+Console.WriteLine($"""
+    -- Этап 2. Добавление координат -------------------------- ({stopwatch.Elapsed:mm\:ss\.fff})
+    {string.Join(", ", positionedSource.Select(pc => $"{pc.Character.ToPrintableChar()}{pc.Position}"))}
+    ----------------------------------------------------------------------
+        
+    """);
+
+stopwatch.Restart();
+List<(char Character, Position Position)> uncommentedSource = [.. positionedSource.ToEnumerableWithoutComments()];
+stopwatch.Stop();
+totalTime += stopwatch.Elapsed;
+Console.WriteLine($"""
+    -- Этап 3. Удаление комментариев ------------------------- ({stopwatch.Elapsed:mm\:ss\.fff})
+    {uncommentedSource.ToJoinedString()}
+    ----------------------------------------------------------------------
+        
+    """);
+
+stopwatch.Restart();
+List<(char Character, Position Position)> unbreakedSource = [.. uncommentedSource.ToEnumerableWithoutLineBreaks()];
+stopwatch.Stop();
+totalTime += stopwatch.Elapsed;
+Console.WriteLine($"""
+    -- Этап 4. Схлопывание переносов ------------------------- ({stopwatch.Elapsed:mm\:ss\.fff})
+    {unbreakedSource.ToJoinedString()}
+    ----------------------------------------------------------------------
+
+    """);
+
+List<(char Character, Position Position)> result = [.. unbreakedSource];
+
+Console.WriteLine($@"Общее время всех этапов: {totalTime:mm\:ss\.fff}");
 
 
 IEnumerable<char> ReadFileAsync(string filePath)
@@ -65,21 +90,8 @@ IEnumerable<char> ReadFileAsync(string filePath)
 
 static class Extensions
 {
-    public static IEnumerable<char> Intercept(this IEnumerable<char> chars, Action<char> receiveChar)
-    {
-        foreach (var @char in chars)
-        {
-            receiveChar(@char);
-            yield return @char;
-        }
-    }
+    public static string ToJoinedString(this IEnumerable<char> chars) => string.Join(null, chars);
+    public static string ToJoinedString(this IEnumerable<(char Character, Position Position)> chars) => string.Join(null, chars.Select(pc => pc.Character));
 
-    public static IEnumerable<(char, Position)> Intercept(this IEnumerable<(char, Position)> chars, Action<char> receiveChar)
-    {
-        foreach (var @char in chars)
-        {
-            receiveChar(@char.Item1);
-            yield return @char;
-        }
-    }
+    public static string ToPrintableChar(this char @char) => char.IsControl(@char) ? $"#{Convert.ToInt32(@char)}" : @char.ToString();
 }
