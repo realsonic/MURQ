@@ -69,7 +69,7 @@ Console.WriteLine($"""
     """);
 
 stopwatch.Restart();
-List<IEnumerable<(char Character, Position Position)>> lines = [.. uncontinuedSource.ToEnumerableByLineBreaks()];
+List<IEnumerable<(char Character, Position Position)>> lines = [.. uncontinuedSource.SplitByLineBreaks()];
 stopwatch.Stop();
 totalTime += stopwatch.Elapsed;
 Console.WriteLine($"""
@@ -83,7 +83,7 @@ Console.WriteLine($"Общее время всех этапов: \t{totalTime}")
 
 // тест цепочки
 stopwatch.Restart();
-var result = ReadFile(urqlFilePath).ToEnumerableWithoutCarriageReturn().ToPositionedEnumerable().ToEnumerableWithoutComments().ToEnumerableWithoutLineContinuations().ToEnumerableByLineBreaks().ToList();
+var result = ReadFile(urqlFilePath).ToEnumerableWithoutCarriageReturn().ToPositionedEnumerable().ToEnumerableWithoutComments().ToEnumerableWithoutLineContinuations().SplitByLineBreaks().ToList();
 stopwatch.Stop();
 Console.WriteLine($"Общее время единой цепочкой: \t{stopwatch.Elapsed}");
 
@@ -95,11 +95,11 @@ static IEnumerable<char> ReadFile(string filePath)
 
     using StreamReader streamReader = File.OpenText(filePath);
 
-    char[] chars = new char[1];
+    char[] buffer = new char[1];
 
-    while (streamReader.ReadBlock(chars.AsSpan()) > 0)
+    while (streamReader.ReadBlock(buffer.AsSpan()) > 0)
     {
-        yield return chars[0];
+        yield return buffer[0];
     }
 }
 
