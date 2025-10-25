@@ -1,7 +1,9 @@
 ﻿using MURQ.URQL.Lexing.EnumerableExtensions;
 using MURQ.URQL.Locations;
+using MURQ.URQL.Substitutions;
 
 using System.Diagnostics;
+using System.Text.Json;
 
 Console.WriteLine("MURQ. Утилита обработки URQL. v.0.1\n");
 
@@ -79,13 +81,32 @@ Console.WriteLine($"""
 
     """);
 
-Console.WriteLine($"Общее время всех этапов: \t{totalTime}");
+stopwatch.Restart();
+SubstitutedLine[] substitutedLines = await Task.WhenAll(lines.ToParseLineTasks());
+stopwatch.Stop();
+totalTime += stopwatch.Elapsed;
+Console.WriteLine($"""
+    -- Этап 6. Распознавание подстановок --------------------- ({stopwatch.Elapsed:mm\:ss\.fff})
+    {JsonSerializer.Serialize(substitutedLines)}
+    ----------------------------------------------------------------------
+
+    """);
+
+Console.WriteLine($"Сумма времени всех этапов: \t{totalTime}");
 
 // тест цепочки
+Console.Write("Общее время единой цепочкой...\t");
 stopwatch.Restart();
-var result = ReadFile(urqlFilePath).ToEnumerableWithoutCarriageReturn().ToPositionedEnumerable().ToEnumerableWithoutComments().ToEnumerableWithoutLineContinuations().SplitByLineBreaks().ToList();
+var parseLineTasks = ReadFile(urqlFilePath)
+    .ToEnumerableWithoutCarriageReturn()
+    .ToPositionedEnumerable()
+    .ToEnumerableWithoutComments()
+    .ToEnumerableWithoutLineContinuations()
+    .SplitByLineBreaks()
+    .ToParseLineTasks();
+SubstitutedLine[] result = await Task.WhenAll(parseLineTasks);
 stopwatch.Stop();
-Console.WriteLine($"Общее время единой цепочкой: \t{stopwatch.Elapsed}");
+Console.WriteLine($"{stopwatch.Elapsed}");
 
 
 static IEnumerable<char> ReadFile(string filePath)
@@ -105,8 +126,18 @@ static IEnumerable<char> ReadFile(string filePath)
 
 static class Extensions
 {
+    public static IEnumerable<Task<SubstitutedLine>> ToParseLineTasks(this IEnumerable<IEnumerable<(char Character, Position Position)>> lines)
+    {
+        foreach (var line in lines)
+        {
+            SubstitutionParser substitutionParser = new(new SubstitutionLexer());
+            yield return Task.Run(() => substitutionParser.ParseLine(line));
+        }
+    }
+
     public static string ToJoinedString(this IEnumerable<char> chars) => string.Join(null, chars);
     public static string ToJoinedString(this IEnumerable<(char Character, Position Position)> chars) => string.Join(null, chars.Select(pc => pc.Character));
 
     public static string ToPrintableChar(this char @char) => char.IsControl(@char) ? $"#{Convert.ToInt32(@char)}" : @char.ToString();
+
 }
