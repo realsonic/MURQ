@@ -3,6 +3,7 @@ using MURQ.URQL.Locations;
 using MURQ.URQL.Substitutions;
 
 using System.Diagnostics;
+using System.Text.Encodings.Web;
 using System.Text.Json;
 
 Console.WriteLine("MURQ. Утилита обработки URQL. v.0.1\n");
@@ -76,7 +77,7 @@ stopwatch.Stop();
 totalTime += stopwatch.Elapsed;
 Console.WriteLine($"""
     -- Этап 5. Разбивка на строки ---------------------------- ({stopwatch.Elapsed:mm\:ss\.fff})
-    {string.Join("\n", lines.Select((line, number) => $"[{number + 1}] {line.ToJoinedString()}"))}
+    {lines.ToNumberedLines(line => line.ToJoinedString())}
     ----------------------------------------------------------------------
 
     """);
@@ -85,9 +86,13 @@ stopwatch.Restart();
 SubstitutedLine[] substitutedLines = await Task.WhenAll(lines.ToParseLineTasks());
 stopwatch.Stop();
 totalTime += stopwatch.Elapsed;
+JsonSerializerOptions jsonSerializerOptions = new()
+{
+    Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping
+};
 Console.WriteLine($"""
     -- Этап 6. Распознавание подстановок --------------------- ({stopwatch.Elapsed:mm\:ss\.fff})
-    {JsonSerializer.Serialize(substitutedLines)}
+    {substitutedLines.ToNumberedLines(line => JsonSerializer.Serialize(line, jsonSerializerOptions))}
     ----------------------------------------------------------------------
 
     """);
@@ -137,6 +142,9 @@ static class Extensions
 
     public static string ToJoinedString(this IEnumerable<char> chars) => string.Join(null, chars);
     public static string ToJoinedString(this IEnumerable<(char Character, Position Position)> chars) => string.Join(null, chars.Select(pc => pc.Character));
+
+    public static string ToNumberedLines<T>(this IEnumerable<T> elements, Func<T, string> convertElement)
+        => string.Join("\n", elements.Select((element, number) => $"[{number + 1}] {convertElement(element)}"));
 
     public static string ToPrintableChar(this char @char) => char.IsControl(@char) ? $"#{Convert.ToInt32(@char)}" : @char.ToString();
 
