@@ -1,4 +1,23 @@
-﻿namespace MURQ.URQL.Substitutions;
-public abstract record SubstitutedLine;
+﻿using System.Text.Json.Serialization;
 
-public record StringLine(string Text) : SubstitutedLine;
+using static MURQ.URQL.Substitutions.SubstitutedLine;
+using static MURQ.URQL.Substitutions.SubstitutedLine.SubstitutionPart;
+
+namespace MURQ.URQL.Substitutions;
+
+public record SubstitutedLine(SubstitutedLinePart[] SubstitutedLineParts)
+{
+    [JsonDerivedType(typeof(StringPart))]
+    [JsonDerivedType(typeof(SubstitutionPart))]
+    public abstract record SubstitutedLinePart;
+    public record StringPart(string Text) : SubstitutedLinePart;
+    public record SubstitutionPart(SubstitutionModifierEnum SubstitutionModifier, SubstitutedLinePart[] SubstitutedLineParts) : SubstitutedLinePart
+    {
+        [JsonConverter(typeof(JsonStringEnumConverter))]
+        public enum SubstitutionModifierEnum
+        {
+            None,
+            AsString
+        }
+    }
+}

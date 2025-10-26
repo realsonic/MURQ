@@ -1,6 +1,8 @@
 ﻿using MURQ.URQL.Locations;
 using MURQ.URQL.Substitutions.Tokens;
 
+using static MURQ.URQL.Substitutions.SubstitutedLine;
+
 namespace MURQ.URQL.Substitutions;
 public class SubstitutionParser(SubstitutionLexer substitutionLexer)
 {
@@ -29,15 +31,32 @@ public class SubstitutionParser(SubstitutionLexer substitutionLexer)
         return PullSubstitutedLine();
     }
 
-    private void PushString(string @string)
-    {
-        // todo: как-то когда-то преклеивать справа к подстановке
-
-        operandStack.Push(new StringOperand(@string));
-    }
+    private void PushString(string @string) => substitutionElementStack.Push(new StringOperand(@string));
 
     private void PushSubstitutionStart(SubstitutionStartToken substitutionStartToken)
-        => operatorStack.Push(ConvertToOperator(substitutionStartToken));
+        => substitutionElementStack.Push(ConvertToOperator(substitutionStartToken));
+
+    private void PushSubstitutionStop()
+    {
+        substitutionElementStack.Push(new SubstitutionStopOperator());
+        CollapseSubstituton();
+    }
+
+    private SubstitutedLine PullSubstitutedLine()
+    {
+        // перекладываем стек в список частей подстановки
+        List<SubstitutedLinePart> substitutionLineParts = [];
+        while (substitutionElementStack.TryPop(out SubstitutionElement? substitutionElement))
+        {
+            SubstitutedLinePart substitutionLinePart = ConvertToSubstitutionPart(substitutionElement);
+            substitutionLineParts.Add(substitutionLinePart);
+        }
+
+        // переворачиваем список
+        substitutionLineParts.Reverse();
+
+        return new SubstitutedLine([.. substitutionLineParts]);
+    }
 
     private static SubstitutionStartOperator ConvertToOperator(SubstitutionStartToken substitutionStartToken)
         => new(substitutionStartToken.SubstitutionModifier switch
@@ -47,103 +66,87 @@ public class SubstitutionParser(SubstitutionLexer substitutionLexer)
             _ => throw new NotImplementedException($"Модификатор подстановки {substitutionStartToken.SubstitutionModifier} пока не обрабатывается.")
         });
 
-    private void PushSubstitutionStop()
+    private SubstitutedLinePart ConvertToSubstitutionPart(SubstitutionElement substitutionElement)
     {
-        operatorStack.Push(new SubstitutionStopOperator());
-        CollapseSubstituton();
-        GlueSubstituionToLeft();
-    }
-
-    private SubstitutedLine PullSubstitutedLine()
-    {
-        if (operatorStack.Count > 0)
-            throw new InvalidOperationException($"Неожиданно в стеке операторов есть операторы при завершении, а ожидалось пусто:\n\t{operatorStack.JoinToString()}.");
-
-        // todo: обработать случай, когда есть $ без # - тогда получается больше одного текста 
-
-        if (operandStack.Count > 1)
-            throw new InvalidOperationException($"Неожиданнов в стеке операндов - {operandStack.Count} операндов при завершении, а ожидался один:\n\t{operandStack.JoinToString()}");
-        if (!operandStack.TryPop(out Operand? operand))
-            throw new InvalidOperationException("Неожиданнов в стеке операндов пусто при завершении, а ожидался один.");
-
-        return operand switch
+        switch (substitutionElement)
         {
-            StringOperand stringOperand => new StringLine(stringOperand.Text),
-            StickySubstitutionOperand stickySubstitutionOperand => ConvertToSubstitutedLine(stickySubstitutionOperand),
-            _ => throw new NotImplementedException($"Операнд {operand} пока не обратывается."),
-        };
-    }
+            case StringOperand stringOperand:
+                return new StringPart(stringOperand.Text);
 
-    private SubstitutedLine ConvertToSubstitutedLine(StickySubstitutionOperand stickySubstitutionOperand)
-    {
-        throw new NotImplementedException();
+            case SubstitutionOperand substitutionOperand:
+                SubstitutionPart.SubstitutionModifierEnum modifier = substitutionOperand.Modifier switch
+                {
+                    SubstitutionModifierEnum.None => SubstitutionPart.SubstitutionModifierEnum.None,
+                    SubstitutionModifierEnum.AsString => SubstitutionPart.SubstitutionModifierEnum.AsString,
+                    _ => throw new NotImplementedException($"Модификатор подстановки {substitutionOperand.Modifier} пока не обрабатывается."),
+                };
+                SubstitutedLinePart[] substitutedLineParts = [.. substitutionOperand.Elements.Select(ConvertToSubstitutionPart)];
+                return new SubstitutionPart(modifier, substitutedLineParts);
+
+            case SubstitutionStartOperator:
+                return new StringPart("#");
+
+            default: throw new NotImplementedException($"Элемент подстановки {substitutionElement} пока не обратывается.");
+        }
     }
 
     private void CollapseSubstituton()
     {
         // вынимаем закрывающий $
-        if (!operatorStack.TryPop(out Operator? rightOperator))
-            throw new InvalidOperationException("Неожиданно в стеке операторов пусто при схлопывании подстановки, а ожидался закрывающий $.");
-        if (rightOperator is not SubstitutionStopOperator)
-            throw new InvalidOperationException($"Неожиданно последний операнд в стеке операторов - {rightOperator} при схлопывании подстановки, а ожидался закрывающий $.");
+        if (!substitutionElementStack.TryPop(out SubstitutionElement? rightElement))
+            throw new InvalidOperationException("Неожиданно в стеке пусто при схлопывании подстановки, а ожидался закрывающий $.");
+        if (rightElement is not SubstitutionStopOperator)
+            throw new InvalidOperationException($"Неожиданно последний операнд в стеке - {rightElement} при схлопывании подстановки, а ожидался закрывающий $.");
 
-        // todo: обработать случай, когда нет открывающего # - считать $ просто текстом
-
-        // вынимаем открывающий #
-        if (!operatorStack.TryPop(out Operator? leftOperator))
-            throw new SubstitutionParserException("Нет открывающего #.");
-        if (leftOperator is not SubstitutionStartOperator substitutionStartOperator)
-            throw new InvalidOperationException($"Неожиданно предпоследний операнд в стеке операторов - {leftOperator} при схлопывании подстановки, а ожидался открывающий #.");
-
-        // вынимаем строку между # и $
-        if (!operandStack.TryPop(out Operand? operand))
-            throw new InvalidOperationException("Неожиданно в стеке операндов пусто при схлопывании подстановки, а ожидалась строка между # и $.");
-        if (operand is not StringOperand stringOperand)
-            throw new InvalidOperationException($"Неожиданно последний операнд в стеке операндов - {operand} при схлопывании подстановки, а ожидалась строка между # и $.");
-
-        // превращаем текст в липкую подстановку
-        StickySubstitutionOperand stickySubstitutionOperand = new(substitutionStartOperator.Modifier, null, stringOperand, null);
-        operandStack.Push(stickySubstitutionOperand);
-    }
-
-    private void GlueSubstituionToLeft()
-    {
-        if (!operandStack.TryPop(out Operand? rightOperand))
-            throw new InvalidOperationException("Неожиданно в стеке операндов пусто при приклеивании подстановки влево, а ожидалась липкая подстановка.");
-        if (rightOperand is not StickySubstitutionOperand stickySubstitutionOperand)
-            throw new InvalidOperationException($"Неожиданно последний операнд в стеке операндов - {rightOperand} при приклеивании подстановки влево, а ожидалась липкая подстановка.");
-        if (stickySubstitutionOperand.Left is not null)
-            throw new InvalidOperationException($"Неожиданно у липкой подстановки уже занято слева - {stickySubstitutionOperand.Left} при приклеивании подстановки влево, а ожидалось свободно.");
-
-        // если есть предыдущий оператор, вынимаем и приклеиваем
-        if (operandStack.TryPop(out Operand? leftOperand))
+        // вынимаем элементы, пока не встретим # или не вынем всё
+        List<SubstitutionElement> substitutionElements = [];
+        SubstitutionStartOperator? metSubstitutionStartOperator = null;
+        while (substitutionElementStack.TryPop(out SubstitutionElement? substitutionElement))
         {
-            stickySubstitutionOperand = stickySubstitutionOperand with { Left = leftOperand };
+            if (substitutionElement is SubstitutionStartOperator substitutionStartOperator)
+            {
+                metSubstitutionStartOperator = substitutionStartOperator;
+                break;
+            }
+            else
+            {
+                substitutionElements.Add(substitutionElement);
+            }
         }
 
-        // кладём липую кодстановку обратно
-        operandStack.Push(stickySubstitutionOperand);
+        // переворачиваем элементы, т.к. они в обратном порядке
+        substitutionElements.Reverse();
+
+        // если был открывающий # - делаем подстановку и кладём в стек
+        if (metSubstitutionStartOperator is not null)
+        {
+            SubstitutionOperand substitutionOperand = new(metSubstitutionStartOperator.Modifier, [.. substitutionElements]);
+            substitutionElementStack.Push(substitutionOperand);
+        }
+        // иначе считаем закрывающий $ просто текстом
+        else
+        {
+            substitutionElements.Add(new StringOperand("$"));
+
+            foreach (var substitutionElement in substitutionElements)
+            {
+                substitutionElementStack.Push(substitutionElement);
+            }
+        }
     }
 
-    readonly Stack<Operand> operandStack = new();
-    readonly Stack<Operator> operatorStack = new();
+    readonly Stack<SubstitutionElement> substitutionElementStack = new();
 
-    private abstract record Operand();
-    private record StringOperand(string Text) : Operand();
-    private record StickySubstitutionOperand(SubstitutionModifierEnum Modifier, Operand? Left, Operand Middle, Operand? Right) : Operand();
+    private abstract record SubstitutionElement();
+    private record StringOperand(string Text) : SubstitutionElement();
+    private record SubstitutionStartOperator(SubstitutionModifierEnum Modifier) : SubstitutionElement();
+    private record SubstitutionStopOperator() : SubstitutionElement();
+    private record SubstitutionOperand(SubstitutionModifierEnum Modifier, SubstitutionElement[] Elements) : SubstitutionElement();
 
-    private abstract record Operator();
-    private record SubstitutionStartOperator(SubstitutionModifierEnum Modifier) : Operator();
-    private record SubstitutionStopOperator() : Operator();
 
     private enum SubstitutionModifierEnum
     {
         None,
         AsString
     }
-}
-
-static class Extensions
-{
-    public static string JoinToString<T>(this Stack<T> stack) => string.Join("\n\t", stack.ToArray());
 }
