@@ -83,7 +83,7 @@ Console.WriteLine($"""
     """);
 
 stopwatch.Restart();
-SubstitutedLine[] substitutedLines = await Task.WhenAll(lines.ToParseLineTasks());
+List<SubstitutedLine> substitutedLines = [.. lines.ToSubstitutedLines()];
 stopwatch.Stop();
 totalTime += stopwatch.Elapsed;
 JsonSerializerOptions jsonSerializerOptions = new()
@@ -102,14 +102,14 @@ Console.WriteLine($"Сумма времени всех этапов: \t{totalTim
 // тест цепочки
 Console.Write("Общее время единой цепочкой...\t");
 stopwatch.Restart();
-var parseLineTasks = ReadFile(urqlFilePath)
+var result = ReadFile(urqlFilePath)
     .ToEnumerableWithoutCarriageReturn()
     .ToPositionedEnumerable()
     .ToEnumerableWithoutComments()
     .ToEnumerableWithoutLineContinuations()
     .SplitByLineBreaks()
-    .ToParseLineTasks();
-SubstitutedLine[] result = await Task.WhenAll(parseLineTasks);
+    .ToSubstitutedLines()
+    .ToList();
 stopwatch.Stop();
 Console.WriteLine($"{stopwatch.Elapsed}");
 
@@ -131,12 +131,12 @@ static IEnumerable<char> ReadFile(string filePath)
 
 static class Extensions
 {
-    public static IEnumerable<Task<SubstitutedLine>> ToParseLineTasks(this IEnumerable<IEnumerable<(char Character, Position Position)>> lines)
+    public static IEnumerable<SubstitutedLine> ToSubstitutedLines(this IEnumerable<IEnumerable<(char Character, Position Position)>> lines)
     {
         foreach (var line in lines)
         {
             SubstitutionParser substitutionParser = new(new SubstitutionLexer());
-            yield return Task.Run(() => substitutionParser.ParseLine(line));
+            yield return substitutionParser.ParseLine(line);
         }
     }
 
