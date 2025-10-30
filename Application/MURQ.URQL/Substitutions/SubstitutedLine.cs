@@ -5,13 +5,13 @@ using static MURQ.URQL.Substitutions.SubstitutedLine.SubstitutionPart;
 
 namespace MURQ.URQL.Substitutions;
 
-public record SubstitutedLine(SubstitutedLinePart[] SubstitutedLineParts)
+public record SubstitutedLine(SubstitutedLinePart[] Parts)
 {
     [JsonDerivedType(typeof(StringPart))]
     [JsonDerivedType(typeof(SubstitutionPart))]
     public abstract record SubstitutedLinePart;
     public record StringPart(string Text) : SubstitutedLinePart;
-    public record SubstitutionPart(SubstitutionModifierEnum SubstitutionModifier, SubstitutedLinePart[] SubstitutedLineParts) : SubstitutedLinePart
+    public record SubstitutionPart(SubstitutionModifierEnum Modifier, SubstitutedLinePart[] Parts) : SubstitutedLinePart
     {
         [JsonConverter(typeof(JsonStringEnumConverter))]
         public enum SubstitutionModifierEnum
