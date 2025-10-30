@@ -16,8 +16,11 @@ public class EnumerableByLineBreaks(IEnumerable<(char Character, Position Positi
         {
             if (character is '\n')
             {
-                yield return [.. line];
-                line.Clear();
+                if (line.Count > 0)
+                {
+                    yield return [.. line];
+                    line.Clear();
+                }
             }
             else
             {
