@@ -85,10 +85,16 @@ public class SubstitutionParser(SubstitutionLexer substitutionLexer)
                     _ => throw new NotImplementedException($"Модификатор подстановки {substitutionOperand.Modifier} пока не обрабатывается."),
                 };
                 SubstitutedLinePart[] substitutedLineParts = [.. substitutionOperand.Elements.Select(ConvertToSubstitutionPart)];
-                return new SubstitutionPart(modifier, substitutedLineParts);
+                return new SubstitutionPart(modifier, substitutedLineParts, substitutionOperand.Location);
 
             case SubstitutionStartOperator substitutionStartOperator:
-                return new StringPart("#", substitutionStartOperator.Location);
+                string text = substitutionStartOperator.Modifier switch
+                {
+                    SubstitutionModifierEnum.None => "#",
+                    SubstitutionModifierEnum.AsString => "#%",
+                    _ => throw new NotImplementedException($"Модификатор подстановки {substitutionStartOperator.Modifier} пока не обрабатывается."),
+                };
+                return new StringPart(text, substitutionStartOperator.Location);
 
             default: throw new NotImplementedException($"Элемент подстановки {substitutionElement} пока не обратывается.");
         }
@@ -124,7 +130,9 @@ public class SubstitutionParser(SubstitutionLexer substitutionLexer)
         // если был открывающий # - делаем подстановку и кладём в стек
         if (metSubstitutionStartOperator is not null)
         {
-            SubstitutionOperand substitutionOperand = new(metSubstitutionStartOperator.Modifier, [.. substitutionElements]);
+            Position start = metSubstitutionStartOperator.Location.Start;
+            Position stop = substitutionStopOperator.Location.End;
+            SubstitutionOperand substitutionOperand = new(metSubstitutionStartOperator.Modifier, [.. substitutionElements], new Location(start, stop));
             substitutionElementStack.Push(substitutionOperand);
         }
         // иначе считаем закрывающий $ просто текстом
@@ -145,7 +153,7 @@ public class SubstitutionParser(SubstitutionLexer substitutionLexer)
     private record StringOperand(string Text, Location Location) : SubstitutionElement(Location);
     private record SubstitutionStartOperator(SubstitutionModifierEnum Modifier, Location Location) : SubstitutionElement(Location);
     private record SubstitutionStopOperator(Location Location) : SubstitutionElement(Location);
-    private record SubstitutionOperand(SubstitutionModifierEnum Modifier, SubstitutionElement[] Elements) : SubstitutionElement(new Location(Elements[0].Location.Start, Elements[^1].Location.End));
+    private record SubstitutionOperand(SubstitutionModifierEnum Modifier, SubstitutionElement[] Elements, Location Location) : SubstitutionElement(Location);
 
 
     private enum SubstitutionModifierEnum

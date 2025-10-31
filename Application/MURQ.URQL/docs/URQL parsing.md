@@ -72,7 +72,7 @@ _не_перенос = 1 & if _не_перенос then pln Переносы р�
 #### Строка 1
 ```plantuml
 @startjson
-{"Parts":[{"Text":"perkill & z=\"if\" & a = 1 & ","Location":{"Start":{"Line":1,"Column":1},"End":{"Line":1,"Column":27}}},{"Modifier":"AsString","Parts":[{"Text":"z","Location":{"Start":{"Line":1,"Column":30},"End":{"Line":1,"Column":30}}}],"Location":{"Start":{"Line":1,"Column":30},"End":{"Line":1,"Column":30}}},{"Text":"  a then pln ","Location":{"Start":{"Line":1,"Column":32},"End":{"Line":2,"Column":12}}},{"Modifier":"None","Parts":[{"Text":"a","Location":{"Start":{"Line":2,"Column":14},"End":{"Line":2,"Column":14}}}],"Location":{"Start":{"Line":2,"Column":14},"End":{"Line":2,"Column":14}}},{"Text":" & pln верная ветка else pln неверная ветка ","Location":{"Start":{"Line":2,"Column":16},"End":{"Line":3,"Column":27}}}]}
+{"Parts":[{"Text":"perkill & z=\"if\" & a = 1 & ","Location":{"Start":{"Line":1,"Column":1},"End":{"Line":1,"Column":27}}},{"Modifier":"AsString","Parts":[{"Text":"z","Location":{"Start":{"Line":1,"Column":30},"End":{"Line":1,"Column":30}}}],"Location":{"Start":{"Line":1,"Column":28},"End":{"Line":1,"Column":31}}},{"Text":"  a then pln ","Location":{"Start":{"Line":1,"Column":32},"End":{"Line":2,"Column":12}}},{"Modifier":"None","Parts":[{"Text":"a","Location":{"Start":{"Line":2,"Column":14},"End":{"Line":2,"Column":14}}}],"Location":{"Start":{"Line":2,"Column":13},"End":{"Line":2,"Column":15}}},{"Text":" & pln верная ветка else pln неверная ветка ","Location":{"Start":{"Line":2,"Column":16},"End":{"Line":3,"Column":27}}}]}
 @endjson
 ```
 #### Строка 2

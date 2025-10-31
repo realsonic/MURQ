@@ -10,7 +10,7 @@ public class SubstitutionLexer
     {
         characterList.Clear();
         var lexemState = LexemState.StringInProgress;
-        Position? startPosition = null;
+        Position? substitutionStartPosition = null;
 
         foreach ((char Character, Position Position) in line)
         {
@@ -23,7 +23,7 @@ public class SubstitutionLexer
                             if (HasString())
                                 yield return PopStringAsToken();
                             lexemState = LexemState.SubstitutionStartMet;
-                            startPosition = Position;
+                            substitutionStartPosition = Position;
                             break;
 
                         case '$':
@@ -39,19 +39,19 @@ public class SubstitutionLexer
                     break;
 
                 case LexemState.SubstitutionStartMet:
+                    Position start = substitutionStartPosition ?? throw new InvalidOperationException($"Неожиданно не задана стартовая позиция для состояния {lexemState}.");
+                    
                     if (Character is '%')
                     {
-                        Position start = startPosition ?? throw new InvalidOperationException($"Неожиданно не задана стартовая позиция для состояния {lexemState}.");
                         yield return new SubstitutionStartToken(ModifierEnum.AsString, new Location(start, Position));
                     }
                     else
                     {
-                        Position start = startPosition ?? throw new InvalidOperationException($"Неожиданно не задана стартовая позиция для состояния {lexemState}.");
                         yield return new SubstitutionStartToken(ModifierEnum.None, new Location(start, start));
                         PushCharacter((Character, Position));
                     }
                     lexemState = LexemState.StringInProgress;
-                    startPosition = null;
+                    substitutionStartPosition = null;
                     break;
 
                 default: throw new NotImplementedException($"Статус лексемы подстановки {lexemState} пока не обрабатывается.");
