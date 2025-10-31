@@ -1,3 +1,5 @@
-﻿namespace MURQ.URQL.Substitutions.Tokens;
+﻿using MURQ.URQL.Locations;
 
-public abstract record Token();
+namespace MURQ.URQL.Substitutions.Tokens;
+
+public abstract record Token(Location Location);
