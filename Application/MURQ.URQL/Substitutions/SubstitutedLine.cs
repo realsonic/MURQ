@@ -13,7 +13,7 @@ public record SubstitutedLine(SubstitutedLinePart[] Parts)
     [JsonDerivedType(typeof(SubstitutionPart))]
     public abstract record SubstitutedLinePart(Location Location);
     public record StringPart(string Text, Location Location) : SubstitutedLinePart(Location);
-    public record SubstitutionPart(SubstitutionModifierEnum Modifier, SubstitutedLinePart[] Parts) : SubstitutedLinePart(new Location(Parts[0].Location.Start, Parts[^1].Location.End))
+    public record SubstitutionPart(SubstitutionModifierEnum Modifier, SubstitutedLinePart[] Parts, Location Location) : SubstitutedLinePart(Location)
     {
         [JsonConverter(typeof(JsonStringEnumConverter))]
         public enum SubstitutionModifierEnum
