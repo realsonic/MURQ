@@ -69,15 +69,22 @@ _не_перенос = 1 & if _не_перенос then pln Переносы р�
 
 #### Этап 6. Распознавание подстановок
 Вся строка распознаётся как строка с подстановками. На выходе получается древовидная структура (конкретная структура и названия полей примерные):
+#### Строка 1
 ```plantuml
 @startjson
-[
-    {"Parts":[{"Text":"perkill & z=\"if\" & a = 1 & "},{"Modifier":"AsString","Parts":[{"Text":"z"}]},{"Text":"  a then pln "},{"Modifier":"None","Parts":[{"Text":"a"}]},{"Text":" & pln верная ветка else pln неверная ветка "}]},
-    
-    {"Parts":[{"Text":"pln Вторая строка"}]},
-
-    {"Parts":[{"Text":"_не_перенос = 1 & if _не_перенос then pln Переносы распознаются верно else pln Переносы распознаются НЕ верно"}]}
-]
+{"Parts":[{"Text":"perkill & z=\"if\" & a = 1 & ","Location":{"Start":{"Line":1,"Column":1},"End":{"Line":1,"Column":27}}},{"Modifier":"AsString","Parts":[{"Text":"z","Location":{"Start":{"Line":1,"Column":30},"End":{"Line":1,"Column":30}}}],"Location":{"Start":{"Line":1,"Column":30},"End":{"Line":1,"Column":30}}},{"Text":"  a then pln ","Location":{"Start":{"Line":1,"Column":32},"End":{"Line":2,"Column":12}}},{"Modifier":"None","Parts":[{"Text":"a","Location":{"Start":{"Line":2,"Column":14},"End":{"Line":2,"Column":14}}}],"Location":{"Start":{"Line":2,"Column":14},"End":{"Line":2,"Column":14}}},{"Text":" & pln верная ветка else pln неверная ветка ","Location":{"Start":{"Line":2,"Column":16},"End":{"Line":3,"Column":27}}}]}
+@endjson
+```
+#### Строка 2
+```plantuml
+@startjson
+{"Parts":[{"Text":"pln Вторая строка","Location":{"Start":{"Line":4,"Column":1},"End":{"Line":4,"Column":17}}}]}
+@endjson
+```
+#### Строка 3
+```plantuml
+@startjson
+{"Parts":[{"Text":"_не_перенос = 1 & if _не_перенос then pln Переносы распознаются верно else pln Переносы распознаются НЕ верно","Location":{"Start":{"Line":5,"Column":1},"End":{"Line":5,"Column":109}}}]}
 @endjson
 ```
 

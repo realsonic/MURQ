@@ -1,3 +1,5 @@
-﻿namespace MURQ.URQL.Substitutions.Tokens;
+﻿using MURQ.URQL.Locations;
 
-public record StringToken(string Value) : Token;
+namespace MURQ.URQL.Substitutions.Tokens;
+
+public record StringToken(string Value, Location Location) : Token(Location);

@@ -13,15 +13,15 @@ public class SubstitutionParser(SubstitutionLexer substitutionLexer)
             switch (token)
             {
                 case StringToken stringToken:
-                    PushString(stringToken.Value);
+                    PushString(stringToken);
                     break;
 
                 case SubstitutionStartToken substitutionStartToken:
                     PushSubstitutionStart(substitutionStartToken);
                     break;
 
-                case SubstitutionStopToken:
-                    PushSubstitutionStop();
+                case SubstitutionStopToken substitutionStopToken:
+                    PushSubstitutionStop(substitutionStopToken);
                     break;
 
                 default: throw new NotImplementedException($"Токен URQ-строки {token} пока не обрабатывается.");
@@ -31,14 +31,14 @@ public class SubstitutionParser(SubstitutionLexer substitutionLexer)
         return PullSubstitutedLine();
     }
 
-    private void PushString(string @string) => substitutionElementStack.Push(new StringOperand(@string));
+    private void PushString(StringToken token) => substitutionElementStack.Push(new StringOperand(token.Value, token.Location));
 
-    private void PushSubstitutionStart(SubstitutionStartToken substitutionStartToken)
-        => substitutionElementStack.Push(ConvertToOperator(substitutionStartToken));
+    private void PushSubstitutionStart(SubstitutionStartToken token)
+        => substitutionElementStack.Push(ConvertToOperator(token));
 
-    private void PushSubstitutionStop()
+    private void PushSubstitutionStop(SubstitutionStopToken token)
     {
-        substitutionElementStack.Push(new SubstitutionStopOperator());
+        substitutionElementStack.Push(new SubstitutionStopOperator(token.Location));
         CollapseSubstituton();
     }
 
@@ -58,20 +58,24 @@ public class SubstitutionParser(SubstitutionLexer substitutionLexer)
         return new SubstitutedLine([.. substitutionLineParts]);
     }
 
-    private static SubstitutionStartOperator ConvertToOperator(SubstitutionStartToken substitutionStartToken)
-        => new(substitutionStartToken.SubstitutionModifier switch
+    private static SubstitutionStartOperator ConvertToOperator(SubstitutionStartToken token)
+    {
+        SubstitutionModifierEnum modifier = token.SubstitutionModifier switch
         {
             SubstitutionStartToken.ModifierEnum.None => SubstitutionModifierEnum.None,
             SubstitutionStartToken.ModifierEnum.AsString => SubstitutionModifierEnum.AsString,
-            _ => throw new NotImplementedException($"Модификатор подстановки {substitutionStartToken.SubstitutionModifier} пока не обрабатывается.")
-        });
+            _ => throw new NotImplementedException($"Модификатор подстановки {token.SubstitutionModifier} пока не обрабатывается.")
+        };
+
+        return new(modifier, token.Location);
+    }
 
     private SubstitutedLinePart ConvertToSubstitutionPart(SubstitutionElement substitutionElement)
     {
         switch (substitutionElement)
         {
             case StringOperand stringOperand:
-                return new StringPart(stringOperand.Text);
+                return new StringPart(stringOperand.Text, stringOperand.Location);
 
             case SubstitutionOperand substitutionOperand:
                 SubstitutionPart.SubstitutionModifierEnum modifier = substitutionOperand.Modifier switch
@@ -83,8 +87,8 @@ public class SubstitutionParser(SubstitutionLexer substitutionLexer)
                 SubstitutedLinePart[] substitutedLineParts = [.. substitutionOperand.Elements.Select(ConvertToSubstitutionPart)];
                 return new SubstitutionPart(modifier, substitutedLineParts);
 
-            case SubstitutionStartOperator:
-                return new StringPart("#");
+            case SubstitutionStartOperator substitutionStartOperator:
+                return new StringPart("#", substitutionStartOperator.Location);
 
             default: throw new NotImplementedException($"Элемент подстановки {substitutionElement} пока не обратывается.");
         }
@@ -95,7 +99,7 @@ public class SubstitutionParser(SubstitutionLexer substitutionLexer)
         // вынимаем закрывающий $
         if (!substitutionElementStack.TryPop(out SubstitutionElement? rightElement))
             throw new InvalidOperationException("Неожиданно в стеке пусто при схлопывании подстановки, а ожидался закрывающий $.");
-        if (rightElement is not SubstitutionStopOperator)
+        if (rightElement is not SubstitutionStopOperator substitutionStopOperator)
             throw new InvalidOperationException($"Неожиданно последний операнд в стеке - {rightElement} при схлопывании подстановки, а ожидался закрывающий $.");
 
         // вынимаем элементы, пока не встретим # или не вынем всё
@@ -126,7 +130,7 @@ public class SubstitutionParser(SubstitutionLexer substitutionLexer)
         // иначе считаем закрывающий $ просто текстом
         else
         {
-            substitutionElements.Add(new StringOperand("$"));
+            substitutionElements.Add(new StringOperand("$", substitutionStopOperator.Location));
 
             foreach (var substitutionElement in substitutionElements)
             {
@@ -137,11 +141,11 @@ public class SubstitutionParser(SubstitutionLexer substitutionLexer)
 
     readonly Stack<SubstitutionElement> substitutionElementStack = new();
 
-    private abstract record SubstitutionElement();
-    private record StringOperand(string Text) : SubstitutionElement();
-    private record SubstitutionStartOperator(SubstitutionModifierEnum Modifier) : SubstitutionElement();
-    private record SubstitutionStopOperator() : SubstitutionElement();
-    private record SubstitutionOperand(SubstitutionModifierEnum Modifier, SubstitutionElement[] Elements) : SubstitutionElement();
+    private abstract record SubstitutionElement(Location Location);
+    private record StringOperand(string Text, Location Location) : SubstitutionElement(Location);
+    private record SubstitutionStartOperator(SubstitutionModifierEnum Modifier, Location Location) : SubstitutionElement(Location);
+    private record SubstitutionStopOperator(Location Location) : SubstitutionElement(Location);
+    private record SubstitutionOperand(SubstitutionModifierEnum Modifier, SubstitutionElement[] Elements) : SubstitutionElement(new Location(Elements[0].Location.Start, Elements[^1].Location.End));
 
 
     private enum SubstitutionModifierEnum

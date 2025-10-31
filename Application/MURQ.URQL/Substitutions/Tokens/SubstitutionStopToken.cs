@@ -1,3 +1,5 @@
-﻿namespace MURQ.URQL.Substitutions.Tokens;
+﻿using MURQ.URQL.Locations;
 
-public record SubstitutionStopToken() : Token();
+namespace MURQ.URQL.Substitutions.Tokens;
+
+public record SubstitutionStopToken(Location Location) : Token(Location);
