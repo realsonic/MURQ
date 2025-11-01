@@ -1,12 +1,12 @@
 ﻿using MURQ.URQL.Locations;
 using MURQ.URQL.Substitutions.Tokens;
 
-using static MURQ.URQL.Substitutions.SubstitutedLine;
+using static MURQ.URQL.Substitutions.SubstitutionTree;
 
 namespace MURQ.URQL.Substitutions;
 public class SubstitutionParser(SubstitutionLexer substitutionLexer)
 {
-    public SubstitutedLine ParseLine(IEnumerable<(char Character, Position Position)> line)
+    public SubstitutionTree ParseLine(IEnumerable<(char Character, Position Position)> line)
     {
         foreach (Token token in substitutionLexer.Scan(line))
         {
@@ -28,37 +28,13 @@ public class SubstitutionParser(SubstitutionLexer substitutionLexer)
             }
         }
 
-        return PullSubstitutedLine();
+        return PopSubstitutionTree();
     }
 
-    private void PushString(StringToken token) => substitutionElementStack.Push(new StringOperand(token.Value, token.Location));
+    private void PushString(StringToken token) 
+        => substitutionElementStack.Push(new StringOperand(token.Value, token.Location));
 
     private void PushSubstitutionStart(SubstitutionStartToken token)
-        => substitutionElementStack.Push(ConvertToOperator(token));
-
-    private void PushSubstitutionStop(SubstitutionStopToken token)
-    {
-        substitutionElementStack.Push(new SubstitutionStopOperator(token.Location));
-        CollapseSubstituton();
-    }
-
-    private SubstitutedLine PullSubstitutedLine()
-    {
-        // перекладываем стек в список частей подстановки
-        List<SubstitutedLinePart> substitutionLineParts = [];
-        while (substitutionElementStack.TryPop(out SubstitutionElement? substitutionElement))
-        {
-            SubstitutedLinePart substitutionLinePart = ConvertToSubstitutionPart(substitutionElement);
-            substitutionLineParts.Add(substitutionLinePart);
-        }
-
-        // переворачиваем список
-        substitutionLineParts.Reverse();
-
-        return new SubstitutedLine([.. substitutionLineParts]);
-    }
-
-    private static SubstitutionStartOperator ConvertToOperator(SubstitutionStartToken token)
     {
         SubstitutionModifierEnum modifier = token.SubstitutionModifier switch
         {
@@ -67,37 +43,29 @@ public class SubstitutionParser(SubstitutionLexer substitutionLexer)
             _ => throw new NotImplementedException($"Модификатор подстановки {token.SubstitutionModifier} пока не обрабатывается.")
         };
 
-        return new(modifier, token.Location);
+        substitutionElementStack.Push(new SubstitutionStartOperator(modifier, token.Location));
     }
 
-    private SubstitutedLinePart ConvertToSubstitutionPart(SubstitutionElement substitutionElement)
+    private void PushSubstitutionStop(SubstitutionStopToken token)
     {
-        switch (substitutionElement)
+        substitutionElementStack.Push(new SubstitutionStopOperator(token.Location));
+        CollapseSubstituton();
+    }
+
+    private SubstitutionTree PopSubstitutionTree()
+    {
+        // перекладываем стек в список частей подстановки
+        List<Node> substitutionLineParts = [];
+        while (substitutionElementStack.TryPop(out SubstitutionElement? substitutionElement))
         {
-            case StringOperand stringOperand:
-                return new StringPart(stringOperand.Text, stringOperand.Location);
-
-            case SubstitutionOperand substitutionOperand:
-                SubstitutionPart.SubstitutionModifierEnum modifier = substitutionOperand.Modifier switch
-                {
-                    SubstitutionModifierEnum.None => SubstitutionPart.SubstitutionModifierEnum.None,
-                    SubstitutionModifierEnum.AsString => SubstitutionPart.SubstitutionModifierEnum.AsString,
-                    _ => throw new NotImplementedException($"Модификатор подстановки {substitutionOperand.Modifier} пока не обрабатывается."),
-                };
-                SubstitutedLinePart[] substitutedLineParts = [.. substitutionOperand.Elements.Select(ConvertToSubstitutionPart)];
-                return new SubstitutionPart(modifier, substitutedLineParts, substitutionOperand.Location);
-
-            case SubstitutionStartOperator substitutionStartOperator:
-                string text = substitutionStartOperator.Modifier switch
-                {
-                    SubstitutionModifierEnum.None => "#",
-                    SubstitutionModifierEnum.AsString => "#%",
-                    _ => throw new NotImplementedException($"Модификатор подстановки {substitutionStartOperator.Modifier} пока не обрабатывается."),
-                };
-                return new StringPart(text, substitutionStartOperator.Location);
-
-            default: throw new NotImplementedException($"Элемент подстановки {substitutionElement} пока не обратывается.");
+            Node substitutionLinePart = ConvertToNode(substitutionElement);
+            substitutionLineParts.Add(substitutionLinePart);
         }
+
+        // переворачиваем список
+        substitutionLineParts.Reverse();
+
+        return new SubstitutionTree([.. substitutionLineParts]);
     }
 
     private void CollapseSubstituton()
@@ -144,6 +112,36 @@ public class SubstitutionParser(SubstitutionLexer substitutionLexer)
             {
                 substitutionElementStack.Push(substitutionElement);
             }
+        }
+    }
+
+    private Node ConvertToNode(SubstitutionElement substitutionElement)
+    {
+        switch (substitutionElement)
+        {
+            case StringOperand stringOperand:
+                return new StringNode(stringOperand.Text, stringOperand.Location);
+
+            case SubstitutionOperand substitutionOperand:
+                SubstitutionNode.SubstitutionModifierEnum modifier = substitutionOperand.Modifier switch
+                {
+                    SubstitutionModifierEnum.None => SubstitutionNode.SubstitutionModifierEnum.None,
+                    SubstitutionModifierEnum.AsString => SubstitutionNode.SubstitutionModifierEnum.AsString,
+                    _ => throw new NotImplementedException($"Модификатор подстановки {substitutionOperand.Modifier} пока не обрабатывается."),
+                };
+                Node[] substitutedLineParts = [.. substitutionOperand.Elements.Select(ConvertToNode)];
+                return new SubstitutionNode(modifier, substitutedLineParts, substitutionOperand.Location);
+
+            case SubstitutionStartOperator substitutionStartOperator:
+                string text = substitutionStartOperator.Modifier switch
+                {
+                    SubstitutionModifierEnum.None => "#",
+                    SubstitutionModifierEnum.AsString => "#%",
+                    _ => throw new NotImplementedException($"Модификатор подстановки {substitutionStartOperator.Modifier} пока не обрабатывается."),
+                };
+                return new StringNode(text, substitutionStartOperator.Location);
+
+            default: throw new NotImplementedException($"Элемент подстановки {substitutionElement} пока не обратывается.");
         }
     }
 

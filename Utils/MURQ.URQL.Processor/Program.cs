@@ -83,7 +83,7 @@ Console.WriteLine($"""
     """);
 
 stopwatch.Restart();
-List<SubstitutedLine> substitutedLines = [.. lines.ToSubstitutedLines()];
+List<SubstitutionTree> substitutedLines = [.. lines.ToSubstitutedLines()];
 stopwatch.Stop();
 totalTime += stopwatch.Elapsed;
 JsonSerializerOptions jsonSerializerOptions = new()
@@ -131,7 +131,7 @@ static IEnumerable<char> ReadFile(string filePath)
 
 static class Extensions
 {
-    public static IEnumerable<SubstitutedLine> ToSubstitutedLines(this IEnumerable<IEnumerable<(char Character, Position Position)>> lines)
+    public static IEnumerable<SubstitutionTree> ToSubstitutedLines(this IEnumerable<IEnumerable<(char Character, Position Position)>> lines)
     {
         foreach (var line in lines)
         {
@@ -147,5 +147,4 @@ static class Extensions
         => string.Join("\n", elements.Select((element, number) => $"[{number + 1}] {convertElement(element)}"));
 
     public static string ToPrintableChar(this char @char) => char.IsControl(@char) ? $"#{Convert.ToInt32(@char)}" : @char.ToString();
-
 }
