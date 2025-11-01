@@ -5,6 +5,10 @@ using MURQ.URQL.Substitutions;
 using System.Diagnostics;
 using System.Text.Encodings.Web;
 using System.Text.Json;
+using System.Text.Json.Serialization;
+using System.Text.Json.Serialization.Metadata;
+
+using static MURQ.URQL.Substitutions.SubstitutionTree;
 
 Console.WriteLine("MURQ. Утилита обработки URQL. v.0.1\n");
 
@@ -88,6 +92,8 @@ stopwatch.Stop();
 totalTime += stopwatch.Elapsed;
 JsonSerializerOptions jsonSerializerOptions = new()
 {
+    TypeInfoResolver = GetJsonTypeInfoResolver(),
+    Converters = { new JsonStringEnumConverter(), new ToStringConverter<Location>() },
     Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping
 };
 Console.WriteLine($"""
@@ -126,6 +132,51 @@ static IEnumerable<char> ReadFile(string filePath)
     while (streamReader.ReadBlock(buffer.AsSpan()) > 0)
     {
         yield return buffer[0];
+    }
+}
+
+static IJsonTypeInfoResolver GetJsonTypeInfoResolver()
+{
+    var resolver = new DefaultJsonTypeInfoResolver();
+
+    resolver.Modifiers.Add(typeInfo =>
+    {
+        if (typeInfo.Type == typeof(Node))
+        {
+            typeInfo.PolymorphismOptions = new JsonPolymorphismOptions
+            {
+                TypeDiscriminatorPropertyName = "Type",
+                UnknownDerivedTypeHandling = JsonUnknownDerivedTypeHandling.FailSerialization,
+                DerivedTypes =
+                {
+                    new JsonDerivedType(typeof(StringNode), "String"),
+                    new JsonDerivedType(typeof(SubstitutionNode), "Substitution")
+                }
+            };
+        }
+    });
+
+    return resolver;
+}
+
+class ToStringConverter<T> : JsonConverter<T> where T : class
+{
+    public override bool CanConvert(Type typeToConvert) =>
+        typeof(T) == typeToConvert;
+
+    public override T Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+    {
+        //string str = reader.GetString();
+        // Здесь нужно восстановить объект из строки (если требуется)
+        throw new NotImplementedException("Десериализация не реализована");
+    }
+
+    public override void Write(Utf8JsonWriter writer, T value, JsonSerializerOptions options)
+    {
+        if (value == null)
+            writer.WriteNullValue();
+        else
+            writer.WriteStringValue(value.ToString());
     }
 }
 
