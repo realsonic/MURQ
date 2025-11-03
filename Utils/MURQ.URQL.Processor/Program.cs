@@ -82,12 +82,12 @@ Console.WriteLine($"""
     """);
 
 stopwatch.Restart();
-List<SubstitutionTree> substitutedLines = [.. lines.ToSubstitutedLines()];
+List<SubstitutionTree> substitutionTrees = [.. lines.ToSubstitutionTrees()];
 stopwatch.Stop();
 totalTime += stopwatch.Elapsed;
 Console.WriteLine($"""
     -- Этап 6. Распознавание подстановок --------------------- ({stopwatch.Elapsed:mm\:ss\.fff})
-    {substitutedLines.ToNumberedLines(line => Serializer.Serialize(line))}
+    {substitutionTrees.ToNumberedLines(Serializer.Serialize)}
     ----------------------------------------------------------------------
 
     """);
@@ -103,7 +103,7 @@ var result = ReadFile(urqlFilePath)
     .ToEnumerableWithoutComments()
     .ToEnumerableWithoutLineContinuations()
     .SplitByLineBreaks()
-    .ToSubstitutedLines()
+    .ToSubstitutionTrees()
     .ToList();
 stopwatch.Stop();
 Console.WriteLine($"{stopwatch.Elapsed}");
@@ -126,7 +126,7 @@ static IEnumerable<char> ReadFile(string filePath)
 
 static class Extensions
 {
-    public static IEnumerable<SubstitutionTree> ToSubstitutedLines(this IEnumerable<IEnumerable<(char Character, Position Position)>> lines)
+    public static IEnumerable<SubstitutionTree> ToSubstitutionTrees(this IEnumerable<IEnumerable<(char Character, Position Position)>> lines)
     {
         foreach (var line in lines)
         {
