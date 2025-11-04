@@ -8,6 +8,16 @@ namespace MURQ.Application.Interfaces;
 public interface IUserInterface
 {
     /// <summary>
+    /// Цвет текста.
+    /// </summary>
+    InterfaceColor ForegroundColor { set; }
+
+    /// <summary>
+    /// Цвет фона текста.
+    /// </summary>
+    InterfaceColor BackgroundColor { set; }
+
+    /// <summary>
     /// Вывести текст игроку.
     /// </summary>
     /// <param name="text">Текст.</param>

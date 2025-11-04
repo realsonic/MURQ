@@ -12,6 +12,7 @@ namespace MURQ.Domain.Games;
 public class Game(Quest quest) : IGameContext
 {
     public event Action? OnScreenCleared;
+    public event Action? OnColorChanged;
 
     public Quest Quest { get; } = quest;
 
@@ -22,10 +23,37 @@ public class Game(Quest quest) : IGameContext
         Buttons = _currentScreenButtons
     };
 
+    /// <summary>
+    /// Цвет текста.
+    /// </summary>
+    public InterfaceColor ForegroundColor
+    {
+        get => foregroundColor;
+        set
+        {
+            foregroundColor = value;
+            OnColorChanged?.Invoke();
+        }
+    }
+
+    /// <summary>
+    /// Цвет фона текста.
+    /// </summary>
+    public InterfaceColor BackgroundColor
+    {
+        get => backgroundColor;
+        set
+        {
+            backgroundColor = value;
+            OnColorChanged?.Invoke();
+        }
+    }
+
     public void Start()
     {
         if (IsStarted) throw new MurqException("Игра уже запущена, второй раз запустить нельзя.");
 
+        SetDefaultColors();
         ClearCurrentView();
         SetNextStatementToStarting();
         RunStatements();
@@ -47,16 +75,18 @@ public class Game(Quest quest) : IGameContext
         OnScreenCleared?.Invoke();
     }
 
-    void IGameContext.AssignVariable(string VariableName, Value Value)
+    public void AssignVariable(string name, Value value)
     {
-        _variables[VariableName] = new Variable(VariableName, Value);
+        if (TryAssignSystemVariable(name, value)) return;
+
+        _userVariables[name] = new Variable(name, value);
     }
 
-    public Variable? GetVariable(string variableName) => GetSystemVariable(variableName) ?? GetGameVariable(variableName);
+    public Variable? GetVariable(string variableName) => GetSystemVariable(variableName) ?? GetUserVariable(variableName);
 
     void IGameContext.Goto(LabelStatement? labelStatement) => JumpByGoto(labelStatement);
 
-    void IGameContext.Perkill() => _variables.Clear();
+    void IGameContext.Perkill() => _userVariables.Clear();
 
     private void JumpByButton(LabelStatement? labelStatement)
     {
@@ -74,6 +104,12 @@ public class Game(Quest quest) : IGameContext
         if (labelStatement is null) return;
 
         SetCurrentLabel(labelStatement);
+    }
+
+    private void SetDefaultColors()
+    {
+        ForegroundColor = InterfaceColor.Gray;
+        BackgroundColor = InterfaceColor.Black;
     }
 
     private void ClearCurrentView()
@@ -117,15 +153,43 @@ public class Game(Quest quest) : IGameContext
         }
     }
 
-    private Variable? GetSystemVariable(string variableName) => variableName.ToLower() switch
+    private Variable? GetSystemVariable(string name) => name.ToLower() switch
     {
         "current_loc" => new Variable("current_loc", new StringValue(_currentLocationName ?? string.Empty)),
         "previous_loc" => new Variable("previous_loc", new StringValue(_previousLocationName ?? string.Empty)),
-        _ when rndRegex.IsMatch(variableName) => GetRandom(variableName),
+        "style_dos_textcolor" => new Variable("style_dos_textcolor", new NumberValue(EncodeDosTextColor(ForegroundColor, BackgroundColor))),
+        _ when rndRegex.IsMatch(name) => GetRandom(name),
         _ => null
     };
 
-    private Variable? GetGameVariable(string variableName) => _variables.TryGetValue(variableName, out Variable? variable) ? variable : null;
+    private Variable? GetUserVariable(string variableName) => _userVariables.TryGetValue(variableName, out Variable? variable) ? variable : null;
+
+    private bool TryAssignSystemVariable(string name, Value value)
+    {
+        switch (name.ToLower())
+        {
+            case "style_dos_textcolor":
+                (ForegroundColor, BackgroundColor) = DecodeDosTextColor(Convert.ToByte(value.AsDecimal));
+                return true;
+
+            default:
+                return false;
+        }
+    }
+
+    private static byte EncodeDosTextColor(InterfaceColor foregroundColor, InterfaceColor backgroundColor)
+    {
+        byte foreground = (byte)foregroundColor;
+        byte background = (byte)((byte)backgroundColor << 0x4);
+        return (byte)(background + foreground);
+    }
+
+    private static (InterfaceColor ForegroundColor, InterfaceColor BackgroundColor) DecodeDosTextColor(byte value)
+    {
+        byte foreground = (byte)((value & 0x0F));
+        byte background = (byte)((value & 0xF0) >> 0x4);
+        return (ForegroundColor: (InterfaceColor)foreground, BackgroundColor: (InterfaceColor)background);
+    }
 
     private void PromoteNextStatement() => _currentStatement = Quest.GetNextStatement(_currentStatement);
 
@@ -173,7 +237,9 @@ public class Game(Quest quest) : IGameContext
     private readonly List<Button> _currentScreenButtons = [];
     private string? _currentLocationName;
     private string? _previousLocationName;
-    private readonly Dictionary<string, Variable> _variables = new(StringComparer.InvariantCultureIgnoreCase);
+    private InterfaceColor foregroundColor;
+    private InterfaceColor backgroundColor;
+    private readonly Dictionary<string, Variable> _userVariables = new(StringComparer.InvariantCultureIgnoreCase);
     private readonly Regex rndRegex = new(@"^rnd(?<number>\d*)$", RegexOptions.Compiled | RegexOptions.IgnoreCase);
     private readonly Random random = new();
 }

@@ -20,12 +20,18 @@ public class ConsoleUserInterface : IUserInterface
         }
     }
 
+    /// <inheritdoc/>>
+    public InterfaceColor ForegroundColor { set => Console.ForegroundColor = (ConsoleColor)value; }
+
+    /// <inheritdoc/>>
+    public InterfaceColor BackgroundColor { set => Console.BackgroundColor = (ConsoleColor)value; }
+
     public void SetTitle(string title) => Console.Title = title;
 
     public void Write(string? text = null)
     {
         Console.Write(text);
-        
+
         if (!string.IsNullOrEmpty(text))
             lastWrittenText = text;
     }

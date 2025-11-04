@@ -35,6 +35,11 @@ public class UrqPlayer(IQuestSource questSource, IUserInterface userInterface, I
 
         var game = new Game(quest);
         game.OnScreenCleared += userInterface.ClearSceen;
+        game.OnColorChanged += () =>
+        {
+            userInterface.ForegroundColor = game.ForegroundColor;
+            userInterface.BackgroundColor = game.BackgroundColor;
+        };
 
         ShowQuestName(questName);
 
@@ -92,7 +97,7 @@ public class UrqPlayer(IQuestSource questSource, IUserInterface userInterface, I
 
     private void ShowQuestName(string? questName) => userInterface.WriteLine($"{questName}\n");
 
-    private void ReportPressedButton(ButtonChosen buttonChosen) 
+    private void ReportPressedButton(ButtonChosen buttonChosen)
         => userInterface.WriteLine($"> [{buttonChosen.ButtonCharacter}] {buttonChosen.Button.Caption}\n");
 
     private void SayGoodbye()
