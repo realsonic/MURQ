@@ -27,7 +27,7 @@ jobs:
 
     - name: Run tests (if any)
       # if: ${{ matrix.configuration == 'Release' }}  # только для Release
-      run: dotnet test --no-build --verbosity normal
+      run: dotnet test MURQ.sln --no-build --verbosity normal
 
     - name: Publish executable
       run: |
