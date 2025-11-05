@@ -219,8 +219,7 @@ public class ConsoleUserInterface : IUserInterface, IDisposable
             {
                 Console.CursorVisible = originalCursorVisible ?? true; // возвращаем курсор на место
             }
-            Console.ForegroundColor = originalForegroundColor;
-            Console.BackgroundColor = originalBackgroundColor;
+            Console.ResetColor();
 
             isDisposed = true;
         }
@@ -232,9 +231,7 @@ public class ConsoleUserInterface : IUserInterface, IDisposable
     }
 
     private string? lastWrittenText = null;
-    private Encoding originalOutputEncoding = Console.OutputEncoding;
-    private bool? originalCursorVisible;
-    private ConsoleColor originalForegroundColor = Console.ForegroundColor;
-    private ConsoleColor originalBackgroundColor = Console.BackgroundColor;
+    private readonly Encoding originalOutputEncoding = Console.OutputEncoding;
+    private readonly bool? originalCursorVisible;
     private bool isDisposed;
 }
