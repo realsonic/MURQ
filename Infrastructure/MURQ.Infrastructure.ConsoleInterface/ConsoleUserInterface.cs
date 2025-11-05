@@ -9,13 +9,17 @@ using static MURQ.Application.Interfaces.IUserInterface;
 
 namespace MURQ.Infrastructure.ConsoleInterface;
 
-public class ConsoleUserInterface : IUserInterface
+public class ConsoleUserInterface : IUserInterface, IDisposable
 {
     public ConsoleUserInterface()
     {
         Console.OutputEncoding = Encoding.UTF8;
+
         if (!Console.IsOutputRedirected)
         {
+            if (OperatingSystem.IsWindows())
+                originalCursorVisible = Console.CursorVisible;
+
             Console.CursorVisible = false; // без курсора красивее :)
         }
     }
@@ -199,13 +203,38 @@ public class ConsoleUserInterface : IUserInterface
         }
     }
 
-    public void FinishWork()
+    public void Dispose()
     {
-        if (!Console.IsOutputRedirected)
+        Dispose(disposing: true);
+        GC.SuppressFinalize(this);
+    }
+
+    protected virtual void Dispose(bool disposing)
+    {
+        Console.WriteLine($"Dispose({disposing})!");
+        if (!isDisposed)
         {
-            Console.CursorVisible = true; // возвращаем курсор на место
+            Console.OutputEncoding = originalOutputEncoding;
+            if (!Console.IsOutputRedirected)
+            {
+                Console.CursorVisible = originalCursorVisible ?? true; // возвращаем курсор на место
+            }
+            Console.ForegroundColor = originalForegroundColor;
+            Console.BackgroundColor = originalBackgroundColor;
+
+            isDisposed = true;
         }
     }
 
+    ~ConsoleUserInterface()
+    {
+        Dispose(disposing: false);
+    }
+
     private string? lastWrittenText = null;
+    private Encoding originalOutputEncoding = Console.OutputEncoding;
+    private bool? originalCursorVisible;
+    private ConsoleColor originalForegroundColor = Console.ForegroundColor;
+    private ConsoleColor originalBackgroundColor = Console.BackgroundColor;
+    private bool isDisposed;
 }

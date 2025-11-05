@@ -20,7 +20,6 @@ public class UrqPlayer(IQuestSource questSource, IUserInterface userInterface, I
 
             SayGoodbye();
             PromptAnyKey();
-            FinishWork();
         }
         catch (Exception ex)
         {
@@ -34,18 +33,21 @@ public class UrqPlayer(IQuestSource questSource, IUserInterface userInterface, I
         (Quest quest, string questName) = await questSource.GetQuest(cancellationToken);
 
         var game = new Game(quest);
+        game.OnTextPrinted += Write;
         game.OnScreenCleared += userInterface.ClearSceen;
-        game.OnColorChanged += () =>
-        {
-            userInterface.ForegroundColor = game.ForegroundColor;
-            userInterface.BackgroundColor = game.BackgroundColor;
-        };
-
+         
         ShowQuestName(questName);
 
         game.Start();
 
         return game;
+    }
+
+    private void Write(string text, InterfaceColor foreground, InterfaceColor background)
+    {
+        userInterface.ForegroundColor = foreground;
+        userInterface.BackgroundColor = background;
+        userInterface.Write(text);
     }
 
     private async Task RunPlayCycle(CancellationToken cancellationToken)
@@ -54,8 +56,6 @@ public class UrqPlayer(IQuestSource questSource, IUserInterface userInterface, I
 
         while (true)
         {
-            userInterface.Write(game.CurrentLocation.Text);
-
             var userChoice = userInterface.ShowButtonsAndGetChoice(game.CurrentLocation.Buttons);
 
             userInterface.WriteLine();
@@ -106,8 +106,6 @@ public class UrqPlayer(IQuestSource questSource, IUserInterface userInterface, I
         userInterface.WriteLineHighlighted(" Вы нажали выход. До свидания! ");
         userInterface.WriteLine();
     }
-
-    private void FinishWork() => userInterface.FinishWork();
 
     private void PromptAnyKey()
     {
