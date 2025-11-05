@@ -7,7 +7,7 @@ on:
     branches: [main]
 
 jobs:
-  build-test:
+  build-test-publish:
     runs-on: windows-latest # ubuntu-latest # или windows-latest, если нужны Windows-специфичные тесты
 
     steps:
