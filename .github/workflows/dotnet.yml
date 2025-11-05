@@ -1,0 +1,42 @@
+name: .NET CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  build-test:
+    runs-on: ubuntu-latest  # или windows-latest, если нужны Windows-специфичные тесты
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v3
+      with:
+        dotnet-version: '8.0.x'  # укажите нужную версию .NET
+
+    - name: Restore dependencies
+      run: dotnet restore
+
+    - name: Build
+      run: dotnet build --configuration Release --no-restore
+
+    - name: Run tests (if any)
+      if: ${{ matrix.configuration == 'Release' }}  # только для Release
+      run: dotnet test --no-build --verbosity normal
+
+    - name: Publish executable
+      run: |
+        dotnet publish --os win --configuration Debug --self-contained true -p:PublishReadyToRun=true -p:PublishSingleFile=true -p:PublishTrimmed=true -p:EnableCompressionInSingleFile=true -o ./publish
+        # Опционально: архивируем результат
+        zip -r published-app.zip ./publish
+
+    - name: Upload artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: MURQ.Console
+        path: ./publish/  # или ./published-app.zip
