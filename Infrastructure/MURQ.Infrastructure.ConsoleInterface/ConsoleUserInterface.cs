@@ -211,7 +211,6 @@ public class ConsoleUserInterface : IUserInterface, IDisposable
 
     protected virtual void Dispose(bool disposing)
     {
-        Console.WriteLine($"Dispose({disposing})!");
         if (!isDisposed)
         {
             Console.OutputEncoding = originalOutputEncoding;
