@@ -8,7 +8,7 @@ on:
 
 jobs:
   build-test:
-    runs-on: ubuntu-latest  # или windows-latest, если нужны Windows-специфичные тесты
+    runs-on: windows-latest # ubuntu-latest # или windows-latest, если нужны Windows-специфичные тесты
 
     steps:
     - name: Checkout repository
@@ -23,17 +23,17 @@ jobs:
       run: dotnet restore
 
     - name: Build
-      run: dotnet build --configuration Release --no-restore
+      run: dotnet build --configuration Debug --no-restore
 
     - name: Run tests (if any)
       # if: ${{ matrix.configuration == 'Release' }}  # только для Release
-      run: dotnet test MURQ.sln --no-build --verbosity normal
+      run: dotnet test --no-build --verbosity normal
 
     - name: Publish executable
       run: |
         dotnet publish Presentation\MURQ.Console\MURQ.Console.csproj --os win --configuration Debug --self-contained true -p:PublishReadyToRun=true -p:PublishSingleFile=true -p:PublishTrimmed=true -p:EnableCompressionInSingleFile=true -o ./publish
         # Опционально: архивируем результат
-        zip -r published-app.zip ./publish
+        zip -r MURQ.Console.zip ./publish
 
     - name: Upload artifact
       uses: actions/upload-artifact@v4
