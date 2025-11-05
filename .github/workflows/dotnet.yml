@@ -1,4 +1,4 @@
-name: .NET CI
+name: MURQ.Console в режиме Debug
 
 on:
   push:
