@@ -45,5 +45,5 @@ jobs:
     - name: Upload artifact
       uses: actions/upload-artifact@v4
       with:
-        name: MURQ.Console
+        name: MURQ.Console.zip
         path: ./publish/  # или ./published-app.zip
