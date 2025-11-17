@@ -13,6 +13,9 @@ public class ConsoleUserInterface : IUserInterface, IDisposable
 {
     public ConsoleUserInterface()
     {
+        Console.CancelKeyPress += HandleCancelKeyPress;
+
+        originalOutputEncoding = Console.OutputEncoding;
         Console.OutputEncoding = Encoding.UTF8;
 
         if (!Console.IsOutputRedirected)
@@ -203,13 +206,19 @@ public class ConsoleUserInterface : IUserInterface, IDisposable
         }
     }
 
+    private void HandleCancelKeyPress(object? sender, ConsoleCancelEventArgs e)
+    {
+        CleanUp();
+        Environment.Exit(0); // Принудительный выход
+    }
+
     public void Dispose()
     {
-        Dispose(disposing: true);
+        CleanUp();
         GC.SuppressFinalize(this);
     }
 
-    protected virtual void Dispose(bool disposing)
+    protected virtual void CleanUp()
     {
         if (!isDisposed)
         {
@@ -226,11 +235,11 @@ public class ConsoleUserInterface : IUserInterface, IDisposable
 
     ~ConsoleUserInterface()
     {
-        Dispose(disposing: false);
+        CleanUp();
     }
 
     private string? lastWrittenText = null;
-    private readonly Encoding originalOutputEncoding = Console.OutputEncoding;
+    private readonly Encoding originalOutputEncoding;
     private readonly bool? originalCursorVisible;
     private bool isDisposed;
 }
