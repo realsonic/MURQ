@@ -4,7 +4,6 @@ using MURQ.Application.Interfaces;
 using MURQ.Console;
 
 using ServiceProvider serviceProvider = ServiceConfiguration.ConfigureServices(args);
-using var scope = serviceProvider.CreateScope();
-IUrqPlayer urqPlayer = scope.ServiceProvider.GetRequiredService<IUrqPlayer>();
+IUrqPlayer urqPlayer = serviceProvider.GetRequiredService<IUrqPlayer>();
 
 await urqPlayer.Run();
