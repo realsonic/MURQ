@@ -14,7 +14,7 @@ namespace MURQ.Infrastructure;
 public static class ServiceConfiguration
 {
     public static IServiceCollection AddConsoleUserInterface(this IServiceCollection services) => services
-        .AddTransient<IUserInterface, ConsoleUserInterface>();
+        .AddSingleton<IUserInterface, ConsoleUserInterface>();
 
     public static IServiceCollection AddFileQuestSource(this IServiceCollection services, string[] args)
     {

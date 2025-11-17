@@ -4,62 +4,47 @@ using MURQ.Domain.Games.Variables;
 using MURQ.Domain.Quests;
 using MURQ.Domain.Quests.Statements;
 
-using System.Text;
 using System.Text.RegularExpressions;
 
 namespace MURQ.Domain.Games;
 
 public class Game(Quest quest) : IGameContext
 {
+    public event Action<string, InterfaceColor, InterfaceColor>? OnTextPrinted;
     public event Action? OnScreenCleared;
-    public event Action? OnColorChanged;
 
     public Quest Quest { get; } = quest;
 
     public CurrentLocationView CurrentLocation => new()
     {
         Name = _currentLocationName,
-        Text = _currentScreenText.ToString(),
         Buttons = _currentScreenButtons
     };
 
     /// <summary>
     /// Цвет текста.
     /// </summary>
-    public InterfaceColor ForegroundColor
-    {
-        get => foregroundColor;
-        set
-        {
-            foregroundColor = value;
-            OnColorChanged?.Invoke();
-        }
-    }
+    public InterfaceColor ForegroundColor { get; private set; } = InterfaceColor.Gray;
 
     /// <summary>
     /// Цвет фона текста.
     /// </summary>
-    public InterfaceColor BackgroundColor
-    {
-        get => backgroundColor;
-        set
-        {
-            backgroundColor = value;
-            OnColorChanged?.Invoke();
-        }
-    }
+    public InterfaceColor BackgroundColor { get; set; } = InterfaceColor.Black;
 
     public void Start()
     {
         if (IsStarted) throw new MurqException("Игра уже запущена, второй раз запустить нельзя.");
 
-        SetDefaultColors();
         ClearCurrentView();
         SetNextStatementToStarting();
         RunStatements();
     }
 
-    void IGameContext.PrintText(string? text) => _currentScreenText.Append(text);
+    void IGameContext.PrintText(string? text)
+    {
+        if (text is not null)
+            OnTextPrinted?.Invoke(text, ForegroundColor, BackgroundColor);
+    }
 
     void IGameContext.AddButton(string caption, LabelStatement? labelStatement) => _currentScreenButtons.Add(new Button
     {
@@ -106,15 +91,8 @@ public class Game(Quest quest) : IGameContext
         SetCurrentLabel(labelStatement);
     }
 
-    private void SetDefaultColors()
-    {
-        ForegroundColor = InterfaceColor.Gray;
-        BackgroundColor = InterfaceColor.Black;
-    }
-
     private void ClearCurrentView()
     {
-        _currentScreenText.Clear();
         _currentScreenButtons.Clear();
     }
 
@@ -233,12 +211,9 @@ public class Game(Quest quest) : IGameContext
 
     private GameState _gameState = GameState.InitialState;
     private Statement? _currentStatement;
-    private readonly StringBuilder _currentScreenText = new();
     private readonly List<Button> _currentScreenButtons = [];
     private string? _currentLocationName;
     private string? _previousLocationName;
-    private InterfaceColor foregroundColor;
-    private InterfaceColor backgroundColor;
     private readonly Dictionary<string, Variable> _userVariables = new(StringComparer.InvariantCultureIgnoreCase);
     private readonly Regex rndRegex = new(@"^rnd(?<number>\d*)$", RegexOptions.Compiled | RegexOptions.IgnoreCase);
     private readonly Random random = new();

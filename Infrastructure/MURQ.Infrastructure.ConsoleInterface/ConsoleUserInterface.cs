@@ -9,13 +9,18 @@ using static MURQ.Application.Interfaces.IUserInterface;
 
 namespace MURQ.Infrastructure.ConsoleInterface;
 
-public class ConsoleUserInterface : IUserInterface
+public class ConsoleUserInterface : IUserInterface, IDisposable
 {
     public ConsoleUserInterface()
     {
+        originalOutputEncoding = Console.OutputEncoding;
         Console.OutputEncoding = Encoding.UTF8;
+
         if (!Console.IsOutputRedirected)
         {
+            if (OperatingSystem.IsWindows())
+                originalCursorVisible = Console.CursorVisible;
+
             Console.CursorVisible = false; // без курсора красивее :)
         }
     }
@@ -130,6 +135,69 @@ public class ConsoleUserInterface : IUserInterface
         }
     }
 
+    private static string ClassifyExceptionMessage(Exception exception) => exception switch
+    {
+        MurqException murqException => murqException switch
+        {
+            UrqlException => $"Ошибка при загрузке URQL: {exception.Message}",
+            _ => exception.Message
+        },
+        _ => $"""
+            Непредвиденная ошибка: {exception.Message}.
+            
+            Сообщите разработчикам детали:
+            {exception}
+            """
+    };
+
+    private static void DoInColors(ConsoleColor? foregroundColor, ConsoleColor? backgroundColor, Action action)
+    {
+        ConsoleColor previousForegroundColor = Console.ForegroundColor;
+        ConsoleColor previousBackgroundColor = Console.BackgroundColor;
+        try
+        {
+            Console.ForegroundColor = foregroundColor ?? Console.ForegroundColor;
+            Console.BackgroundColor = backgroundColor ?? Console.BackgroundColor;
+            action();
+        }
+        finally
+        {
+            Console.ForegroundColor = previousForegroundColor;
+            Console.BackgroundColor = previousBackgroundColor;
+        }
+    }
+
+    public void Dispose()
+    {
+        CleanUp();
+        GC.SuppressFinalize(this);
+    }
+
+    protected virtual void CleanUp()
+    {
+        if (!isDisposed)
+        {
+            Console.OutputEncoding = originalOutputEncoding;
+            if (!Console.IsOutputRedirected)
+            {
+                Console.CursorVisible = originalCursorVisible ?? true; // возвращаем курсор на место
+            }
+            Console.ResetColor();
+
+            isDisposed = true;
+        }
+    }
+
+    ~ConsoleUserInterface()
+    {
+        CleanUp();
+    }
+
+    private string? lastWrittenText = null;
+    private readonly Encoding originalOutputEncoding;
+    private readonly bool? originalCursorVisible;
+    private bool isDisposed;
+
     private abstract record UserInput
     {
         public static UserInput GetInput()
@@ -166,46 +234,4 @@ public class ConsoleUserInterface : IUserInterface
         public override bool IsReload() => Char is 'r' or 'R';
         public override bool IsQuit() => Char is null or 'q' or 'Q';
     }
-
-    private static string ClassifyExceptionMessage(Exception exception) => exception switch
-    {
-        MurqException murqException => murqException switch
-        {
-            UrqlException => $"Ошибка при загрузке URQL: {exception.Message}",
-            _ => exception.Message
-        },
-        _ => $"""
-            Непредвиденная ошибка: {exception.Message}.
-            
-            Сообщите разработчикам детали:
-            {exception}
-            """
-    };
-
-    private static void DoInColors(ConsoleColor? foregroundColor, ConsoleColor? backgroundColor, Action action)
-    {
-        ConsoleColor previousForegroundColor = Console.ForegroundColor;
-        ConsoleColor previousBackgroundColor = Console.BackgroundColor;
-        try
-        {
-            Console.ForegroundColor = foregroundColor ?? Console.ForegroundColor;
-            Console.BackgroundColor = backgroundColor ?? Console.BackgroundColor;
-            action();
-        }
-        finally
-        {
-            Console.ForegroundColor = previousForegroundColor;
-            Console.BackgroundColor = previousBackgroundColor;
-        }
-    }
-
-    public void FinishWork()
-    {
-        if (!Console.IsOutputRedirected)
-        {
-            Console.CursorVisible = true; // возвращаем курсор на место
-        }
-    }
-
-    private string? lastWrittenText = null;
 }
