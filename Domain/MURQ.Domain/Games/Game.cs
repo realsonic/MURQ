@@ -4,21 +4,24 @@ using MURQ.Domain.Games.Variables;
 using MURQ.Domain.Quests;
 using MURQ.Domain.Quests.Statements;
 
+using System.Text;
 using System.Text.RegularExpressions;
 
 namespace MURQ.Domain.Games;
 
 public class Game(Quest quest) : IGameContext
 {
-    public event Action<string, InterfaceColor, InterfaceColor>? OnTextPrinted;
+    public event EventHandler<OnTextPrintedEventArgs>? OnTextPrinted;
+
     public event Action? OnScreenCleared;
 
     public Quest Quest { get; } = quest;
 
     public CurrentLocationView CurrentLocation => new()
     {
-        Name = _currentLocationName,
-        Buttons = _currentScreenButtons
+        Name = currentLocationName,
+        Text = currentLocationText.ToString(),
+        Buttons = currentScreenButtons
     };
 
     /// <summary>
@@ -40,20 +43,31 @@ public class Game(Quest quest) : IGameContext
         RunStatements();
     }
 
-    void IGameContext.PrintText(string? text)
+    /// <inheritdoc/>
+    void IGameContext.Print(string? text)
     {
-        if (text is not null)
-            OnTextPrinted?.Invoke(text, ForegroundColor, BackgroundColor);
+        currentLocationText.Append(text);
+        OnTextPrinted?.Invoke(this, new OnTextPrintedEventArgs(text, false, ForegroundColor, BackgroundColor));
     }
 
-    void IGameContext.AddButton(string caption, LabelStatement? labelStatement) => _currentScreenButtons.Add(new Button
+    /// <inheritdoc/>
+    void IGameContext.PrintLine(string? text)
+    {
+        currentLocationText.AppendLine(text);
+        OnTextPrinted?.Invoke(this, new OnTextPrintedEventArgs(text, true, ForegroundColor, BackgroundColor));
+    }
+
+    /// <inheritdoc/>
+    void IGameContext.AddButton(string caption, LabelStatement? labelStatement) => currentScreenButtons.Add(new Button
     {
         Caption = caption,
         OnButtonPressed = () => JumpByButton(labelStatement)
     });
 
+    /// <inheritdoc/>
     void IGameContext.EndLocation() => SetModeWaitingUserInput();
 
+    /// <inheritdoc/>
     void IGameContext.ClearScreen()
     {
         ClearCurrentView();
@@ -93,13 +107,14 @@ public class Game(Quest quest) : IGameContext
 
     private void ClearCurrentView()
     {
-        _currentScreenButtons.Clear();
+        currentLocationText.Clear();
+        currentScreenButtons.Clear();
     }
 
-    private void UpdateCurrentLocationName(string currentLocationName)
+    private void UpdateCurrentLocationName(string name)
     {
-        _previousLocationName = _currentLocationName;
-        _currentLocationName = currentLocationName;
+        previousLocationName = currentLocationName;
+        currentLocationName = name;
     }
 
     private void RunStatements()
@@ -114,13 +129,13 @@ public class Game(Quest quest) : IGameContext
 
     private void RunCurrentStatement()
     {
-        if (_currentStatement is null)
+        if (currentStatement is null)
         {
             SetModeWaitingUserInput();
             return;
         }
 
-        _currentStatement.Run(this);
+        currentStatement.Run(this);
     }
 
     private void SetCurrentLabel(LabelStatement? labelStatement)
@@ -133,8 +148,8 @@ public class Game(Quest quest) : IGameContext
 
     private Variable? GetSystemVariable(string name) => name.ToLower() switch
     {
-        "current_loc" => new Variable("current_loc", new StringValue(_currentLocationName ?? string.Empty)),
-        "previous_loc" => new Variable("previous_loc", new StringValue(_previousLocationName ?? string.Empty)),
+        "current_loc" => new Variable("current_loc", new StringValue(currentLocationName ?? string.Empty)),
+        "previous_loc" => new Variable("previous_loc", new StringValue(previousLocationName ?? string.Empty)),
         "style_dos_textcolor" => new Variable("style_dos_textcolor", new NumberValue(EncodeDosTextColor(ForegroundColor, BackgroundColor))),
         _ when rndRegex.IsMatch(name) => GetRandom(name),
         _ => null
@@ -169,15 +184,15 @@ public class Game(Quest quest) : IGameContext
         return (ForegroundColor: (InterfaceColor)foreground, BackgroundColor: (InterfaceColor)background);
     }
 
-    private void PromoteNextStatement() => _currentStatement = Quest.GetNextStatement(_currentStatement);
+    private void PromoteNextStatement() => currentStatement = Quest.GetNextStatement(currentStatement);
 
-    private void SetNextStatementToStarting() => _currentStatement = Quest.StartingStatement;
-    private void SetModeRunningStatements() => _gameState = GameState.RunningStatements;
-    private void SetModeWaitingUserInput() => _gameState = GameState.WaitingUserInput;
-    private void SetCurrentStatement(Statement statement) => _currentStatement = statement;
+    private void SetNextStatementToStarting() => currentStatement = Quest.StartingStatement;
+    private void SetModeRunningStatements() => gameState = GameState.RunningStatements;
+    private void SetModeWaitingUserInput() => gameState = GameState.WaitingUserInput;
+    private void SetCurrentStatement(Statement statement) => currentStatement = statement;
 
-    private bool IsStarted => _gameState is not GameState.InitialState;
-    private bool IsRunningStatements => _gameState == GameState.RunningStatements;
+    private bool IsStarted => gameState is not GameState.InitialState;
+    private bool IsRunningStatements => gameState == GameState.RunningStatements;
 
     private Variable GetRandom(string variableName)
     {
@@ -209,12 +224,21 @@ public class Game(Quest quest) : IGameContext
         public void Press() => OnButtonPressed();
     }
 
-    private GameState _gameState = GameState.InitialState;
-    private Statement? _currentStatement;
-    private readonly List<Button> _currentScreenButtons = [];
-    private string? _currentLocationName;
-    private string? _previousLocationName;
+    private GameState gameState = GameState.InitialState;
+    private Statement? currentStatement;
+    private readonly StringBuilder currentLocationText = new();
+    private readonly List<Button> currentScreenButtons = [];
+    private string? currentLocationName;
+    private string? previousLocationName;
     private readonly Dictionary<string, Variable> _userVariables = new(StringComparer.InvariantCultureIgnoreCase);
     private readonly Regex rndRegex = new(@"^rnd(?<number>\d*)$", RegexOptions.Compiled | RegexOptions.IgnoreCase);
     private readonly Random random = new();
+
+    public class OnTextPrintedEventArgs(string? text, bool isNewLineAtEnd, InterfaceColor foregroundColor, InterfaceColor backgroundColor) : EventArgs
+    {
+        public string? Text { get; } = text;
+        public bool IsNewLineAtEnd { get; } = isNewLineAtEnd;
+        public InterfaceColor ForegroundColor { get; } = foregroundColor;
+        public InterfaceColor BackgroundColor { get; } = backgroundColor;
+    }
 }

@@ -6,7 +6,18 @@ namespace MURQ.Domain.Games;
 
 public interface IGameContext
 {
-    void PrintText(string? text);
+    /// <summary>
+    /// Напечатать текст для игрока.
+    /// </summary>
+    /// <param name="text">Текст.</param>
+    void Print(string? text);
+
+    /// <summary>
+    /// Напечатать текст для игрока и новую строку в конце.
+    /// </summary>
+    /// <param name="text">Текст.</param>
+    void PrintLine(string? text = null);
+
     void AddButton(string caption, LabelStatement? labelStatement);
     void EndLocation();
     void ClearScreen();

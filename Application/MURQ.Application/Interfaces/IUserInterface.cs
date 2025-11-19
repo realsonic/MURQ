@@ -18,24 +18,24 @@ public interface IUserInterface
     InterfaceColor BackgroundColor { set; }
 
     /// <summary>
-    /// Вывести текст игроку.
+    /// Напечатать текст для игрока.
     /// </summary>
     /// <param name="text">Текст.</param>
-    void Write(string? text = null);
+    void Print(string? text);
 
     /// <summary>
-    /// Вывести текст игроку и добавить новую строку в конце.
+    /// Напечатать текст для игрока и новую строку в конце.
     /// </summary>
     /// <param name="text">Текст.</param>
-    void WriteLine(string? text = null);
+    void PrintLine(string? text = null);
 
     /// <summary>
     /// Очистить экран.
     /// </summary>
     void ClearSceen();
 
-    void WriteHighlighted(string? text = null);
-    void WriteLineHighlighted(string? text = null);
+    void PrintHighlighted(string? text = null);
+    void PrintLineHighlighted(string? text = null);
     void SetTitle(string title);
     void ReportException(Exception exception);
     UserChoice ShowButtonsAndGetChoice(IEnumerable<Game.Button> buttons);

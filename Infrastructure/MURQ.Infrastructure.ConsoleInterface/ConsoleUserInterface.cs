@@ -16,6 +16,8 @@ public class ConsoleUserInterface : IUserInterface, IDisposable
         originalOutputEncoding = Console.OutputEncoding;
         Console.OutputEncoding = Encoding.UTF8;
 
+        Console.ResetColor();
+
         if (!Console.IsOutputRedirected)
         {
             if (OperatingSystem.IsWindows())
@@ -33,22 +35,24 @@ public class ConsoleUserInterface : IUserInterface, IDisposable
 
     public void SetTitle(string title) => Console.Title = title;
 
-    public void Write(string? text = null)
+    public void Print(string? text)
     {
-        Console.Write(text);
+        string textToWrite = text ?? string.Empty;
 
-        if (!string.IsNullOrEmpty(text))
-            lastWrittenText = text;
+        Console.Write(textToWrite);
+
+        if (textToWrite.EndsWith(Environment.NewLine))
+            isNewLineAtLast = true;
     }
 
-    public void WriteLine(string? text = null) => Write(text + '\n');
+    public void PrintLine(string? text = null) => Print(text + Environment.NewLine);
 
-    public void WriteHighlighted(string? text = null) => DoInColors(ConsoleColor.Black, ConsoleColor.DarkYellow, () => Write(text));
+    public void PrintHighlighted(string? text) => DoInColors(ConsoleColor.Black, ConsoleColor.DarkYellow, () => Print(text));
 
-    public void WriteLineHighlighted(string? text = null)
+    public void PrintLineHighlighted(string? text)
     {
-        WriteHighlighted(text);
-        WriteLine(); // нужно новую строку делать не подсвеченной, иначе подсветка залезает на следующую строку
+        PrintHighlighted(text);
+        PrintLine(); // нужно новую строку делать не подсвеченной, иначе подсветка залезает на следующую строку
     }
 
     public UserChoice ShowButtonsAndGetChoice(IEnumerable<Game.Button> buttons)
@@ -58,7 +62,7 @@ public class ConsoleUserInterface : IUserInterface, IDisposable
         ShowButtons(buttonMap);
         UserChoice userChoice = GetValidChoice(buttonMap);
 
-        WriteLine();
+        PrintLine();
         return userChoice;
     }
 
@@ -68,7 +72,7 @@ public class ConsoleUserInterface : IUserInterface, IDisposable
         if (!Console.IsOutputRedirected)
             Console.Clear();
 
-        lastWrittenText = null;
+        isNewLineAtLast = false;
     }
 
     public void WaitAnyKey()
@@ -82,11 +86,11 @@ public class ConsoleUserInterface : IUserInterface, IDisposable
     public void ReportException(Exception exception)
     {
         Console.Beep();
-        WriteLine();
+        PrintLine();
 
-        DoInColors(ConsoleColor.Black, ConsoleColor.Red, () => WriteLine($" [ОШИБКА] {ClassifyExceptionMessage(exception)} "));
+        DoInColors(ConsoleColor.Black, ConsoleColor.Red, () => PrintLine($" [ОШИБКА] {ClassifyExceptionMessage(exception)} "));
 
-        WriteLine();
+        PrintLine();
     }
 
     private static Dictionary<char, Game.Button> MapButtonsToCharacters(IEnumerable<Game.Button> buttons) => buttons
@@ -102,14 +106,14 @@ public class ConsoleUserInterface : IUserInterface, IDisposable
 
     private void ShowButtons(Dictionary<char, Game.Button> buttonMap)
     {
-        if (lastWrittenText?[^1] is not '\n')
-            WriteLine(); // если текст локации не кончается новой строкой, то перед кнопками нужно добавить
+        if (!isNewLineAtLast)
+            PrintLine(); // если текст локации не кончается новой строкой, то перед кнопками нужно добавить
 
         DoInColors(ConsoleColor.Cyan, null, () =>
         {
             foreach (var mappedButton in buttonMap)
             {
-                WriteLine($"[{mappedButton.Key}] {mappedButton.Value.Caption}");
+                PrintLine($"[{mappedButton.Key}] {mappedButton.Value.Caption}");
             }
         });
     }
@@ -193,7 +197,7 @@ public class ConsoleUserInterface : IUserInterface, IDisposable
         CleanUp();
     }
 
-    private string? lastWrittenText = null;
+    private bool isNewLineAtLast;
     private readonly Encoding originalOutputEncoding;
     private readonly bool? originalCursorVisible;
     private bool isDisposed;
