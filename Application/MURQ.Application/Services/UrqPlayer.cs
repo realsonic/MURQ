@@ -10,7 +10,7 @@ public class UrqPlayer(IQuestSource questSource, IUserInterface userInterface, I
 {
     public async Task Run(CancellationToken cancellationToken)
     {
-        ShowTitleAndLogo();
+        PrintTitleAndLogo();
 
         try
         {
@@ -18,9 +18,8 @@ public class UrqPlayer(IQuestSource questSource, IUserInterface userInterface, I
 
             await RunPlayCycle(cancellationToken);
 
-            SayGoodbye();
+            PrintGoodbye();
             PromptAnyKey();
-            FinishWork();
         }
         catch (Exception ex)
         {
@@ -34,13 +33,22 @@ public class UrqPlayer(IQuestSource questSource, IUserInterface userInterface, I
         (Quest quest, string questName) = await questSource.GetQuest(cancellationToken);
 
         var game = new Game(quest);
+        game.OnTextPrinted += Game_OnTextPrinted;
         game.OnScreenCleared += userInterface.ClearSceen;
 
-        ShowQuestName(questName);
+        PrintQuestName(questName);
 
         game.Start();
 
         return game;
+    }
+
+    private void Game_OnTextPrinted(object? sender, Game.OnTextPrintedEventArgs e)
+    {
+        if (e.IsNewLineAtEnd)
+            userInterface.PrintLine(e.Text, e.ForegroundColor, e.BackgroundColor);
+        else
+            userInterface.Print(e.Text, e.ForegroundColor, e.BackgroundColor);
     }
 
     private async Task RunPlayCycle(CancellationToken cancellationToken)
@@ -49,11 +57,9 @@ public class UrqPlayer(IQuestSource questSource, IUserInterface userInterface, I
 
         while (true)
         {
-            userInterface.Write(game.CurrentLocation.Text);
+            var userChoice = userInterface.PrintButtonsAndWaitChoice(game.CurrentLocation.Buttons);
 
-            var userChoice = userInterface.ShowButtonsAndGetChoice(game.CurrentLocation.Buttons);
-
-            userInterface.WriteLine();
+            userInterface.PrintLine();
 
             switch (userChoice)
             {
@@ -70,12 +76,12 @@ public class UrqPlayer(IQuestSource questSource, IUserInterface userInterface, I
         }
     }
 
-    private void ShowTitleAndLogo()
+    private void PrintTitleAndLogo()
     {
         string version = versionProvider.Version;
         userInterface.SetTitle($"MURQ.Console {version}");
         var versionWithPrefix = $"v.{version}";
-        userInterface.WriteLine($"""
+        userInterface.PrintLine($"""
 
                 /\_/\
                ( o.o )
@@ -90,27 +96,33 @@ public class UrqPlayer(IQuestSource questSource, IUserInterface userInterface, I
         """);
     }
 
-    private void ShowQuestName(string? questName) => userInterface.WriteLine($"{questName}\n");
-
-    private void ReportPressedButton(ButtonChosen buttonChosen) 
-        => userInterface.WriteLine($"> [{buttonChosen.ButtonCharacter}] {buttonChosen.Button.Caption}\n");
-
-    private void SayGoodbye()
+    private void PrintQuestName(string? questName)
     {
-        userInterface.WriteLine();
-        userInterface.WriteLineHighlighted(" Вы нажали выход. До свидания! ");
-        userInterface.WriteLine();
+        userInterface.PrintLine($"{questName}");
+        userInterface.PrintLine();
     }
 
-    private void FinishWork() => userInterface.FinishWork();
+    private void ReportPressedButton(ButtonChosen buttonChosen)
+    {
+        userInterface.PrintLine($"> [{buttonChosen.ButtonCharacter}] {buttonChosen.Button.Caption}");
+        userInterface.PrintLine();
+    }
+
+    private void PrintGoodbye()
+    {
+        userInterface.PrintLine();
+        userInterface.PrintHighlighted(" Вы нажали выход. До свидания! ");
+        userInterface.PrintLine();
+        userInterface.PrintLine();
+    }
 
     private void PromptAnyKey()
     {
-        userInterface.Write("Нажмите любую клавишу для выхода...");
+        userInterface.Print("Нажмите любую клавишу для выхода...");
         userInterface.WaitAnyKey();
     }
 
-    private void ReportException(Exception ex) => userInterface.ReportException(ex);
+    private void ReportException(Exception ex) => userInterface.PrintException(ex);
 
     private Game? game;
 }

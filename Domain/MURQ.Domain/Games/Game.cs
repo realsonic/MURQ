@@ -11,48 +11,78 @@ namespace MURQ.Domain.Games;
 
 public class Game(Quest quest) : IGameContext
 {
+    public event EventHandler<OnTextPrintedEventArgs>? OnTextPrinted;
+
     public event Action? OnScreenCleared;
 
     public Quest Quest { get; } = quest;
 
     public CurrentLocationView CurrentLocation => new()
     {
-        Name = _currentLocationName,
-        Text = _currentScreenText.ToString(),
-        Buttons = _currentScreenButtons
+        Name = currentLocationName,
+        Text = currentLocationText.ToString(),
+        Buttons = currentScreenButtons
     };
+
+    /// <summary>
+    /// Цвет текста. Работает через переменную <c>style_dos_textcolor</c>.
+    /// </summary>
+    public InterfaceColor ForegroundColor => ExtractColorsFromVariable().ForegroundColor;
+
+    /// <summary>
+    /// Цвет фона текста. Работает через переменную <c>style_dos_textcolor</c>.
+    /// </summary>
+    public InterfaceColor BackgroundColor => ExtractColorsFromVariable().BackgroundColor;
 
     public void Start()
     {
         if (IsStarted) throw new MurqException("Игра уже запущена, второй раз запустить нельзя.");
 
+        SeedSystemVariables();
         ClearCurrentView();
         SetNextStatementToStarting();
         RunStatements();
     }
 
-    void IGameContext.PrintText(string? text) => _currentScreenText.Append(text);
+    /// <inheritdoc/>
+    void IGameContext.Print(string? text)
+    {
+        currentLocationText.Append(text);
+        OnTextPrinted?.Invoke(this, new OnTextPrintedEventArgs(text, false, ForegroundColor, BackgroundColor));
+    }
 
-    void IGameContext.AddButton(string caption, LabelStatement? labelStatement) => _currentScreenButtons.Add(new Button
+    /// <inheritdoc/>
+    void IGameContext.PrintLine(string? text)
+    {
+        currentLocationText.AppendLine(text);
+        OnTextPrinted?.Invoke(this, new OnTextPrintedEventArgs(text, true, ForegroundColor, BackgroundColor));
+    }
+
+    /// <inheritdoc/>
+    void IGameContext.AddButton(string caption, LabelStatement? labelStatement) => currentScreenButtons.Add(new Button
     {
         Caption = caption,
         OnButtonPressed = () => JumpByButton(labelStatement)
     });
 
+    /// <inheritdoc/>
     void IGameContext.EndLocation() => SetModeWaitingUserInput();
 
+    /// <inheritdoc/>
     void IGameContext.ClearScreen()
     {
         ClearCurrentView();
         OnScreenCleared?.Invoke();
     }
 
-    void IGameContext.AssignVariable(string VariableName, Value Value)
+    public void AssignVariable(string name, Value value)
     {
-        _variables[VariableName] = new Variable(VariableName, Value);
+        if (TryAssignSystemVariable(name, value)) return;
+
+        _variables[name] = new Variable(name, value);
     }
 
-    public Variable? GetVariable(string variableName) => GetSystemVariable(variableName) ?? GetGameVariable(variableName);
+    public Variable? GetVariable(string variableName) => GetPseudoVariable(variableName) ?? GetTrueVariable(variableName);
 
     void IGameContext.Goto(LabelStatement? labelStatement) => JumpByGoto(labelStatement);
 
@@ -78,14 +108,14 @@ public class Game(Quest quest) : IGameContext
 
     private void ClearCurrentView()
     {
-        _currentScreenText.Clear();
-        _currentScreenButtons.Clear();
+        currentLocationText.Clear();
+        currentScreenButtons.Clear();
     }
 
-    private void UpdateCurrentLocationName(string currentLocationName)
+    private void UpdateCurrentLocationName(string name)
     {
-        _previousLocationName = _currentLocationName;
-        _currentLocationName = currentLocationName;
+        previousLocationName = currentLocationName;
+        currentLocationName = name;
     }
 
     private void RunStatements()
@@ -100,13 +130,13 @@ public class Game(Quest quest) : IGameContext
 
     private void RunCurrentStatement()
     {
-        if (_currentStatement is null)
+        if (currentStatement is null)
         {
             SetModeWaitingUserInput();
             return;
         }
 
-        _currentStatement.Run(this);
+        currentStatement.Run(this);
     }
 
     private void SetCurrentLabel(LabelStatement? labelStatement)
@@ -117,25 +147,67 @@ public class Game(Quest quest) : IGameContext
         }
     }
 
-    private Variable? GetSystemVariable(string variableName) => variableName.ToLower() switch
+    private void SeedSystemVariables()
     {
-        "current_loc" => new Variable("current_loc", new StringValue(_currentLocationName ?? string.Empty)),
-        "previous_loc" => new Variable("previous_loc", new StringValue(_previousLocationName ?? string.Empty)),
-        _ when rndRegex.IsMatch(variableName) => GetRandom(variableName),
+        _variables[StyleDosTextcolorVarName] = new Variable(StyleDosTextcolorVarName, new NumberValue(7));
+    }
+
+    private Variable? GetPseudoVariable(string name) => name.ToLower() switch
+    {
+        CurrentLocVarName => new Variable(CurrentLocVarName, new StringValue(currentLocationName ?? string.Empty)),
+        PreviousLocVarName => new Variable(PreviousLocVarName, new StringValue(previousLocationName ?? string.Empty)),
+        _ when rndRegex.IsMatch(name) => GetRandom(name),
         _ => null
     };
 
-    private Variable? GetGameVariable(string variableName) => _variables.TryGetValue(variableName, out Variable? variable) ? variable : null;
+    private Variable? GetTrueVariable(string variableName) => _variables.TryGetValue(variableName, out Variable? variable) ? variable : null;
 
-    private void PromoteNextStatement() => _currentStatement = Quest.GetNextStatement(_currentStatement);
+    private bool TryAssignSystemVariable(string name, Value value)
+    {
+        switch (name.ToLower())
+        {
+            case StyleDosTextcolorVarName:
+                if (value is NumberValue numberValue)
+                    _variables[StyleDosTextcolorVarName] = new Variable(StyleDosTextcolorVarName, numberValue);
+                return true;
 
-    private void SetNextStatementToStarting() => _currentStatement = Quest.StartingStatement;
-    private void SetModeRunningStatements() => _gameState = GameState.RunningStatements;
-    private void SetModeWaitingUserInput() => _gameState = GameState.WaitingUserInput;
-    private void SetCurrentStatement(Statement statement) => _currentStatement = statement;
+            default:
+                return false;
+        }
+    }
 
-    private bool IsStarted => _gameState is not GameState.InitialState;
-    private bool IsRunningStatements => _gameState == GameState.RunningStatements;
+    private (InterfaceColor ForegroundColor, InterfaceColor BackgroundColor) ExtractColorsFromVariable()
+    {
+        Variable colorVariable = _variables[StyleDosTextcolorVarName] ?? throw new MurqException($"Нет системной переменной {StyleDosTextcolorVarName}.");
+        NumberValue numberValue = colorVariable.Value as NumberValue ?? throw new MurqException($"Системная переменная {StyleDosTextcolorVarName} не числового типа.");
+        decimal value = numberValue.AsDecimal;
+
+        byte colorCode = value switch
+        {
+            > byte.MaxValue => 128,
+            < byte.MinValue => 128,
+            _ => (byte)value
+        };
+
+        return DecodeDosTextColor(colorCode);
+    }
+
+    private static (InterfaceColor ForegroundColor, InterfaceColor BackgroundColor) DecodeDosTextColor(byte value)
+    {
+        byte foreground = (byte)((value & 0x0F));
+        byte background = (byte)((value & 0xF0) >> 0x4);
+        return (ForegroundColor: (InterfaceColor)foreground, BackgroundColor: (InterfaceColor)background);
+    }
+
+    private void PromoteNextStatement() => currentStatement = Quest.GetNextStatement(currentStatement);
+
+    private void SetNextStatementToStarting() => currentStatement = Quest.StartingStatement;
+    private void SetModeRunningStatements() => gameState = GameState.RunningStatements;
+    private void SetModeWaitingUserInput() => gameState = GameState.WaitingUserInput;
+    private void SetCurrentStatement(Statement statement) => currentStatement = statement;
+
+    private bool IsStarted => gameState is not GameState.InitialState;
+    private bool IsRunningStatements => gameState == GameState.RunningStatements;
 
     private Variable GetRandom(string variableName)
     {
@@ -167,13 +239,25 @@ public class Game(Quest quest) : IGameContext
         public void Press() => OnButtonPressed();
     }
 
-    private GameState _gameState = GameState.InitialState;
-    private Statement? _currentStatement;
-    private readonly StringBuilder _currentScreenText = new();
-    private readonly List<Button> _currentScreenButtons = [];
-    private string? _currentLocationName;
-    private string? _previousLocationName;
+    private GameState gameState = GameState.InitialState;
+    private Statement? currentStatement;
+    private readonly StringBuilder currentLocationText = new();
+    private readonly List<Button> currentScreenButtons = [];
+    private string? currentLocationName;
+    private string? previousLocationName;
     private readonly Dictionary<string, Variable> _variables = new(StringComparer.InvariantCultureIgnoreCase);
     private readonly Regex rndRegex = new(@"^rnd(?<number>\d*)$", RegexOptions.Compiled | RegexOptions.IgnoreCase);
     private readonly Random random = new();
+
+    private const string CurrentLocVarName = "current_loc";
+    private const string PreviousLocVarName = "previous_loc";
+    private const string StyleDosTextcolorVarName = "style_dos_textcolor";
+
+    public class OnTextPrintedEventArgs(string? text, bool isNewLineAtEnd, InterfaceColor foregroundColor, InterfaceColor backgroundColor) : EventArgs
+    {
+        public string? Text { get; } = text;
+        public bool IsNewLineAtEnd { get; } = isNewLineAtEnd;
+        public InterfaceColor ForegroundColor { get; } = foregroundColor;
+        public InterfaceColor BackgroundColor { get; } = backgroundColor;
+    }
 }

@@ -9,45 +9,74 @@ using static MURQ.Application.Interfaces.IUserInterface;
 
 namespace MURQ.Infrastructure.ConsoleInterface;
 
-public class ConsoleUserInterface : IUserInterface
+public class ConsoleUserInterface : IUserInterface, IDisposable
 {
     public ConsoleUserInterface()
     {
+        originalOutputEncoding = Console.OutputEncoding;
         Console.OutputEncoding = Encoding.UTF8;
+
+        Console.ResetColor();
+
         if (!Console.IsOutputRedirected)
         {
+            if (OperatingSystem.IsWindows())
+                originalCursorVisible = Console.CursorVisible;
+
             Console.CursorVisible = false; // без курсора красивее :)
         }
     }
 
+    /// <inheritdoc/>
     public void SetTitle(string title) => Console.Title = title;
 
-    public void Write(string? text = null)
+
+    /// <inheritdoc/>
+    public void Print(string? text, InterfaceColor? foreground = null, InterfaceColor? background = null)
     {
-        Console.Write(text);
-        
-        if (!string.IsNullOrEmpty(text))
-            lastWrittenText = text;
+        string textToWrite = text ?? string.Empty;
+
+        try
+        {
+            if (foreground is not null) Console.ForegroundColor = (ConsoleColor)foreground.Value;
+            if (background is not null) Console.BackgroundColor = (ConsoleColor)background.Value;
+
+            Console.Write(textToWrite);
+        }
+        finally
+        {
+            Console.ResetColor();
+        }
     }
 
-    public void WriteLine(string? text = null) => Write(text + '\n');
-
-    public void WriteHighlighted(string? text = null) => DoInColors(ConsoleColor.Black, ConsoleColor.DarkYellow, () => Write(text));
-
-    public void WriteLineHighlighted(string? text = null)
+    /// <inheritdoc/>
+    public void PrintLine(string? text = null, InterfaceColor? foreground = null, InterfaceColor? background = null)
     {
-        WriteHighlighted(text);
-        WriteLine(); // нужно новую строку делать не подсвеченной, иначе подсветка залезает на следующую строку
+        Print(text, foreground, background);
+        Console.WriteLine();
     }
 
-    public UserChoice ShowButtonsAndGetChoice(IEnumerable<Game.Button> buttons)
+    /// <inheritdoc/>
+    public void PrintHighlighted(string? text) => Print(text, InterfaceColor.Black, InterfaceColor.DarkYellow);
+
+    /// <inheritdoc/>
+    public void PrintException(Exception exception)
+    {
+        Console.Beep();
+        PrintLine();
+        PrintLine($" [ОШИБКА] {ClassifyExceptionMessage(exception)} ", InterfaceColor.Black, InterfaceColor.Red);
+        PrintLine();
+    }
+
+    /// <inheritdoc/>
+    public UserChoice PrintButtonsAndWaitChoice(IEnumerable<Game.Button> buttons)
     {
         var buttonMap = MapButtonsToCharacters(buttons);
 
-        ShowButtons(buttonMap);
+        PrintButtons(buttonMap);
         UserChoice userChoice = GetValidChoice(buttonMap);
 
-        WriteLine();
+        PrintLine();
         return userChoice;
     }
 
@@ -56,26 +85,15 @@ public class ConsoleUserInterface : IUserInterface
     {
         if (!Console.IsOutputRedirected)
             Console.Clear();
-
-        lastWrittenText = null;
     }
 
+    /// <inheritdoc/>
     public void WaitAnyKey()
     {
         if (!Console.IsInputRedirected)
             Console.ReadKey(true);
         else
             Console.Read();
-    }
-
-    public void ReportException(Exception exception)
-    {
-        Console.Beep();
-        WriteLine();
-
-        DoInColors(ConsoleColor.Black, ConsoleColor.Red, () => WriteLine($" [ОШИБКА] {ClassifyExceptionMessage(exception)} "));
-
-        WriteLine();
     }
 
     private static Dictionary<char, Game.Button> MapButtonsToCharacters(IEnumerable<Game.Button> buttons) => buttons
@@ -89,18 +107,14 @@ public class ConsoleUserInterface : IUserInterface
         _ => '❌'
     };
 
-    private void ShowButtons(Dictionary<char, Game.Button> buttonMap)
+    private void PrintButtons(Dictionary<char, Game.Button> buttonMap)
     {
-        if (lastWrittenText?[^1] is not '\n')
-            WriteLine(); // если текст локации не кончается новой строкой, то перед кнопками нужно добавить
+        PrintLine();
 
-        DoInColors(ConsoleColor.Cyan, null, () =>
+        foreach (var mappedButton in buttonMap)
         {
-            foreach (var mappedButton in buttonMap)
-            {
-                WriteLine($"[{mappedButton.Key}] {mappedButton.Value.Caption}");
-            }
-        });
+            PrintLine($"[{mappedButton.Key}] {mappedButton.Value.Caption}", InterfaceColor.Cyan, InterfaceColor.Black);
+        }
     }
 
     private static UserChoice GetValidChoice(Dictionary<char, Game.Button> buttonMap)
@@ -123,6 +137,51 @@ public class ConsoleUserInterface : IUserInterface
                 return new QuitChosen();
         }
     }
+
+    private static string ClassifyExceptionMessage(Exception exception) => exception switch
+    {
+        MurqException murqException => murqException switch
+        {
+            UrqlException => $"Ошибка при загрузке URQL: {exception.Message}",
+            _ => exception.Message
+        },
+        _ => $"""
+            Непредвиденная ошибка: {exception.Message}.
+            
+            Сообщите разработчикам детали:
+            {exception}
+            """
+    };
+
+    public void Dispose()
+    {
+        CleanUp();
+        GC.SuppressFinalize(this);
+    }
+
+    protected virtual void CleanUp()
+    {
+        if (!isDisposed)
+        {
+            Console.OutputEncoding = originalOutputEncoding;
+            if (!Console.IsOutputRedirected)
+            {
+                Console.CursorVisible = originalCursorVisible ?? true; // возвращаем курсор на место
+            }
+            Console.ResetColor();
+
+            isDisposed = true;
+        }
+    }
+
+    ~ConsoleUserInterface()
+    {
+        CleanUp();
+    }
+
+    private readonly Encoding originalOutputEncoding;
+    private readonly bool? originalCursorVisible;
+    private bool isDisposed;
 
     private abstract record UserInput
     {
@@ -160,46 +219,4 @@ public class ConsoleUserInterface : IUserInterface
         public override bool IsReload() => Char is 'r' or 'R';
         public override bool IsQuit() => Char is null or 'q' or 'Q';
     }
-
-    private static string ClassifyExceptionMessage(Exception exception) => exception switch
-    {
-        MurqException murqException => murqException switch
-        {
-            UrqlException => $"Ошибка при загрузке URQL: {exception.Message}",
-            _ => exception.Message
-        },
-        _ => $"""
-            Непредвиденная ошибка: {exception.Message}.
-            
-            Сообщите разработчикам детали:
-            {exception}
-            """
-    };
-
-    private static void DoInColors(ConsoleColor? foregroundColor, ConsoleColor? backgroundColor, Action action)
-    {
-        ConsoleColor previousForegroundColor = Console.ForegroundColor;
-        ConsoleColor previousBackgroundColor = Console.BackgroundColor;
-        try
-        {
-            Console.ForegroundColor = foregroundColor ?? Console.ForegroundColor;
-            Console.BackgroundColor = backgroundColor ?? Console.BackgroundColor;
-            action();
-        }
-        finally
-        {
-            Console.ForegroundColor = previousForegroundColor;
-            Console.BackgroundColor = previousBackgroundColor;
-        }
-    }
-
-    public void FinishWork()
-    {
-        if (!Console.IsOutputRedirected)
-        {
-            Console.CursorVisible = true; // возвращаем курсор на место
-        }
-    }
-
-    private string? lastWrittenText = null;
 }

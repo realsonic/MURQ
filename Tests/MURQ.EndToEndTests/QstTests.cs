@@ -47,7 +47,7 @@ public class QstTests
         sut.Start();
 
         // Assert
-        sut.CurrentLocation.Text.Should().Be("Привет, мир!\n");
+        sut.CurrentLocation.Text.Should().Be("Привет, мир!" + Environment.NewLine);
     }
 
     [Fact(DisplayName = "Метки загружаются")]
@@ -79,7 +79,7 @@ public class QstTests
         sut.CurrentLocation.Buttons[0].Press();
 
         // Assert
-        sut.CurrentLocation.Text.Should().Be("Привет, это тест кнопки!\n");
+        sut.CurrentLocation.Text.Should().Be("Привет, это тест кнопки!" + Environment.NewLine);
         sut.CurrentLocation.Buttons[0].Caption.Should().Be("Нажми меня, чтобы попасть снова сюда.");
     }
 
@@ -96,7 +96,7 @@ public class QstTests
 
         // Assert
         sut.CurrentLocation.Name.Should().Be("Далеко");
-        sut.CurrentLocation.Text.Should().Be("Вы попали совсем далеко!\n");
+        sut.CurrentLocation.Text.Should().Be("Вы попали совсем далеко!" + Environment.NewLine);
         sut.CurrentLocation.Buttons[0].Caption.Should().Be("Назад!");
     }
 
@@ -110,7 +110,7 @@ public class QstTests
         sut.Start();
 
         // Assert
-        sut.CurrentLocation.Text.Should().Be("Привет, мир!\n");
+        sut.CurrentLocation.Text.Should().Be("Привет, мир!" + Environment.NewLine);
     }
 
     [Fact(DisplayName = "Однострочные комментарии игнорируются")]
@@ -125,7 +125,7 @@ public class QstTests
 
         // Assert
         sut.CurrentLocation.Name.Should().Be("1");
-        sut.CurrentLocation.Text.Should().Be("Привет, мир! \n");
+        sut.CurrentLocation.Text.Should().Be("Привет, мир! " + Environment.NewLine);
         sut.CurrentLocation.Buttons[0].Caption.Should().Be("Повторить!");
         (sut.Quest.Statements[2] as ButtonStatement)!.LabelStatement!.Label.Should().Be("1");
     }
@@ -175,7 +175,7 @@ public class QstTests
         sut.Start();
 
         // Assert
-        sut.CurrentLocation.Text.Should().Be("Всего хорошего!\n");
+        sut.CurrentLocation.Text.Should().Be("Всего хорошего!" + Environment.NewLine);
     }
 
     [Fact(DisplayName = "Из меток-дублей выбирается первая")]
@@ -190,7 +190,7 @@ public class QstTests
         // Assert
         sut.CurrentLocation.Buttons[0].Press();
         sut.CurrentLocation.Buttons[0].Press();
-        sut.CurrentLocation.Text.Should().Be("Метка1\n");
+        sut.CurrentLocation.Text.Should().Be("Метка1" + Environment.NewLine);
     }
 
     [Fact(DisplayName = "Однострочные комментарии вырезаются из кнопок")]
@@ -203,7 +203,7 @@ public class QstTests
         sut.Start();
 
         // Assert
-        sut.CurrentLocation.Text.Should().Be("Тест комментариев \n");
+        sut.CurrentLocation.Text.Should().Be("Тест комментариев " + Environment.NewLine);
         IEnumerable<string> buttonCaptions = sut.CurrentLocation.Buttons.Select(button => button.Caption);
         buttonCaptions.Should().BeEquivalentTo([
             "тест кнопки без комментария",
@@ -270,7 +270,7 @@ public class QstTests
         sut.Start();
 
         // Assert
-        sut.CurrentLocation.Text.Should().Be("  |\n/ |\n");
+        sut.CurrentLocation.Text.Should().Be("  |" + Environment.NewLine + "/ |" + Environment.NewLine);
     }
 
     [Fact(DisplayName = "При проходе дублирующей метки не происходит переброс на оригинальную метку")]
@@ -284,7 +284,7 @@ public class QstTests
         sut.CurrentLocation.Buttons.Single().Press();
 
         // Assert
-        sut.CurrentLocation.Text.Should().Be("\nя опустил морду - четкий запах манит мен¤ вперед.\n");
+        sut.CurrentLocation.Text.Should().Be(Environment.NewLine + "я опустил морду - четкий запах манит мен¤ вперед." + Environment.NewLine);
     }
 
     [Fact(DisplayName = "Подстановка с переменной вставляет значение")]
@@ -297,7 +297,7 @@ public class QstTests
         sut.Start();
 
         // Assert
-        sut.CurrentLocation.Text.Should().Be("У меня 4 рубля!\n");
+        sut.CurrentLocation.Text.Should().Be("У меня 4 рубля!" + Environment.NewLine);
     }
 
     [Fact(DisplayName = "Подстановка со строковой переменной вставляет значение")]

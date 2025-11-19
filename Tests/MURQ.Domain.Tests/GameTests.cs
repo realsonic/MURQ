@@ -110,6 +110,6 @@ public class GameTests
         game.Start();
 
         // Assert
-        game.CurrentLocation.Text.Should().Be("Всего хорошего!\n");
+        game.CurrentLocation.Text.Should().Be("Всего хорошего!" + Environment.NewLine);
     }
 }
