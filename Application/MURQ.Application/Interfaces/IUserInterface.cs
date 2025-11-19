@@ -8,37 +8,40 @@ namespace MURQ.Application.Interfaces;
 public interface IUserInterface
 {
     /// <summary>
-    /// Цвет текста.
-    /// </summary>
-    InterfaceColor ForegroundColor { set; }
-
-    /// <summary>
-    /// Цвет фона текста.
-    /// </summary>
-    InterfaceColor BackgroundColor { set; }
-
-    /// <summary>
     /// Напечатать текст для игрока.
     /// </summary>
     /// <param name="text">Текст.</param>
-    void Print(string? text);
+    /// <param name="foreground">Цвет текста.</param>
+    /// <param name="background">Цвет фона.</param>
+    void Print(string? text, InterfaceColor? foreground = null, InterfaceColor? background = null);
 
     /// <summary>
     /// Напечатать текст для игрока и новую строку в конце.
     /// </summary>
     /// <param name="text">Текст.</param>
-    void PrintLine(string? text = null);
+    /// <param name="foreground">Цвет текста.</param>
+    /// <param name="background">Цвет фона.</param>
+    void PrintLine(string? text = null, InterfaceColor? foreground = null, InterfaceColor? background = null);
+
+    /// <summary>
+    /// Вывести выделенный текст.
+    /// </summary>
+    /// <param name="text">Текст</param>
+    void PrintHighlighted(string? text = null);
+
+    /// <summary>
+    /// Вывести ошибку.
+    /// </summary>
+    /// <param name="exception">Ошибка</param>
+    void PrintException(Exception exception);
 
     /// <summary>
     /// Очистить экран.
     /// </summary>
     void ClearSceen();
 
-    void PrintHighlighted(string? text = null);
-    void PrintLineHighlighted(string? text = null);
     void SetTitle(string title);
-    void ReportException(Exception exception);
-    UserChoice ShowButtonsAndGetChoice(IEnumerable<Game.Button> buttons);
+    UserChoice PrintButtonsAndWaitChoice(IEnumerable<Game.Button> buttons);
     void WaitAnyKey();
 
     public abstract record UserChoice();

@@ -27,39 +27,53 @@ public class ConsoleUserInterface : IUserInterface, IDisposable
         }
     }
 
-    /// <inheritdoc/>>
-    public InterfaceColor ForegroundColor { set => Console.ForegroundColor = (ConsoleColor)value; }
-
-    /// <inheritdoc/>>
-    public InterfaceColor BackgroundColor { set => Console.BackgroundColor = (ConsoleColor)value; }
-
+    /// <inheritdoc/>
     public void SetTitle(string title) => Console.Title = title;
 
-    public void Print(string? text)
+
+    /// <inheritdoc/>
+    public void Print(string? text, InterfaceColor? foreground = null, InterfaceColor? background = null)
     {
         string textToWrite = text ?? string.Empty;
 
-        Console.Write(textToWrite);
+        try
+        {
+            if (foreground is not null) Console.ForegroundColor = (ConsoleColor)foreground.Value;
+            if (background is not null) Console.BackgroundColor = (ConsoleColor)background.Value;
 
-        if (textToWrite.EndsWith(Environment.NewLine))
-            isNewLineAtLast = true;
+            Console.Write(textToWrite);
+        }
+        finally
+        {
+            Console.ResetColor();
+        }
     }
 
-    public void PrintLine(string? text = null) => Print(text + Environment.NewLine);
-
-    public void PrintHighlighted(string? text) => DoInColors(ConsoleColor.Black, ConsoleColor.DarkYellow, () => Print(text));
-
-    public void PrintLineHighlighted(string? text)
+    /// <inheritdoc/>
+    public void PrintLine(string? text = null, InterfaceColor? foreground = null, InterfaceColor? background = null)
     {
-        PrintHighlighted(text);
-        PrintLine(); // нужно новую строку делать не подсвеченной, иначе подсветка залезает на следующую строку
+        Print(text, foreground, background);
+        Console.WriteLine();
     }
 
-    public UserChoice ShowButtonsAndGetChoice(IEnumerable<Game.Button> buttons)
+    /// <inheritdoc/>
+    public void PrintHighlighted(string? text) => Print(text, InterfaceColor.Black, InterfaceColor.DarkYellow);
+
+    /// <inheritdoc/>
+    public void PrintException(Exception exception)
+    {
+        Console.Beep();
+        PrintLine();
+        PrintLine($" [ОШИБКА] {ClassifyExceptionMessage(exception)} ", InterfaceColor.Black, InterfaceColor.Red);
+        PrintLine();
+    }
+
+    /// <inheritdoc/>
+    public UserChoice PrintButtonsAndWaitChoice(IEnumerable<Game.Button> buttons)
     {
         var buttonMap = MapButtonsToCharacters(buttons);
 
-        ShowButtons(buttonMap);
+        PrintButtons(buttonMap);
         UserChoice userChoice = GetValidChoice(buttonMap);
 
         PrintLine();
@@ -71,26 +85,15 @@ public class ConsoleUserInterface : IUserInterface, IDisposable
     {
         if (!Console.IsOutputRedirected)
             Console.Clear();
-
-        isNewLineAtLast = false;
     }
 
+    /// <inheritdoc/>
     public void WaitAnyKey()
     {
         if (!Console.IsInputRedirected)
             Console.ReadKey(true);
         else
             Console.Read();
-    }
-
-    public void ReportException(Exception exception)
-    {
-        Console.Beep();
-        PrintLine();
-
-        DoInColors(ConsoleColor.Black, ConsoleColor.Red, () => PrintLine($" [ОШИБКА] {ClassifyExceptionMessage(exception)} "));
-
-        PrintLine();
     }
 
     private static Dictionary<char, Game.Button> MapButtonsToCharacters(IEnumerable<Game.Button> buttons) => buttons
@@ -104,18 +107,14 @@ public class ConsoleUserInterface : IUserInterface, IDisposable
         _ => '❌'
     };
 
-    private void ShowButtons(Dictionary<char, Game.Button> buttonMap)
+    private void PrintButtons(Dictionary<char, Game.Button> buttonMap)
     {
-        if (!isNewLineAtLast)
-            PrintLine(); // если текст локации не кончается новой строкой, то перед кнопками нужно добавить
+        PrintLine();
 
-        DoInColors(ConsoleColor.Cyan, null, () =>
+        foreach (var mappedButton in buttonMap)
         {
-            foreach (var mappedButton in buttonMap)
-            {
-                PrintLine($"[{mappedButton.Key}] {mappedButton.Value.Caption}");
-            }
-        });
+            PrintLine($"[{mappedButton.Key}] {mappedButton.Value.Caption}", InterfaceColor.Cyan, InterfaceColor.Black);
+        }
     }
 
     private static UserChoice GetValidChoice(Dictionary<char, Game.Button> buttonMap)
@@ -154,23 +153,6 @@ public class ConsoleUserInterface : IUserInterface, IDisposable
             """
     };
 
-    private static void DoInColors(ConsoleColor? foregroundColor, ConsoleColor? backgroundColor, Action action)
-    {
-        ConsoleColor previousForegroundColor = Console.ForegroundColor;
-        ConsoleColor previousBackgroundColor = Console.BackgroundColor;
-        try
-        {
-            Console.ForegroundColor = foregroundColor ?? Console.ForegroundColor;
-            Console.BackgroundColor = backgroundColor ?? Console.BackgroundColor;
-            action();
-        }
-        finally
-        {
-            Console.ForegroundColor = previousForegroundColor;
-            Console.BackgroundColor = previousBackgroundColor;
-        }
-    }
-
     public void Dispose()
     {
         CleanUp();
@@ -197,7 +179,6 @@ public class ConsoleUserInterface : IUserInterface, IDisposable
         CleanUp();
     }
 
-    private bool isNewLineAtLast;
     private readonly Encoding originalOutputEncoding;
     private readonly bool? originalCursorVisible;
     private bool isDisposed;

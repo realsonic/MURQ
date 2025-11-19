@@ -45,13 +45,10 @@ public class UrqPlayer(IQuestSource questSource, IUserInterface userInterface, I
 
     private void Game_OnTextPrinted(object? sender, Game.OnTextPrintedEventArgs e)
     {
-        userInterface.ForegroundColor = e.ForegroundColor;
-        userInterface.BackgroundColor = e.BackgroundColor;
-
         if (e.IsNewLineAtEnd)
-            userInterface.PrintLine(e.Text);
+            userInterface.PrintLine(e.Text, e.ForegroundColor, e.BackgroundColor);
         else
-            userInterface.Print(e.Text);
+            userInterface.Print(e.Text, e.ForegroundColor, e.BackgroundColor);
     }
 
     private async Task RunPlayCycle(CancellationToken cancellationToken)
@@ -60,7 +57,7 @@ public class UrqPlayer(IQuestSource questSource, IUserInterface userInterface, I
 
         while (true)
         {
-            var userChoice = userInterface.ShowButtonsAndGetChoice(game.CurrentLocation.Buttons);
+            var userChoice = userInterface.PrintButtonsAndWaitChoice(game.CurrentLocation.Buttons);
 
             userInterface.PrintLine();
 
@@ -114,7 +111,8 @@ public class UrqPlayer(IQuestSource questSource, IUserInterface userInterface, I
     private void PrintGoodbye()
     {
         userInterface.PrintLine();
-        userInterface.PrintLineHighlighted(" Вы нажали выход. До свидания! ");
+        userInterface.PrintHighlighted(" Вы нажали выход. До свидания! ");
+        userInterface.PrintLine();
         userInterface.PrintLine();
     }
 
@@ -124,7 +122,7 @@ public class UrqPlayer(IQuestSource questSource, IUserInterface userInterface, I
         userInterface.WaitAnyKey();
     }
 
-    private void ReportException(Exception ex) => userInterface.ReportException(ex);
+    private void ReportException(Exception ex) => userInterface.PrintException(ex);
 
     private Game? game;
 }
