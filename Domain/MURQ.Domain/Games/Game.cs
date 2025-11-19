@@ -152,7 +152,6 @@ public class Game(Quest quest) : IGameContext
         _variables[StyleDosTextcolorVarName] = new Variable(StyleDosTextcolorVarName, new NumberValue(7));
     }
 
-
     private Variable? GetPseudoVariable(string name) => name.ToLower() switch
     {
         CurrentLocVarName => new Variable(CurrentLocVarName, new StringValue(currentLocationName ?? string.Empty)),
