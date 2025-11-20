@@ -38,17 +38,17 @@ jobs:
     - name: Upload artifact - win
       uses: actions/upload-artifact@v4
       with:
-        name: MURQ.Console.win.zip
+        name: MURQ.Console.win
         path: ./publish-win/  # или ./published-app.zip
 
     - name: Upload artifact - linux
       uses: actions/upload-artifact@v4
       with:
-        name: MURQ.Console.linux.zip
+        name: MURQ.Console.linux
         path: ./publish-linux/  # или ./published-app.zip
 
     - name: Upload artifact - osx
       uses: actions/upload-artifact@v4
       with:
-        name: MURQ.Console.osx.zip
+        name: MURQ.Console.osx
         path: ./publish-osx/  # или ./published-app.zip
