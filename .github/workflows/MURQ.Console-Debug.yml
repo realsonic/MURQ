@@ -35,23 +35,6 @@ jobs:
         && dotnet publish Presentation\MURQ.Console\MURQ.Console.csproj --os linux --configuration Debug --self-contained true -p:PublishReadyToRun=true -p:PublishSingleFile=true -p:PublishTrimmed=true -p:EnableCompressionInSingleFile=true -o ./publish-linux `
         && dotnet publish Presentation\MURQ.Console\MURQ.Console.csproj --os osx --configuration Debug --self-contained true -p:PublishReadyToRun=true -p:PublishSingleFile=true -p:PublishTrimmed=true -p:EnableCompressionInSingleFile=true -o ./publish-osx
 
-      # Опционально: архивируем результат
-    - name: Create ZIP Archive
-      shell: pwsh  # явно указываем PowerShell
-      run: |
-        Compress-Archive `
-          -Path ./publish-win/* `
-          -DestinationPath ./MURQ.Console.win.zip `
-          -CompressionLevel Optimal `
-        && Compress-Archive `
-          -Path ./publish-linux/* `
-          -DestinationPath ./MURQ.Console.linux.zip `
-          -CompressionLevel Optimal `
-        && Compress-Archive `
-          -Path ./publish-osx/* `
-          -DestinationPath ./MURQ.Console.osx.zip `
-          -CompressionLevel Optimal
-
     - name: Upload artifact - win
       uses: actions/upload-artifact@v4
       with:
