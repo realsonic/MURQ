@@ -1,0 +1,54 @@
+name: MURQ.Console в режиме Debug
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  build-test-publish:
+    runs-on: windows-latest # ubuntu-latest # или windows-latest, если нужны Windows-специфичные тесты
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v3
+      with:
+        dotnet-version: '8.0.x'  # укажите нужную версию .NET
+
+    - name: Restore dependencies
+      run: dotnet restore
+
+    - name: Build
+      run: dotnet build --configuration Debug --no-restore
+
+    - name: Run tests (if any)
+      # if: ${{ matrix.configuration == 'Release' }}  # только для Release
+      run: dotnet test --no-build --verbosity normal
+
+    - name: Publish executable
+      run: |
+        dotnet publish Presentation\MURQ.Console\MURQ.Console.csproj --os win --configuration Debug --self-contained true -p:PublishReadyToRun=true -p:PublishSingleFile=true -p:PublishTrimmed=true -p:EnableCompressionInSingleFile=true -o ./publish-win `
+        && dotnet publish Presentation\MURQ.Console\MURQ.Console.csproj --os linux --configuration Debug --self-contained true -p:PublishReadyToRun=true -p:PublishSingleFile=true -p:PublishTrimmed=true -p:EnableCompressionInSingleFile=true -o ./publish-linux `
+        && dotnet publish Presentation\MURQ.Console\MURQ.Console.csproj --os osx --configuration Debug --self-contained true -p:PublishReadyToRun=true -p:PublishSingleFile=true -p:PublishTrimmed=true -p:EnableCompressionInSingleFile=true -o ./publish-osx
+
+    - name: Upload artifact - win
+      uses: actions/upload-artifact@v4
+      with:
+        name: MURQ.Console.win
+        path: ./publish-win/  # или ./published-app.zip
+
+    - name: Upload artifact - linux
+      uses: actions/upload-artifact@v4
+      with:
+        name: MURQ.Console.linux
+        path: ./publish-linux/  # или ./published-app.zip
+
+    - name: Upload artifact - osx
+      uses: actions/upload-artifact@v4
+      with:
+        name: MURQ.Console.osx
+        path: ./publish-osx/  # или ./published-app.zip

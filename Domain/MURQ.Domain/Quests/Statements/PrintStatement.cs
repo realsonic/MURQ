@@ -14,14 +14,12 @@ public class PrintStatement : Statement
 
     public override void Run(IGameContext gameContext)
     {
-        string text = UrqString?.ToString(gameContext) ?? string.Empty;
+        string? text = UrqString?.ToString(gameContext);
 
         if (IsNewLineAtEnd)
-        {
-            text += "\n";
-        }
-       
-        gameContext.PrintText(text);
+            gameContext.PrintLine(text);
+        else
+            gameContext.Print(text);
     }
 
     private string DebuggerDisplay => $"{(IsNewLineAtEnd ? "pln" : "p")} {UrqString}";
