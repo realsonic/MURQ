@@ -31,21 +31,41 @@ jobs:
 
     - name: Publish executable
       run: |
-        dotnet publish Presentation\MURQ.Console\MURQ.Console.csproj --os win --configuration Debug --self-contained true -p:PublishReadyToRun=true -p:PublishSingleFile=true -p:PublishTrimmed=true -p:EnableCompressionInSingleFile=true -o ./publish `
-        && dotnet publish Presentation\MURQ.Console\MURQ.Console.csproj --os linux --configuration Debug --self-contained true -p:PublishReadyToRun=true -p:PublishSingleFile=true -p:PublishTrimmed=true -p:EnableCompressionInSingleFile=true -o ./publish `
-        && dotnet publish Presentation\MURQ.Console\MURQ.Console.csproj --os osx --configuration Debug --self-contained true -p:PublishReadyToRun=true -p:PublishSingleFile=true -p:PublishTrimmed=true -p:EnableCompressionInSingleFile=true -o ./publish
+        dotnet publish Presentation\MURQ.Console\MURQ.Console.csproj --os win --configuration Debug --self-contained true -p:PublishReadyToRun=true -p:PublishSingleFile=true -p:PublishTrimmed=true -p:EnableCompressionInSingleFile=true -o ./publish-win `
+        && dotnet publish Presentation\MURQ.Console\MURQ.Console.csproj --os linux --configuration Debug --self-contained true -p:PublishReadyToRun=true -p:PublishSingleFile=true -p:PublishTrimmed=true -p:EnableCompressionInSingleFile=true -o ./publish-linux `
+        && dotnet publish Presentation\MURQ.Console\MURQ.Console.csproj --os osx --configuration Debug --self-contained true -p:PublishReadyToRun=true -p:PublishSingleFile=true -p:PublishTrimmed=true -p:EnableCompressionInSingleFile=true -o ./publish-osx
 
       # Опционально: архивируем результат
     - name: Create ZIP Archive
       shell: pwsh  # явно указываем PowerShell
       run: |
         Compress-Archive `
-          -Path ./publish/* `
-          -DestinationPath ./MURQ.Console.zip `
+          -Path ./publish-win/* `
+          -DestinationPath ./MURQ.Console.win.zip `
+          -CompressionLevel Optimal `
+        && Compress-Archive `
+          -Path ./publish-linux/* `
+          -DestinationPath ./MURQ.Console.linux.zip `
+          -CompressionLevel Optimal `
+        && Compress-Archive `
+          -Path ./publish-osx/* `
+          -DestinationPath ./MURQ.Console.osx.zip `
           -CompressionLevel Optimal
 
-    - name: Upload artifact
+    - name: Upload artifact - win
       uses: actions/upload-artifact@v4
       with:
-        name: MURQ.Console.zip
-        path: ./publish/  # или ./published-app.zip
+        name: MURQ.Console.win.zip
+        path: ./publish-win/  # или ./published-app.zip
+
+    - name: Upload artifact - linux
+      uses: actions/upload-artifact@v4
+      with:
+        name: MURQ.Console.linux.zip
+        path: ./publish-linux/  # или ./published-app.zip
+
+    - name: Upload artifact - osx
+      uses: actions/upload-artifact@v4
+      with:
+        name: MURQ.Console.osx.zip
+        path: ./publish-osx/  # или ./published-app.zip
