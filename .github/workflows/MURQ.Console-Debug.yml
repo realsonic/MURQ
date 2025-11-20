@@ -31,7 +31,9 @@ jobs:
 
     - name: Publish executable
       run: |
-        dotnet publish Presentation\MURQ.Console\MURQ.Console.csproj --os win --configuration Debug --self-contained true -p:PublishReadyToRun=true -p:PublishSingleFile=true -p:PublishTrimmed=true -p:EnableCompressionInSingleFile=true -o ./publish
+        dotnet publish Presentation\MURQ.Console\MURQ.Console.csproj --os win --configuration Debug --self-contained true -p:PublishReadyToRun=true -p:PublishSingleFile=true -p:PublishTrimmed=true -p:EnableCompressionInSingleFile=true -o ./publish `
+        && dotnet publish Presentation\MURQ.Console\MURQ.Console.csproj --os linux --configuration Debug --self-contained true -p:PublishReadyToRun=true -p:PublishSingleFile=true -p:PublishTrimmed=true -p:EnableCompressionInSingleFile=true -o ./publish `
+        && dotnet publish Presentation\MURQ.Console\MURQ.Console.csproj --os osx --configuration Debug --self-contained true -p:PublishReadyToRun=true -p:PublishSingleFile=true -p:PublishTrimmed=true -p:EnableCompressionInSingleFile=true -o ./publish
 
       # Опционально: архивируем результат
     - name: Create ZIP Archive
