@@ -57,7 +57,7 @@ public class UrqPlayer(IQuestSource questSource, IUserInterface userInterface, I
 
         while (true)
         {
-            var userChoice = userInterface.PrintButtonsAndWaitChoice(game.CurrentLocation.Buttons);
+            var userChoice = userInterface.PrintButtonsAndWaitChoice(game.CurrentLocation.Buttons, game.ButtonForegroundColor, game.ButtonBackgroundColor);
 
             userInterface.PrintLine();
 

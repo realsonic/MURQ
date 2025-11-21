@@ -41,7 +41,16 @@ public interface IUserInterface
     void ClearSceen();
 
     void SetTitle(string title);
-    UserChoice PrintButtonsAndWaitChoice(IEnumerable<Game.Button> buttons);
+
+    /// <summary>
+    /// Вывести кнопки и ждать нажатия.
+    /// </summary>
+    /// <param name="buttons">Кнопки.</param>
+    /// <param name="foreground">Цвет текста.</param>
+    /// <param name="background">Цвет фона.</param>
+    /// <returns>Результат выбора пользователя. См. <see cref="UserChoice"/>.</returns>
+    UserChoice PrintButtonsAndWaitChoice(IEnumerable<Game.Button> buttons, InterfaceColor foreground, InterfaceColor background);
+    
     void WaitAnyKey();
 
     public abstract record UserChoice();
