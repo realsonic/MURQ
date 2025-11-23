@@ -69,11 +69,11 @@ public class ConsoleUserInterface : IUserInterface, IDisposable
     }
 
     /// <inheritdoc/>
-    public UserChoice PrintButtonsAndWaitChoice(IEnumerable<Game.Button> buttons)
+    public UserChoice PrintButtonsAndWaitChoice(IEnumerable<Game.Button> buttons, InterfaceColor foreground, InterfaceColor background)
     {
         var buttonMap = MapButtonsToCharacters(buttons);
 
-        PrintButtons(buttonMap);
+        PrintButtons(buttonMap, foreground, background);
         UserChoice userChoice = GetValidChoice(buttonMap);
 
         PrintLine();
@@ -107,13 +107,13 @@ public class ConsoleUserInterface : IUserInterface, IDisposable
         _ => '❌'
     };
 
-    private void PrintButtons(Dictionary<char, Game.Button> buttonMap)
+    private void PrintButtons(Dictionary<char, Game.Button> buttonMap, InterfaceColor foreground, InterfaceColor background)
     {
         PrintLine();
 
         foreach (var mappedButton in buttonMap)
         {
-            PrintLine($"[{mappedButton.Key}] {mappedButton.Value.Caption}", InterfaceColor.Cyan, InterfaceColor.Black);
+            PrintLine($"[{mappedButton.Key}] {mappedButton.Value.Caption}", foreground, background);
         }
     }
 

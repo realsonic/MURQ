@@ -57,7 +57,7 @@ public class UrqPlayer(IQuestSource questSource, IUserInterface userInterface, I
 
         while (true)
         {
-            var userChoice = userInterface.PrintButtonsAndWaitChoice(game.CurrentLocation.Buttons);
+            var userChoice = userInterface.PrintButtonsAndWaitChoice(game.CurrentLocation.Buttons, game.ButtonForegroundColor, game.ButtonBackgroundColor);
 
             userInterface.PrintLine();
 
@@ -81,7 +81,9 @@ public class UrqPlayer(IQuestSource questSource, IUserInterface userInterface, I
         string version = versionProvider.Version;
         userInterface.SetTitle($"MURQ.Console {version}");
         var versionWithPrefix = $"v.{version}";
-        userInterface.PrintLine($"""
+        
+        // Обычная версия:
+        /*userInterface.PrintLine($"""
 
                 /\_/\
                ( o.o )
@@ -91,6 +93,23 @@ public class UrqPlayer(IQuestSource questSource, IUserInterface userInterface, I
             |     |  |  | ___ |     | 
             | | | |  |  |    -|  |  | 
             |_|_|_|_____|__|__|__  _| 
+                                 |__|
+
+        """);*/
+
+        // Новогодняя версия:
+        userInterface.PrintLine($"""           
+
+                          *
+                         / \
+                /\_/\   //' \
+               ( o.o ) /   ' \
+            |   >   <  //   `\
+             | /     \/    {versionWithPrefix,8}
+             _(___ __ )_'_____\_____
+            |     |  |  | ___ |     |
+            | | | |  |  |    -|  |  |
+            |_|_|_|_____|__|__|__  _|
                                  |__|
 
         """);

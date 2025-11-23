@@ -27,12 +27,22 @@ public class Game(Quest quest) : IGameContext
     /// <summary>
     /// Цвет текста. Работает через переменную <c>style_dos_textcolor</c>.
     /// </summary>
-    public InterfaceColor ForegroundColor => ExtractColorsFromVariable().ForegroundColor;
+    public InterfaceColor TextForegroundColor => ExtractColorsFromVariable(StyleDosTextColorVarName).ForegroundColor;
 
     /// <summary>
     /// Цвет фона текста. Работает через переменную <c>style_dos_textcolor</c>.
     /// </summary>
-    public InterfaceColor BackgroundColor => ExtractColorsFromVariable().BackgroundColor;
+    public InterfaceColor TextBackgroundColor => ExtractColorsFromVariable(StyleDosTextColorVarName).BackgroundColor;
+
+    /// <summary>
+    /// Цвет текста кнопок. Работает через переменную <c>style_dos_buttoncolor</c>.
+    /// </summary>
+    public InterfaceColor ButtonForegroundColor => ExtractColorsFromVariable(StyleDosButtonColorVarName).ForegroundColor;
+
+    /// <summary>
+    /// Цвет фона кнопок. Работает через переменную <c>style_dos_buttoncolor</c>.
+    /// </summary>
+    public InterfaceColor ButtonBackgroundColor => ExtractColorsFromVariable(StyleDosButtonColorVarName).BackgroundColor;
 
     public void Start()
     {
@@ -48,14 +58,14 @@ public class Game(Quest quest) : IGameContext
     void IGameContext.Print(string? text)
     {
         currentLocationText.Append(text);
-        OnTextPrinted?.Invoke(this, new OnTextPrintedEventArgs(text, false, ForegroundColor, BackgroundColor));
+        OnTextPrinted?.Invoke(this, new OnTextPrintedEventArgs(text, false, TextForegroundColor, TextBackgroundColor));
     }
 
     /// <inheritdoc/>
     void IGameContext.PrintLine(string? text)
     {
         currentLocationText.AppendLine(text);
-        OnTextPrinted?.Invoke(this, new OnTextPrintedEventArgs(text, true, ForegroundColor, BackgroundColor));
+        OnTextPrinted?.Invoke(this, new OnTextPrintedEventArgs(text, true, TextForegroundColor, TextBackgroundColor));
     }
 
     /// <inheritdoc/>
@@ -149,7 +159,8 @@ public class Game(Quest quest) : IGameContext
 
     private void SeedSystemVariables()
     {
-        _variables[StyleDosTextcolorVarName] = new Variable(StyleDosTextcolorVarName, new NumberValue(7));
+        _variables[StyleDosTextColorVarName] = new Variable(StyleDosTextColorVarName, new NumberValue(7));
+        _variables[StyleDosButtonColorVarName] = new Variable(StyleDosButtonColorVarName, new NumberValue(15));
     }
 
     private Variable? GetPseudoVariable(string name) => name.ToLower() switch
@@ -166,9 +177,9 @@ public class Game(Quest quest) : IGameContext
     {
         switch (name.ToLower())
         {
-            case StyleDosTextcolorVarName:
+            case StyleDosTextColorVarName or StyleDosButtonColorVarName:
                 if (value is NumberValue numberValue)
-                    _variables[StyleDosTextcolorVarName] = new Variable(StyleDosTextcolorVarName, numberValue);
+                    _variables[name] = new Variable(name, numberValue);
                 return true;
 
             default:
@@ -176,10 +187,10 @@ public class Game(Quest quest) : IGameContext
         }
     }
 
-    private (InterfaceColor ForegroundColor, InterfaceColor BackgroundColor) ExtractColorsFromVariable()
+    private (InterfaceColor ForegroundColor, InterfaceColor BackgroundColor) ExtractColorsFromVariable(string variableName)
     {
-        Variable colorVariable = _variables[StyleDosTextcolorVarName] ?? throw new MurqException($"Нет системной переменной {StyleDosTextcolorVarName}.");
-        NumberValue numberValue = colorVariable.Value as NumberValue ?? throw new MurqException($"Системная переменная {StyleDosTextcolorVarName} не числового типа.");
+        Variable colorVariable = _variables[variableName] ?? throw new MurqException($"Системная переменная {variableName} не задана.");
+        NumberValue numberValue = colorVariable.Value as NumberValue ?? throw new MurqException($"Системная переменная {variableName} не числового типа.");
         decimal value = numberValue.AsDecimal;
 
         byte colorCode = value switch
@@ -251,7 +262,8 @@ public class Game(Quest quest) : IGameContext
 
     private const string CurrentLocVarName = "current_loc";
     private const string PreviousLocVarName = "previous_loc";
-    private const string StyleDosTextcolorVarName = "style_dos_textcolor";
+    private const string StyleDosTextColorVarName = "style_dos_textcolor";
+    private const string StyleDosButtonColorVarName = "style_dos_buttoncolor";
 
     public class OnTextPrintedEventArgs(string? text, bool isNewLineAtEnd, InterfaceColor foregroundColor, InterfaceColor backgroundColor) : EventArgs
     {
