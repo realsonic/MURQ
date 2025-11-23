@@ -51,6 +51,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MURQ.Infrastructure", "Infr
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "QuestSources.FileSource", "Infrastructure\QuestSources\QuestSources.FileSource\QuestSources.FileSource.csproj", "{8A8F6FB9-1514-468B-D867-D79D7E4E3484}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Utils", "Utils", "{890127B6-FFC3-4E4E-A8E3-56C0C581B4DD}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MURQ.URQL.Processor", "Utils\MURQ.URQL.Processor\MURQ.URQL.Processor.csproj", "{C6793460-5265-495A-9C7F-D9DD62B46C66}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -125,6 +129,10 @@ Global
 		{8A8F6FB9-1514-468B-D867-D79D7E4E3484}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{8A8F6FB9-1514-468B-D867-D79D7E4E3484}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{8A8F6FB9-1514-468B-D867-D79D7E4E3484}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C6793460-5265-495A-9C7F-D9DD62B46C66}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C6793460-5265-495A-9C7F-D9DD62B46C66}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C6793460-5265-495A-9C7F-D9DD62B46C66}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C6793460-5265-495A-9C7F-D9DD62B46C66}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -147,6 +155,7 @@ Global
 		{F99F4A78-DE7C-476B-BEDC-2223149975C4} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
 		{26696884-FEA8-40DA-8F69-E0205D0A6123} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
 		{8A8F6FB9-1514-468B-D867-D79D7E4E3484} = {F99F4A78-DE7C-476B-BEDC-2223149975C4}
+		{C6793460-5265-495A-9C7F-D9DD62B46C66} = {890127B6-FFC3-4E4E-A8E3-56C0C581B4DD}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {BF74B623-EA0C-4F20-9A5E-8C3B13147F9E}
