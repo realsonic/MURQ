@@ -7,8 +7,10 @@ namespace MURQ.Domain.Quests.Statements;
 [DebuggerDisplay("cls")]
 public class ClearScreenStatement : Statement
 {
-    public override void Run(IGameContext gameContext)
+    public override Task RunAsync(IGameContext gameContext)
     {
         gameContext.ClearScreen();
+
+        return Task.CompletedTask;
     }
 }

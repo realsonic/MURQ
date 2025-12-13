@@ -12,7 +12,7 @@ var urqLoader = new UrqLoader(new UrqStringLoader(new UrqStringLexer()));
 var quest = urqLoader.LoadQuest(questSource);
 var game = new Game(quest);
 
-game.Start();
+await game.StartAsync();
 Console.WriteLine(game.CurrentLocation.Text);
 
 Console.Write(">> Нажмите любую клавишу для выхода. <<");

@@ -8,18 +8,18 @@ namespace MURQ.Domain.Tests;
 public class GameTests
 {
     [Fact(DisplayName = "Пустой квест запускается")]
-    public void Empty_quest_starts()
+    public async Task Empty_quest_starts()
     {
         // Arrange
         var quest = new Quest([]);
         var game = new Game(quest);
 
         // Act & Assert
-        game.Start();
+        await game.StartAsync();
     }
 
     [Fact(DisplayName = "Print выводит текст")]
-    public void Print_shows_text()
+    public async Task Print_shows_text()
     {
         // Arrange
         var printStatement = new PrintStatement { UrqString = "Hello World!" };
@@ -27,14 +27,14 @@ public class GameTests
         var game = new Game(quest);
 
         // Act
-        game.Start();
+        await game.StartAsync();
 
         // Assert
         game.CurrentLocation.Text.Should().Be("Hello World!");
     }
 
     [Fact(DisplayName = "Button добавляет кнопку")]
-    public void ButtonInstruction_adds_button()
+    public async Task ButtonInstruction_adds_button()
     {
         // Arrange
         var btnStatement = new ButtonStatement { Caption = "Push me" };
@@ -42,14 +42,14 @@ public class GameTests
         var game = new Game(quest);
 
         // Act
-        game.Start();
+        await game.StartAsync();
 
         // Assert
         game.CurrentLocation.Buttons![0].Caption.Should().Be("Push me");
     }
 
     [Fact(DisplayName = "Кнопка переходит на метку")]
-    public void Button_goes_to_label()
+    public async Task Button_goes_to_label()
     {
         // Arrange
         var labelStatement = new LabelStatement { Label = "Начало" };
@@ -61,18 +61,18 @@ public class GameTests
         var game = new Game(quest);
 
         // Act & Assert: start game
-        game.Start();
+        await game.StartAsync();
         game.CurrentLocation.Text.Should().Be("Text");
         game.CurrentLocation.Buttons![0].Caption.Should().Be("Push me");
 
         // Act & Assert: push button
-        game.CurrentLocation.Buttons![0].Press();
+        await game.CurrentLocation.Buttons![0].PressAsync();
         game.CurrentLocation.Text.Should().Be("Text");
         game.CurrentLocation.Buttons![0].Caption.Should().Be("Push me");
     }
 
     [Fact(DisplayName = "End останавливает выполнение")]
-    public void End_stops()
+    public async Task End_stops()
     {
         // Arrange
         var quest = new Quest([
@@ -84,14 +84,14 @@ public class GameTests
         var game = new Game(quest);
 
         // Act
-        game.Start();
+        await game.StartAsync();
 
         // Assert
         game.CurrentLocation.Text.Should().Be("Первая локация");
     }
 
     [Fact(DisplayName = "If проверяет простое условие сравнения переменной с числом и выполняет команду")]
-    public void If_checks_relation_and_runs_statement()
+    public async Task If_checks_relation_and_runs_statement()
     {
         // Arrange
         var quest = new Quest([
@@ -107,7 +107,7 @@ public class GameTests
         var game = new Game(quest);
 
         // Act
-        game.Start();
+        await game.StartAsync();
 
         // Assert
         game.CurrentLocation.Text.Should().Be("Всего хорошего!" + Environment.NewLine);

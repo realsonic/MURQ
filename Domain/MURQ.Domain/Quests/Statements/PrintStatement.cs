@@ -12,7 +12,7 @@ public class PrintStatement : Statement
 
     public bool IsNewLineAtEnd { get; init; }
 
-    public override void Run(IGameContext gameContext)
+    public override Task RunAsync(IGameContext gameContext)
     {
         string? text = UrqString?.ToString(gameContext);
 
@@ -20,6 +20,8 @@ public class PrintStatement : Statement
             gameContext.PrintLine(text);
         else
             gameContext.Print(text);
+
+        return Task.CompletedTask;
     }
 
     private string DebuggerDisplay => $"{(IsNewLineAtEnd ? "pln" : "p")} {UrqString}";

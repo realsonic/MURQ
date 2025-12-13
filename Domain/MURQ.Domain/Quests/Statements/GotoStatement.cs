@@ -9,8 +9,10 @@ public class GotoStatement : Statement
 {
     public LabelStatement? LabelStatement { get; init; }
 
-    public override void Run(IGameContext gameContext)
+    public override Task RunAsync(IGameContext gameContext)
     {
         gameContext.Goto(LabelStatement);
+
+        return Task.CompletedTask;
     }
 }

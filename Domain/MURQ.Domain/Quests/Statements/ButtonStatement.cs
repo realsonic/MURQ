@@ -11,8 +11,10 @@ public class ButtonStatement : Statement
 
     public LabelStatement? LabelStatement { get; init; }
 
-    public override void Run(IGameContext gameContext)
+    public override Task RunAsync(IGameContext gameContext)
     {
         gameContext.AddButton(Caption, LabelStatement);
+
+        return Task.CompletedTask;
     }
 }

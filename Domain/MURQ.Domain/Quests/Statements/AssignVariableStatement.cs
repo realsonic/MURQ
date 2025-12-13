@@ -9,9 +9,11 @@ public class AssignVariableStatement : Statement
 
     public required Expression Expression { get; init; }
 
-    public override void Run(IGameContext gameContext)
+    public override Task RunAsync(IGameContext gameContext)
     {
         Value value = Expression.Calculate(gameContext);
         gameContext.AssignVariable(VariableName, value);
+        
+        return Task.CompletedTask;
     }
 }

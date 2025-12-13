@@ -38,7 +38,7 @@ public class UrqPlayer(IQuestSource questSource, IUserInterface userInterface, I
 
         PrintQuestName(questName);
 
-        game.Start();
+        await game.StartAsync();
 
         return game;
     }
@@ -65,7 +65,7 @@ public class UrqPlayer(IQuestSource questSource, IUserInterface userInterface, I
             {
                 case ButtonChosen buttonChosen:
                     ReportPressedButton(buttonChosen);
-                    buttonChosen.Button.Press();
+                    await buttonChosen.Button.PressAsync();
                     break;
                 case ReloadChosen:
                     game = await LoadQuestAndStartGame(cancellationToken);
