@@ -3,6 +3,8 @@ using MURQ.Domain.Quests;
 using MURQ.Domain.Quests.Expressions;
 using MURQ.Domain.Quests.Statements;
 
+using System.Diagnostics;
+
 namespace MURQ.Domain.Tests;
 
 public class GameTests
@@ -111,5 +113,28 @@ public class GameTests
 
         // Assert
         game.CurrentLocation.Text.Should().Be("Всего хорошего!" + Environment.NewLine);
+    }
+
+    [Fact(DisplayName = "Pause приостанавливает игру на заданное кол-во миллисекунд")]
+    public async Task Pause_pauses()
+    {
+        // Arrange
+        var label = new LabelStatement { Label = "1" };
+        var quest = new Quest([
+            new ButtonStatement { Caption = "", LabelStatement = label},
+            new EndStatement(),
+            label,
+            new PauseStatement { Duration = 100 }
+        ]);
+        var game = new Game(quest);
+
+        // Act
+        await game.StartAsync();
+        Stopwatch stopwatch = Stopwatch.StartNew();
+        await game.CurrentLocation.Buttons.Single().PressAsync();
+        stopwatch.Stop();
+
+        // Assert
+        stopwatch.ElapsedMilliseconds.Should().BeGreaterThanOrEqualTo(100);
     }
 }
