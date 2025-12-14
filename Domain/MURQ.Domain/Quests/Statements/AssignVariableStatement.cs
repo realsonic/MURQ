@@ -9,7 +9,7 @@ public class AssignVariableStatement : Statement
 
     public required Expression Expression { get; init; }
 
-    public override Task RunAsync(IGameContext gameContext)
+    public override Task RunAsync(IGameContext gameContext, CancellationToken cancellationToken)
     {
         Value value = Expression.Calculate(gameContext);
         gameContext.AssignVariable(VariableName, value);

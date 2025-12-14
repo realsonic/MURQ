@@ -9,8 +9,8 @@ public class PauseStatement : Statement
 {
     public int Duration { get; init; }
 
-    public override async Task RunAsync(IGameContext gameContext)
+    public override async Task RunAsync(IGameContext gameContext, CancellationToken cancellationToken)
     {
-        await Task.Delay(Duration);
+        await Task.Delay(Duration, cancellationToken);
     }
 }

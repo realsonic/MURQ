@@ -11,7 +11,7 @@ public class ButtonStatement : Statement
 
     public LabelStatement? LabelStatement { get; init; }
 
-    public override Task RunAsync(IGameContext gameContext)
+    public override Task RunAsync(IGameContext gameContext, CancellationToken cancellationToken)
     {
         gameContext.AddButton(Caption, LabelStatement);
 

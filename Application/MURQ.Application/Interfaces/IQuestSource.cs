@@ -6,5 +6,5 @@ namespace MURQ.Application.Interfaces;
 /// </summary>
 public interface IQuestSource
 {
-    Task<(Quest Quest, string SourceName)> GetQuest(CancellationToken stoppingToken);
+    Task<(Quest Quest, string SourceName)> GetQuestAsync(CancellationToken cancellationToken);
 }

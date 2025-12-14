@@ -12,7 +12,7 @@ public class PrintStatement : Statement
 
     public bool IsNewLineAtEnd { get; init; }
 
-    public override Task RunAsync(IGameContext gameContext)
+    public override Task RunAsync(IGameContext gameContext, CancellationToken cancellationToken)
     {
         string? text = UrqString?.ToString(gameContext);
 

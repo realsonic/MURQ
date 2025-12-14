@@ -8,7 +8,7 @@ public class FileEncodingDetector
         Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
     }
 
-    public static async ValueTask<Encoding> Detect(string filePath, CancellationToken cancellationToken)
+    public static async ValueTask<Encoding> DetectAsync(string filePath, CancellationToken cancellationToken)
     {
         byte[] buffer = new byte[5];
         await using FileStream fileStream = new(filePath, FileMode.Open);

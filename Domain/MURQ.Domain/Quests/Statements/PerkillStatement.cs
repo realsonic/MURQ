@@ -7,7 +7,7 @@ namespace MURQ.Domain.Quests.Statements;
 [DebuggerDisplay("perkill")]
 public class PerkillStatement : Statement
 {
-    public override Task RunAsync(IGameContext gameContext)
+    public override Task RunAsync(IGameContext gameContext, CancellationToken cancellationToken)
     {
         gameContext.Perkill();
 

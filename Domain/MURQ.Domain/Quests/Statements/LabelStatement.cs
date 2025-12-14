@@ -9,8 +9,5 @@ public class LabelStatement : Statement
 {
     public required string Label { get; init; }
 
-    public override Task RunAsync(IGameContext gameContext)
-    {
-        return Task.CompletedTask;
-    }
+    public override Task RunAsync(IGameContext gameContext, CancellationToken cancellationToken) => Task.CompletedTask;
 }

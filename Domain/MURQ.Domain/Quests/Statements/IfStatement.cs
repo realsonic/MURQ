@@ -9,12 +9,12 @@ public class IfStatement : Statement
 
     public required Statement ThenStatement { get; init; }
 
-    public override async Task RunAsync(IGameContext gameContext)
+    public override async Task RunAsync(IGameContext gameContext, CancellationToken cancellationToken)
     {
         Value value = Condition.Calculate(gameContext);
         if (value.AsDecimal != 0)
         {
-            await ThenStatement.RunAsync(gameContext);
+            await ThenStatement.RunAsync(gameContext, cancellationToken);
         }
     }
 }
