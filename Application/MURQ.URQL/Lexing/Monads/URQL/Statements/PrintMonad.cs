@@ -39,10 +39,10 @@ public record PrintMonad(PrintLexemeProgress LexemeProgress, PrintStatementVaria
     public enum PrintStatementVariant
     {
         P,
-        PLN
+        Pln
     }
 
-    private bool IsNewLineAtEnd() => StatementVariant == PrintStatementVariant.PLN;
+    private bool IsNewLineAtEnd() => StatementVariant == PrintStatementVariant.Pln;
 
     private const string WhitespaceExpected = "После команды p/pln ожидался пробел, табуляция, новая строка или комментарий";
 }

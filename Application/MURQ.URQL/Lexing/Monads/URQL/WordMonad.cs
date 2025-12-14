@@ -21,7 +21,7 @@ public record WordMonad(string Lexeme, Location Location) : UncompletedLexemeMon
     private UncompletedLexemeMonad SpecifyMonad() => Lexeme.ToLower() switch
     {
         "p" => PrintMonad.StartAfterKeyword(PrintMonad.PrintStatementVariant.P, Lexeme, Location),
-        "pln" => PrintMonad.StartAfterKeyword(PrintMonad.PrintStatementVariant.PLN, Lexeme, Location),
+        "pln" => PrintMonad.StartAfterKeyword(PrintMonad.PrintStatementVariant.Pln, Lexeme, Location),
         "btn" => ButtonMonad.StartAfterBtn(Lexeme, Location),
         "end" => new EndMonad(Lexeme, Location),
         "cls" => new ClearScreenMonad(Lexeme, Location),
@@ -29,6 +29,7 @@ public record WordMonad(string Lexeme, Location Location) : UncompletedLexemeMon
         "then" => new ThenMonad(Lexeme, Location),
         "goto" => GotoMonad.StartAfterGoto(Lexeme, Location),
         "perkill" => new PerkillMonad(Lexeme, Location),
+        "pause" => PauseMonad.StartAfterPause(Lexeme, Location),
         _ => new VariableMonad(Lexeme, Location)
     };
 }

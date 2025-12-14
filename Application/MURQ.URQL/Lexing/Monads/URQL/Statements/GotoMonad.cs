@@ -6,8 +6,8 @@ using static MURQ.URQL.Lexing.Monads.URQL.Statements.GotoMonad;
 namespace MURQ.URQL.Lexing.Monads.URQL.Statements;
 public record GotoMonad(GotoLexemeProgress LexemeProgress, string Label, string Lexeme, Location Location) : UncompletedLexemeMonad(Lexeme, Location)
 {
-    public static GotoMonad StartAfterGoto(string Lexeme, Location Location)
-        => new(GotoLexemeProgress.JustAfterGoto, string.Empty, Lexeme, Location);
+    public static GotoMonad StartAfterGoto(string lexeme, Location location)
+        => new(GotoLexemeProgress.JustAfterGoto, string.Empty, lexeme, location);
 
     public override LexemeMonad Append(char character, Position position) => LexemeProgress switch
     {

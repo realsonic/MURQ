@@ -109,6 +109,7 @@ public class UrqlParser
         ClearScreenToken => ParseClearScreenTerminal(),
         GotoToken => ParseGotoTerminal(),
         PerkillToken => ParsePerkillTerminal(),
+        PauseToken => ParsePauseTerminal(),
         _ when lookahead.IsStartOfAssignVariableStatement() => ParseAssignVariableStatement(),
         _ when lookahead.IsStartOfIfStatement() => ParseIfThenStatement(),
         _ => throw new UnexpectedElementException("Ожидалась инструкция", lookahead)
@@ -178,6 +179,12 @@ public class UrqlParser
     {
         PerkillToken perkillToken = Match<PerkillToken>();
         return new PerkillStatementSto(perkillToken.Location);
+    }
+
+    private PauseStatementSto ParsePauseTerminal()
+    {
+        PauseToken pauseToken = Match<PauseToken>();
+        return new PauseStatementSto(pauseToken.Duration, pauseToken.Location);
     }
 
     /// <summary>
