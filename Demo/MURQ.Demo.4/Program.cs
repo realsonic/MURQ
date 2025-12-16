@@ -15,7 +15,7 @@ UrqLoader urqLoader = new(new UrqStringLoader(new UrqStringLexer()));
 Quest quest = urqLoader.LoadQuest(questSource);
 
 var game = new Game(quest);
-game.Start();
+await game.StartAsync();
 
 while (true)
 {
@@ -25,7 +25,7 @@ while (true)
 
     Console.WriteLine();
 
-    game.CurrentLocation.Buttons[choicenButtonIndex].Press();
+    await game.CurrentLocation.Buttons[choicenButtonIndex].PressAsync();
 }
 
 static int ShowButtonsAndGetChoice(IReadOnlyList<Game.Button> buttonList)

@@ -8,7 +8,7 @@ namespace MURQ.Application.Services;
 
 public class UrqPlayer(IQuestSource questSource, IUserInterface userInterface, IVersionProvider versionProvider) : IUrqPlayer
 {
-    public async Task Run(CancellationToken cancellationToken)
+    public async Task RunAsync(CancellationToken cancellationToken)
     {
         PrintTitleAndLogo();
 
@@ -30,7 +30,7 @@ public class UrqPlayer(IQuestSource questSource, IUserInterface userInterface, I
 
     private async Task<Game> LoadQuestAndStartGame(CancellationToken cancellationToken)
     {
-        (Quest quest, string questName) = await questSource.GetQuest(cancellationToken);
+        (Quest quest, string questName) = await questSource.GetQuestAsync(cancellationToken);
 
         var game = new Game(quest);
         game.OnTextPrinted += Game_OnTextPrinted;
@@ -38,7 +38,7 @@ public class UrqPlayer(IQuestSource questSource, IUserInterface userInterface, I
 
         PrintQuestName(questName);
 
-        game.Start();
+        await game.StartAsync(cancellationToken);
 
         return game;
     }
@@ -55,7 +55,7 @@ public class UrqPlayer(IQuestSource questSource, IUserInterface userInterface, I
     {
         ArgumentNullException.ThrowIfNull(game);
 
-        while (true)
+        while (!cancellationToken.IsCancellationRequested)
         {
             var userChoice = userInterface.PrintButtonsAndWaitChoice(game.CurrentLocation.Buttons, game.ButtonForegroundColor, game.ButtonBackgroundColor);
 
@@ -65,7 +65,7 @@ public class UrqPlayer(IQuestSource questSource, IUserInterface userInterface, I
             {
                 case ButtonChosen buttonChosen:
                     ReportPressedButton(buttonChosen);
-                    buttonChosen.Button.Press();
+                    await buttonChosen.Button.PressAsync(cancellationToken);
                     break;
                 case ReloadChosen:
                     game = await LoadQuestAndStartGame(cancellationToken);

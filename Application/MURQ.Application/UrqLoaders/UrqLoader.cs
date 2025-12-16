@@ -56,6 +56,7 @@ public class UrqLoader(UrqStringLoader urqStringLoader)
         IfStatementSto ifStatementSto => ProduceIfStatement(ifStatementSto),
         GotoStatementSto gotoStatementSto => ProduceGotoStatement(gotoStatementSto),
         PerkillStatementSto => new PerkillStatement(),
+        PauseStatementSto pauseStatementSto => ProducePauseStatement(pauseStatementSto),
         _ => throw new NotImplementedException($"Инструкция ({statementSto}) ещё не реализована.")
     };
 
@@ -91,6 +92,11 @@ public class UrqLoader(UrqStringLoader urqStringLoader)
     private GotoStatement ProduceGotoStatement(GotoStatementSto gotoStatementSto) => new()
     {
         LabelStatement = TryGetLabelStatementByLabel(gotoStatementSto.Label)
+    };
+
+    private static PauseStatement ProducePauseStatement(PauseStatementSto pauseStatementSto) => new()
+    {
+        Duration = pauseStatementSto.Duration
     };
 
     private Expression ProduceExpression(ExpressionSto expressionSto) => expressionSto switch

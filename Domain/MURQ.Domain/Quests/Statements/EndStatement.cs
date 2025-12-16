@@ -7,8 +7,10 @@ namespace MURQ.Domain.Quests.Statements;
 [DebuggerDisplay("end")]
 public class EndStatement : Statement
 {
-    public override void Run(IGameContext gameContext)
+    public override Task RunAsync(IGameContext gameContext, CancellationToken cancellationToken)
     {
         gameContext.EndLocation();
+
+        return Task.CompletedTask;
     }
 }

@@ -26,7 +26,7 @@ var quest = new Quest([
 
 var game = new Game(quest);
 
-game.Start();
+await game.StartAsync();
 
 while (true)
 {
@@ -43,7 +43,7 @@ while (true)
     }
 
     int choicenButtonIndex = GetValidChoice(currentLocation.Buttons.Count) - 1;
-    game.CurrentLocation.Buttons[choicenButtonIndex].Press();
+    await game.CurrentLocation.Buttons[choicenButtonIndex].PressAsync();
 }
 
 static int GetValidChoice(int maxNumber)

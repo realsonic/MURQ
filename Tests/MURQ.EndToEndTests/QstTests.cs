@@ -18,7 +18,7 @@ public class QstTests
         Game sut = await LoadQuestIntoGame(@"Quests/Two_P.qst");
 
         // Act
-        sut.Start();
+        await sut.StartAsync();
 
         // Assert
         sut.CurrentLocation.Text.Should().Be("Привет, мир!");
@@ -31,7 +31,7 @@ public class QstTests
         Game sut = await LoadQuestIntoGame(@"Quests/P_wo_text.qst");
 
         // Act
-        sut.Start();
+        await sut.StartAsync();
 
         // Assert
         sut.CurrentLocation.Text.Should().Be("Привет, мир!");
@@ -44,7 +44,7 @@ public class QstTests
         Game sut = await LoadQuestIntoGame(@"Quests/Pln.qst");
 
         // Act
-        sut.Start();
+        await sut.StartAsync();
 
         // Assert
         sut.CurrentLocation.Text.Should().Be("Привет, мир!" + Environment.NewLine);
@@ -57,7 +57,7 @@ public class QstTests
         Game sut = await LoadQuestIntoGame(@"Quests/Labels.qst");
 
         // Act
-        sut.Start();
+        await sut.StartAsync();
 
         // Assert
         List<string> labelList = [.. sut.Quest.Statements.OfType<LabelStatement>().Select(labelStatement => labelStatement.Label)];
@@ -75,8 +75,8 @@ public class QstTests
         Game sut = await LoadQuestIntoGame(@"Quests/Location_and_btn.qst");
 
         // Act
-        sut.Start();
-        sut.CurrentLocation.Buttons[0].Press();
+        await sut.StartAsync();
+        await sut.CurrentLocation.Buttons[0].PressAsync();
 
         // Assert
         sut.CurrentLocation.Text.Should().Be("Привет, это тест кнопки!" + Environment.NewLine);
@@ -90,9 +90,9 @@ public class QstTests
         Game sut = await LoadQuestIntoGame(@"Quests/Three_locations.qst");
 
         // Act
-        sut.Start();
-        sut.CurrentLocation.Buttons[0].Press();
-        sut.CurrentLocation.Buttons[0].Press();
+        await sut.StartAsync();
+        await sut.CurrentLocation.Buttons[0].PressAsync();
+        await sut.CurrentLocation.Buttons[0].PressAsync();
 
         // Assert
         sut.CurrentLocation.Name.Should().Be("Далеко");
@@ -107,7 +107,7 @@ public class QstTests
         Game sut = await LoadQuestIntoGame(@"Quests/Pln_and_single_comments_on_separate_lines.qst");
 
         // Act
-        sut.Start();
+        await sut.StartAsync();
 
         // Assert
         sut.CurrentLocation.Text.Should().Be("Привет, мир!" + Environment.NewLine);
@@ -120,8 +120,8 @@ public class QstTests
         Game sut = await LoadQuestIntoGame(@"Quests/Pln_and_single_comments_everywhere.qst");
 
         // Act
-        sut.Start();
-        sut.CurrentLocation.Buttons[0].Press();
+        await sut.StartAsync();
+        await sut.CurrentLocation.Buttons[0].PressAsync();
 
         // Assert
         sut.CurrentLocation.Name.Should().Be("1");
@@ -139,7 +139,7 @@ public class QstTests
         sut.OnScreenCleared += () => eventWasFired = true;
 
         // Act
-        sut.Start();
+        await sut.StartAsync();
 
         // Assert
         sut.CurrentLocation.Text.Should().BeEmpty();
@@ -154,7 +154,7 @@ public class QstTests
         Game sut = await LoadQuestIntoGame(@"Quests/Numeric_var.qst");
 
         // Act
-        sut.Start();
+        await sut.StartAsync();
 
         // Assert
         var variable1 = sut.GetVariable("bT");
@@ -172,7 +172,7 @@ public class QstTests
         Game sut = await LoadQuestIntoGame(@"Quests/If_a_4_then_pln.qst");
 
         // Act
-        sut.Start();
+        await sut.StartAsync();
 
         // Assert
         sut.CurrentLocation.Text.Should().Be("Всего хорошего!" + Environment.NewLine);
@@ -185,11 +185,11 @@ public class QstTests
         Game sut = await LoadQuestIntoGame(@"Quests/Duplicate_labels.qst");
 
         // Act
-        sut.Start();
+        await sut.StartAsync();
 
         // Assert
-        sut.CurrentLocation.Buttons[0].Press();
-        sut.CurrentLocation.Buttons[0].Press();
+        await sut.CurrentLocation.Buttons[0].PressAsync();
+        await sut.CurrentLocation.Buttons[0].PressAsync();
         sut.CurrentLocation.Text.Should().Be("Метка1" + Environment.NewLine);
     }
 
@@ -200,7 +200,7 @@ public class QstTests
         Game sut = await LoadQuestIntoGame(@"Quests/Comments_in_btn.qst");
 
         // Act
-        sut.Start();
+        await sut.StartAsync();
 
         // Assert
         sut.CurrentLocation.Text.Should().Be("Тест комментариев " + Environment.NewLine);
@@ -219,7 +219,7 @@ public class QstTests
         Game sut = await LoadQuestIntoGame(@"Quests/Multiline_comments.qst");
 
         // Act
-        sut.Start();
+        await sut.StartAsync();
 
         // Assert
         sut.CurrentLocation.Text.Should().Be("1&pln 2");
@@ -232,7 +232,7 @@ public class QstTests
         Game sut = await LoadQuestIntoGame(@"Quests/String_variables.qst");
 
         // Act
-        sut.Start();
+        await sut.StartAsync();
 
         // Assert
         sut.CurrentLocation.Text.Should().Be("Привет!");
@@ -245,17 +245,17 @@ public class QstTests
         Game sut = await LoadQuestIntoGame(@"Quests/Prev_and_curr_locs.qst");
 
         // Act
-        sut.Start();
+        await sut.StartAsync();
 
         // Act Ⅰ
-        sut.CurrentLocation.Buttons.Single(button => button.Caption == "В лес").Press();
-        sut.CurrentLocation.Buttons.Single(button => button.Caption == "В пещеру").Press();
+        await sut.CurrentLocation.Buttons.Single(button => button.Caption == "В лес").PressAsync();
+        await sut.CurrentLocation.Buttons.Single(button => button.Caption == "В пещеру").PressAsync();
         // Assert Ⅰ
         sut.CurrentLocation.Text.Should().Be("Вы пришли из лесу в пещеру.");
 
         // Act Ⅱ        
-        sut.CurrentLocation.Buttons.Single(button => button.Caption == "На озеро").Press();
-        sut.CurrentLocation.Buttons.Single(button => button.Caption == "На поляну").Press();
+        await sut.CurrentLocation.Buttons.Single(button => button.Caption == "На озеро").PressAsync();
+        await sut.CurrentLocation.Buttons.Single(button => button.Caption == "На поляну").PressAsync();
         // Assert Ⅱ
         sut.CurrentLocation.Text.Should().Be("Вы пришли с озера на поляну.");
     }
@@ -267,7 +267,7 @@ public class QstTests
         Game sut = await LoadQuestIntoGame(@"Quests/slash_in_pln.qst");
 
         // Act
-        sut.Start();
+        await sut.StartAsync();
 
         // Assert
         sut.CurrentLocation.Text.Should().Be("  |" + Environment.NewLine + "/ |" + Environment.NewLine);
@@ -280,8 +280,8 @@ public class QstTests
         Game sut = await LoadQuestIntoGame(@"Quests/Double_sniff.qst");
 
         // Act
-        sut.Start();
-        sut.CurrentLocation.Buttons.Single().Press();
+        await sut.StartAsync();
+        await sut.CurrentLocation.Buttons.Single().PressAsync();
 
         // Assert
         sut.CurrentLocation.Text.Should().Be(Environment.NewLine + "я опустил морду - четкий запах манит мен¤ вперед." + Environment.NewLine);
@@ -294,7 +294,7 @@ public class QstTests
         Game sut = await LoadQuestIntoGame(@"Quests/Substitution.qst");
 
         // Act
-        sut.Start();
+        await sut.StartAsync();
 
         // Assert
         sut.CurrentLocation.Text.Should().Be("У меня 4 рубля!" + Environment.NewLine);
@@ -307,7 +307,7 @@ public class QstTests
         Game sut = await LoadQuestIntoGame(@"Quests/String_substitution.qst");
 
         // Act
-        sut.Start();
+        await sut.StartAsync();
 
         // Assert
         sut.CurrentLocation.Text.Should().Be("Здравствуй, странник, длина твоя 8!");
@@ -320,7 +320,7 @@ public class QstTests
         Game sut = await LoadQuestIntoGame(@"Quests/Goto.qst");
 
         // Act
-        sut.Start();
+        await sut.StartAsync();
 
         // Assert
         sut.CurrentLocation.Text.Should().Be("Привет, мир!");
@@ -333,7 +333,7 @@ public class QstTests
         Game sut = await LoadQuestIntoGame(@"Quests/perkill.qst");
 
         // Act
-        sut.Start();
+        await sut.StartAsync();
 
         // Assert
         sut.CurrentLocation.Text.Should().Be("18 0");

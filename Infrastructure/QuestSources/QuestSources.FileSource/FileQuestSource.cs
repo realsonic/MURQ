@@ -9,7 +9,7 @@ namespace QuestSources.FileSource;
 
 public class FileQuestSource(UrqLoader urqLoader, string? filePath, Encoding? encoding) : IQuestSource
 {
-    public async Task<(Quest Quest, string SourceName)> GetQuest(CancellationToken cancellationToken)
+    public async Task<(Quest Quest, string SourceName)> GetQuestAsync(CancellationToken cancellationToken)
     {
         if (filePath is null)
             throw new MurqException("Путь к файлу квеста не задан");
@@ -17,7 +17,7 @@ public class FileQuestSource(UrqLoader urqLoader, string? filePath, Encoding? en
         if (!File.Exists(filePath))
             throw new MurqException($"Заданный файл квеста ({filePath}) не найден (ищу по пути: {Path.GetFullPath(filePath)})");
 
-        encoding ??= await FileEncodingDetector.Detect(filePath, cancellationToken);
+        encoding ??= await FileEncodingDetector.DetectAsync(filePath, cancellationToken);
         string questSource = await File.ReadAllTextAsync(filePath, encoding, cancellationToken);
 
         Quest quest = urqLoader.LoadQuest(questSource);

@@ -44,14 +44,14 @@ public class Game(Quest quest) : IGameContext
     /// </summary>
     public InterfaceColor ButtonBackgroundColor => ExtractColorsFromVariable(StyleDosButtonColorVarName).BackgroundColor;
 
-    public void Start()
+    public async Task StartAsync(CancellationToken cancellationToken = default)
     {
         if (IsStarted) throw new MurqException("Игра уже запущена, второй раз запустить нельзя.");
 
         SeedSystemVariables();
         ClearCurrentView();
         SetNextStatementToStarting();
-        RunStatements();
+        await RunStatementsAsync(cancellationToken);
     }
 
     /// <inheritdoc/>
@@ -72,7 +72,7 @@ public class Game(Quest quest) : IGameContext
     void IGameContext.AddButton(string caption, LabelStatement? labelStatement) => currentScreenButtons.Add(new Button
     {
         Caption = caption,
-        OnButtonPressed = () => JumpByButton(labelStatement)
+        OnButtonPressedAsync = (cancellationToken) => JumpByButtonAsync(labelStatement, cancellationToken)
     });
 
     /// <inheritdoc/>
@@ -98,7 +98,7 @@ public class Game(Quest quest) : IGameContext
 
     void IGameContext.Perkill() => _variables.Clear();
 
-    private void JumpByButton(LabelStatement? labelStatement)
+    private async Task JumpByButtonAsync(LabelStatement? labelStatement, CancellationToken cancellationToken)
     {
         if (labelStatement is null) return;
 
@@ -106,7 +106,7 @@ public class Game(Quest quest) : IGameContext
         SetCurrentLabel(labelStatement);
         UpdateCurrentLocationName(labelStatement.Label);
 
-        RunStatements();
+        await RunStatementsAsync(cancellationToken);
     }
 
     private void JumpByGoto(LabelStatement? labelStatement)
@@ -128,17 +128,17 @@ public class Game(Quest quest) : IGameContext
         currentLocationName = name;
     }
 
-    private void RunStatements()
+    private async Task RunStatementsAsync(CancellationToken cancellationToken)
     {
         SetModeRunningStatements();
-        while (IsRunningStatements)
+        while (IsRunningStatements && !cancellationToken.IsCancellationRequested)
         {
-            RunCurrentStatement();
+            await RunCurrentStatementAsync(cancellationToken);
             PromoteNextStatement();
         }
     }
 
-    private void RunCurrentStatement()
+    private async Task RunCurrentStatementAsync(CancellationToken cancellationToken)
     {
         if (currentStatement is null)
         {
@@ -146,7 +146,7 @@ public class Game(Quest quest) : IGameContext
             return;
         }
 
-        currentStatement.Run(this);
+        await currentStatement.RunAsync(this, cancellationToken);
     }
 
     private void SetCurrentLabel(LabelStatement? labelStatement)
@@ -245,9 +245,9 @@ public class Game(Quest quest) : IGameContext
     public class Button
     {
         public required string Caption { get; init; }
-        public required Action OnButtonPressed { get; init; }
+        public required Func<CancellationToken, Task> OnButtonPressedAsync { get; init; }
 
-        public void Press() => OnButtonPressed();
+        public async Task PressAsync(CancellationToken cancellationToken = default) => await OnButtonPressedAsync(cancellationToken);
     }
 
     private GameState gameState = GameState.InitialState;

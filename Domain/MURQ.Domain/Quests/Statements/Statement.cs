@@ -4,5 +4,5 @@ namespace MURQ.Domain.Quests.Statements;
 
 public abstract class Statement
 {
-    public abstract void Run(IGameContext gameContext);
+    public abstract Task RunAsync(IGameContext gameContext, CancellationToken cancellationToken);
 }

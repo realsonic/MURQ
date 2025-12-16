@@ -14,7 +14,7 @@ var quest = new Quest([
 
 var game = new Game(quest);
 
-game.Start();
+await game.StartAsync();
 Console.WriteLine(game.CurrentLocation.Text);
 
 Console.Write("🔶 Нажмите любую клавишу для выхода.");
