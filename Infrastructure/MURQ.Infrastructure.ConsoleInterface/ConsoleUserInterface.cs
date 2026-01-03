@@ -123,18 +123,24 @@ public class ConsoleUserInterface : IUserInterface, IDisposable
         {
             UserInput userInput = UserInput.GetInput();
 
-            if (userInput.IsButtonCharacter())
+            if (userInput.IsReload)
+                return new ReloadChosen();
+
+            if (userInput.IsQuit)
+                return new QuitChosen();
+
+            if (userInput.IsButtonCharacter)
             {
-                char pressedButtonCharacter = userInput.GetButtonCharacter();
+                char pressedButtonCharacter = userInput.GetButtonCharacter;
                 if (buttonMap.TryGetValue(pressedButtonCharacter, out Game.Button? button))
                     return new ButtonChosen(button, pressedButtonCharacter);
             }
 
-            if (userInput.IsReload())
-                return new ReloadChosen();
-
-            if (userInput.IsQuit())
-                return new QuitChosen();
+            if (userInput.IsEnter && buttonMap.Count == 1)
+            {
+                KeyValuePair<char, Game.Button> keyButtonPair = buttonMap.Single();
+                return new ButtonChosen(keyButtonPair.Value, keyButtonPair.Key);
+            }
         }
     }
 
@@ -198,25 +204,28 @@ public class ConsoleUserInterface : IUserInterface, IDisposable
             }
         }
 
-        public abstract bool IsButtonCharacter();
-        public abstract char GetButtonCharacter();
-        public abstract bool IsReload();
-        public abstract bool IsQuit();
+        public abstract bool IsButtonCharacter { get; }
+        public abstract bool IsEnter { get; }
+        public abstract char GetButtonCharacter { get; }
+        public abstract bool IsReload { get; }
+        public abstract bool IsQuit { get; }
     }
 
     private record KeyInfoInput(ConsoleKeyInfo ConsoleKeyInfo) : UserInput
     {
-        public override bool IsButtonCharacter() => char.IsAsciiLetterOrDigit(ConsoleKeyInfo.KeyChar);
-        public override char GetButtonCharacter() => ConsoleKeyInfo.KeyChar;
-        public override bool IsReload() => ConsoleKeyInfo.Key is ConsoleKey.R && ConsoleKeyInfo.Modifiers is ConsoleModifiers.Control;
-        public override bool IsQuit() => ConsoleKeyInfo.Key is ConsoleKey.Q && ConsoleKeyInfo.Modifiers is ConsoleModifiers.Control;
+        public override bool IsButtonCharacter => char.IsAsciiLetterOrDigit(ConsoleKeyInfo.KeyChar);
+        public override bool IsEnter => ConsoleKeyInfo.Key is ConsoleKey.Enter;
+        public override char GetButtonCharacter => ConsoleKeyInfo.KeyChar;
+        public override bool IsReload => ConsoleKeyInfo.Key is ConsoleKey.R && ConsoleKeyInfo.Modifiers is ConsoleModifiers.Control;
+        public override bool IsQuit => ConsoleKeyInfo.Key is ConsoleKey.Q && ConsoleKeyInfo.Modifiers is ConsoleModifiers.Control;
     }
 
     private record CharInput(char? Char) : UserInput
     {
-        public override bool IsButtonCharacter() => Char is not null && char.IsAsciiLetterOrDigit(Char.Value);
-        public override char GetButtonCharacter() => Char ?? throw new MurqException("Неожиданное обращение к символу при ненажатой кнопке");
-        public override bool IsReload() => Char is 'r' or 'R';
-        public override bool IsQuit() => Char is null or 'q' or 'Q';
+        public override bool IsButtonCharacter => Char is not null && char.IsAsciiLetterOrDigit(Char.Value);
+        public override bool IsEnter => Char is '\n';
+        public override char GetButtonCharacter => Char ?? throw new MurqException("Неожиданное обращение к символу при ненажатой кнопке");
+        public override bool IsReload => Char is 'r' or 'R';
+        public override bool IsQuit => Char is null or 'q' or 'Q';
     }
 }
