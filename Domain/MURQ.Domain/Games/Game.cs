@@ -96,7 +96,11 @@ public class Game(Quest quest) : IGameContext
 
     void IGameContext.Goto(LabelStatement? labelStatement) => JumpByGoto(labelStatement);
 
-    void IGameContext.Perkill() => _variables.Clear();
+    void IGameContext.Perkill()
+    {
+        _variables.Clear();
+        SeedSystemVariables();
+    }
 
     private async Task JumpByButtonAsync(LabelStatement? labelStatement, CancellationToken cancellationToken)
     {
@@ -189,7 +193,7 @@ public class Game(Quest quest) : IGameContext
 
     private (InterfaceColor ForegroundColor, InterfaceColor BackgroundColor) ExtractColorsFromVariable(string variableName)
     {
-        Variable colorVariable = _variables[variableName] ?? throw new MurqException($"Системная переменная {variableName} не задана.");
+        Variable colorVariable = GetTrueVariable(variableName) ?? throw new MurqException($"Системная переменная {variableName} не задана.");
         NumberValue numberValue = colorVariable.Value as NumberValue ?? throw new MurqException($"Системная переменная {variableName} не числового типа.");
         decimal value = numberValue.AsDecimal;
 
