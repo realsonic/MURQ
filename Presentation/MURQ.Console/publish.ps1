@@ -1,0 +1,3 @@
+dotnet publish --os win --configuration Debug --self-contained true -p:PublishSingleFile=true -p:PublishTrimmed=true -p:EnableCompressionInSingleFile=true `
+&& dotnet publish --os linux --configuration Debug --self-contained true -p:PublishSingleFile=true -p:PublishTrimmed=true -p:EnableCompressionInSingleFile=true `
+&& dotnet publish --os osx --configuration Debug --self-contained true -p:PublishSingleFile=true -p:PublishTrimmed=true -p:EnableCompressionInSingleFile=true
