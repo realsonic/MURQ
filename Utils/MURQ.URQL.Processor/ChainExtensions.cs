@@ -1,7 +1,7 @@
 ﻿using MURQ.URQL.Locations;
 using MURQ.URQL.Substitutions;
 
-static class URQLLoadExtensions
+static class ChainExtensions
 {
     public static IEnumerable<SubstitutionTree> ToSubstitutionTrees(this IEnumerable<IEnumerable<(char Character, Position Position)>> lines)
     {
