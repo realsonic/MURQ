@@ -95,7 +95,7 @@ Console.WriteLine($"""
 Console.WriteLine($"Сумма времени всех этапов: \t{totalTime}");
 
 // тест цепочки
-Console.Write("Общее время единой цепочкой...\t");
+Console.Write("Общее время единой цепочкой: \t");
 stopwatch.Restart();
 var result = ReadFile(urqlFilePath)
     .ToEnumerableWithoutCarriageReturn()
@@ -108,38 +108,19 @@ var result = ReadFile(urqlFilePath)
 stopwatch.Stop();
 Console.WriteLine($"{stopwatch.Elapsed}");
 
-
 static IEnumerable<char> ReadFile(string filePath)
 {
     if (!Path.Exists(filePath))
         throw new InvalidOperationException($"Файл {filePath} не найден.");
 
     using StreamReader streamReader = File.OpenText(filePath);
+    const int bufferSize = 1024 * 8; // 8 KB — хороший компромисс
+    char[] buffer = new char[bufferSize];
 
-    char[] buffer = new char[1];
-
-    while (streamReader.ReadBlock(buffer.AsSpan()) > 0)
+    int charsRead;
+    while ((charsRead = streamReader.ReadBlock(buffer, 0, bufferSize)) > 0)
     {
-        yield return buffer[0];
+        for (int i = 0; i < charsRead; i++)
+            yield return buffer[i];
     }
-}
-
-static class Extensions
-{
-    public static IEnumerable<SubstitutionTree> ToSubstitutionTrees(this IEnumerable<IEnumerable<(char Character, Position Position)>> lines)
-    {
-        foreach (var line in lines)
-        {
-            SubstitutionParser substitutionParser = new(new SubstitutionLexer());
-            yield return substitutionParser.ParseLine(line);
-        }
-    }
-
-    public static string ToJoinedString(this IEnumerable<char> chars) => string.Join(null, chars);
-    public static string ToJoinedString(this IEnumerable<(char Character, Position Position)> chars) => string.Join(null, chars.Select(pc => pc.Character));
-
-    public static string ToNumberedLines<T>(this IEnumerable<T> elements, Func<T, string> convertElement)
-        => string.Join("\n", elements.Select((element, number) => $"[{number + 1}] {convertElement(element)}"));
-
-    public static string ToPrintableChar(this char @char) => char.IsControl(@char) ? $"#{Convert.ToInt32(@char)}" : @char.ToString();
 }
