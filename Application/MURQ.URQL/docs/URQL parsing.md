@@ -72,19 +72,77 @@ _не_перенос = 1 & if _не_перенос then pln Переносы р�
 #### Строка 1
 ```plantuml
 @startjson
-{"Parts":[{"Text":"perkill & z=\"if\" & a = 1 & ","Location":{"Start":{"Line":1,"Column":1},"End":{"Line":1,"Column":27}}},{"Modifier":"AsString","Parts":[{"Text":"z","Location":{"Start":{"Line":1,"Column":30},"End":{"Line":1,"Column":30}}}],"Location":{"Start":{"Line":1,"Column":28},"End":{"Line":1,"Column":31}}},{"Text":"  a then pln ","Location":{"Start":{"Line":1,"Column":32},"End":{"Line":2,"Column":12}}},{"Modifier":"None","Parts":[{"Text":"a","Location":{"Start":{"Line":2,"Column":14},"End":{"Line":2,"Column":14}}}],"Location":{"Start":{"Line":2,"Column":13},"End":{"Line":2,"Column":15}}},{"Text":" & pln верная ветка else pln неверная ветка ","Location":{"Start":{"Line":2,"Column":16},"End":{"Line":3,"Column":27}}}]}
+{
+  "Nodes": [
+    {
+      "Type": "String",
+      "Text": "perkill & z=\"if\" & a = 1 & ",
+      "Location": "[1, 1]-[1, 27]"
+    },
+    {
+      "Type": "Substitution",
+      "Modifier": "AsString",
+      "Nodes": [
+        {
+          "Type": "String",
+          "Text": "z",
+          "Location": "[1, 30]-[1, 30]"
+        }
+      ],
+      "Location": "[1, 28]-[1, 31]"
+    },
+    {
+      "Type": "String",
+      "Text": "  a then pln ",
+      "Location": "[1, 32]-[2, 12]"
+    },
+    {
+      "Type": "Substitution",
+      "Modifier": "None",
+      "Nodes": [
+        {
+          "Type": "String",
+          "Text": "a",
+          "Location": "[2, 14]-[2, 14]"
+        }
+      ],
+      "Location": "[2, 13]-[2, 15]"
+    },
+    {
+      "Type": "String",
+      "Text": " & pln верная ветка else pln неверная ветка ",
+      "Location": "[2, 16]-[3, 27]"
+    }
+  ]
+}
 @endjson
 ```
 #### Строка 2
 ```plantuml
 @startjson
-{"Parts":[{"Text":"pln Вторая строка","Location":{"Start":{"Line":4,"Column":1},"End":{"Line":4,"Column":17}}}]}
+{
+  "Nodes": [
+    {
+      "Type": "String",
+      "Text": "pln Вторая строка",
+      "Location": "[4, 1]-[4, 17]"
+    }
+  ]
+}
 @endjson
 ```
 #### Строка 3
 ```plantuml
 @startjson
-{"Parts":[{"Text":"_не_перенос = 1 & if _не_перенос then pln Переносы распознаются верно else pln Переносы распознаются НЕ верно","Location":{"Start":{"Line":5,"Column":1},"End":{"Line":5,"Column":109}}}]}
+{
+  "Nodes": [
+    {
+      "Type": "String",
+      "Text": "_не_перенос = 1 & if _не_перенос then pln Переносы распознаются верно else pln Переносы распознаются НЕ верно",
+      "Location": "[5, 1]-[5, 109]"
+    }
+  ]
+}
 @endjson
 ```
 
