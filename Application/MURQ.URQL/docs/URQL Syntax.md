@@ -1,6 +1,8 @@
 ﻿# Синтаксическая диаграмма
 ```plantuml
 @startebnf URQL
+!theme crt-amber
+
 quest = statements;
 
 statements = [
@@ -31,6 +33,8 @@ valueExpression = ? Variable ? | ? Number ? | ? StringLiteral ?;
 ### `statements`
 ```plantuml
 @startebnf Адаптация statements
+!theme crt-amber
+
 statementsAdapted = [statement], statementsRest;
 statementsRest = [? NewLine ?, [statement], statementsRest];
 @endebnf
@@ -123,6 +127,8 @@ _Примечения:_
 ### РБНФ-диаграммы
 ```plantuml
 @startebnf Лексемы
+!theme crt-amber
+
 (* Регистр не учитывается *)
 
 Пробельный_символ = ' ' | '\t';
@@ -143,6 +149,7 @@ End = "end";
 ### Диграммы регулярных выражений
 ```plantuml
 @startregex Пробельный символ
+!theme crt-amber
 title Пробельный символ
 !option useDescriptiveNames true
 !option language ru
@@ -151,6 +158,7 @@ title Пробельный символ
 ```
 ```plantuml
 @startregex NewLine
+!theme crt-amber
 title NewLine
 !option useDescriptiveNames true
 !option language ru
@@ -159,6 +167,7 @@ title NewLine
 ```
 ```plantuml
 @startregex Label
+!theme crt-amber
 title Label
 !option useDescriptiveNames true
 !option language ru
@@ -167,6 +176,7 @@ title Label
 ```
 ```plantuml
 @startregex Print
+!theme crt-amber
 title Print
 !option useDescriptiveNames true
 !option language ru
@@ -175,6 +185,7 @@ title Print
 ```
 ```plantuml
 @startregex Комментарий
+!theme crt-amber
 title Комментарий
 !option useDescriptiveNames true
 !option language ru

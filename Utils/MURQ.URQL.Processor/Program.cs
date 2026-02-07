@@ -16,7 +16,7 @@ if (args is not [string urqlFilePath])
 TimeSpan totalTime = default;
 Stopwatch stopwatch = Stopwatch.StartNew();
 
-List<char> source = [.. ReadFile(urqlFilePath)];
+List<char> source = [.. FileUtilities.ReadFile(urqlFilePath)];
 stopwatch.Stop();
 totalTime += stopwatch.Elapsed;
 Console.WriteLine($"""
@@ -97,7 +97,7 @@ Console.WriteLine($"Сумма времени всех этапов: \t{totalTim
 // тест цепочки
 Console.Write("Общее время единой цепочкой: \t");
 stopwatch.Restart();
-var result = ReadFile(urqlFilePath)
+List<SubstitutionTree> result = FileUtilities.ReadFile(urqlFilePath)
     .ToEnumerableWithoutCarriageReturn()
     .ToPositionedEnumerable()
     .ToEnumerableWithoutComments()
@@ -106,21 +106,19 @@ var result = ReadFile(urqlFilePath)
     .ToSubstitutionTrees()
     .ToList();
 stopwatch.Stop();
-Console.WriteLine($"{stopwatch.Elapsed}");
+Console.WriteLine($"{stopwatch.Elapsed}\n");
 
-static IEnumerable<char> ReadFile(string filePath)
-{
-    if (!Path.Exists(filePath))
-        throw new InvalidOperationException($"Файл {filePath} не найден.");
+Console.WriteLine($"""
+    == Эмуляция раскрытия подстановок ====================================
+    {substitutionTrees.ToNumberedLines(substitutionTree => substitutionTree.ToRawUrql(new GameContextEmulation()).ToJoinedString())}
+    ======================================================================
 
-    using StreamReader streamReader = File.OpenText(filePath);
-    const int bufferSize = 1024 * 8; // 8 KB — хороший компромисс
-    char[] buffer = new char[bufferSize];
+    """);
 
-    int charsRead;
-    while ((charsRead = streamReader.ReadBlock(buffer, 0, bufferSize)) > 0)
-    {
-        for (int i = 0; i < charsRead; i++)
-            yield return buffer[i];
-    }
-}
+/*Console.WriteLine("""
+
+    === Эмуляция построчного выполнения URQL ===
+
+    """);
+
+*/
