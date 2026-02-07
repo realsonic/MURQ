@@ -27,7 +27,7 @@ class GameContextEmulation : IGameContext
 
     public Variable? GetVariable(string variableName)
     {
-        return new Variable(variableName, new StringValue($"Строковая переменная {variableName}"));
+        return new Variable(variableName, new StringValue($"<Строковая переменная {variableName}>"));
     }
 
     public void Goto(LabelStatement? labelStatement)

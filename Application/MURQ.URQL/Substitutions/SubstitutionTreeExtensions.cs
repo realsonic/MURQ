@@ -30,35 +30,33 @@ public static class SubstitutionTreeExtensions
 
                 case SubstitutionNode substitutionNode:
                     IEnumerable<(char Character, Position Position)> rawCharacters = NodesToRawUrql(substitutionNode.Nodes, gameContext);
-
                     string variableName = string.Join(string.Empty, rawCharacters.Select(rawCharacter => rawCharacter.Character));
-                    VariableExpression variableExpression = new() { Name = variableName };
-                    Domain.Games.Values.Value value = variableExpression.Calculate(gameContext);
+                    
+                    Domain.Games.Values.Value value = CalculateVariable(gameContext, variableName);
 
-                    switch(substitutionNode.Modifier)
+                    string stringValue = substitutionNode.Modifier switch
                     {
-                        case SubstitutionModifierEnum.None:
-                            string numberAsString = value.AsDecimal.ToString();
-                            foreach (char character in numberAsString)
-                            {
-                                yield return (character, null); // todo возвращать позицию
-                            }
-                            break;
-
-                        case SubstitutionModifierEnum.AsString:
-                            foreach (char character in value.AsString)
-                            {
-                                yield return (character, null); // todo возвращать позицию
-                            }
-                            break;
-
-                        default: throw new NotImplementedException($"Модификатор подстановки {substitutionNode.Modifier} пока не обрабатывается.");
+                        SubstitutionModifierEnum.None => value.AsDecimal.ToString(),
+                        SubstitutionModifierEnum.AsString => value.AsString,
+                        _ => throw new NotImplementedException($"Модификатор подстановки {substitutionNode.Modifier} пока не обрабатывается."),
                     };
+
+                    foreach (char character in stringValue)
+                    {
+                        yield return (character, null); // todo возвращать позицию
+                    }
+
                     break;
-                
+
                 default:
                     throw new NotImplementedException($"Элемент дерева подстановок типа {node.GetType()} пока не обрабатывается.");
             }
         }
+    }
+
+    private static Domain.Games.Values.Value CalculateVariable(IGameContext gameContext, string variableName)
+    {
+        VariableExpression variableExpression = new() { Name = variableName };
+        return variableExpression.Calculate(gameContext);
     }
 }
