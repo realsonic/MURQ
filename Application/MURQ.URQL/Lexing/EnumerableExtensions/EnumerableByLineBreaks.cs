@@ -3,12 +3,12 @@
 using System.Collections;
 
 namespace MURQ.URQL.Lexing.EnumerableExtensions;
-public class EnumerableByLineBreaks(IEnumerable<(char Character, Position Position)> enumerable) : IEnumerable<IEnumerable<(char Character, Position Position)>>
+public class EnumerableByLineBreaks(IEnumerable<(char Character, Position Position)> enumerable) : IEnumerable<List<(char Character, Position Position)>>
 {
-    public IEnumerator<IEnumerable<(char Character, Position Position)>> GetEnumerator() => Enumerate().GetEnumerator();
+    public IEnumerator<List<(char Character, Position Position)>> GetEnumerator() => Enumerate().GetEnumerator();
     IEnumerator IEnumerable.GetEnumerator() => Enumerate().GetEnumerator();
 
-    private IEnumerable<IEnumerable<(char Character, Position Position)>> Enumerate()
+    private IEnumerable<List<(char Character, Position Position)>> Enumerate()
     {
         List<(char Character, Position Position)> line = [];
 

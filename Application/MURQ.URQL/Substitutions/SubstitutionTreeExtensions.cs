@@ -24,7 +24,7 @@ public static class SubstitutionTreeExtensions
                 case StringNode stringNode:
                     foreach (char character in stringNode.Text)
                     {
-                        yield return (character, null); // todo возвращать позицию
+                        yield return (character, null); // todo возвращать позицию | локацию
                     }
                     break;
 
@@ -32,7 +32,7 @@ public static class SubstitutionTreeExtensions
                     IEnumerable<(char Character, Position Position)> rawCharacters = NodesToRawUrql(substitutionNode.Nodes, gameContext);
                     string variableName = string.Join(string.Empty, rawCharacters.Select(rawCharacter => rawCharacter.Character));
                     
-                    Domain.Games.Values.Value value = CalculateVariable(gameContext, variableName);
+                    Domain.Games.Values.Value value = CalculateVariable(gameContext, variableName); //todo заменить на выражение
 
                     string stringValue = substitutionNode.Modifier switch
                     {
@@ -43,7 +43,7 @@ public static class SubstitutionTreeExtensions
 
                     foreach (char character in stringValue)
                     {
-                        yield return (character, null); // todo возвращать позицию
+                        yield return (character, null); // todo возвращать позицию | локацию
                     }
 
                     break;

@@ -1,7 +1,9 @@
-﻿using MURQ.URQL.Lexing.EnumerableExtensions;
+﻿using MURQ.URQL.Lexing;
+using MURQ.URQL.Lexing.EnumerableExtensions;
 using MURQ.URQL.Locations;
 using MURQ.URQL.Processor.Json;
 using MURQ.URQL.Substitutions;
+using MURQ.URQL.Tokens;
 
 using System.Diagnostics;
 
@@ -71,7 +73,7 @@ Console.WriteLine($"""
     """);
 
 stopwatch.Restart();
-List<IEnumerable<(char Character, Position Position)>> lines = [.. uncontinuedSource.SplitByLineBreaks()];
+List<List<(char Character, Position Position)>> lines = [.. uncontinuedSource.SplitByLineBreaks()];
 stopwatch.Stop();
 totalTime += stopwatch.Elapsed;
 Console.WriteLine($"""
@@ -108,17 +110,41 @@ List<SubstitutionTree> result = FileUtilities.ReadFile(urqlFilePath)
 stopwatch.Stop();
 Console.WriteLine($"{stopwatch.Elapsed}\n");
 
-Console.WriteLine($"""
-    == Эмуляция раскрытия подстановок ====================================
-    {substitutionTrees.ToNumberedLines(substitutionTree => substitutionTree.ToRawUrql(new GameContextEmulation()).ToJoinedString())}
-    ======================================================================
+stopwatch.Restart();
+List<List<(char Character, Position Position)>> urqlLines = [.. substitutionTrees.Select(substitutionTree => substitutionTree.ToRawUrql(new GameContextEmulation()).ToList())];
+stopwatch.Stop();
+WriteBlock(
+    "Шаг 1. Эмуляция раскрытия подстановок",
+    urqlLines.ToNumberedLines(line => line.ToJoinedString()),
+    stopwatch);
 
-    """);
+stopwatch.Restart();
+List<List<Token>> tokens = [.. urqlLines.Select(line => new UrqlLexer(line.Select(element => element.Character)).Scan().ToList())];
+stopwatch.Stop();
+WriteBlock(
+    "Шаг 2. Эмуляция получения токенов",
+    tokens.ToNumberedLines(line => line.ToJoinedString()),
+    stopwatch);
 
-/*Console.WriteLine("""
 
-    === Эмуляция построчного выполнения URQL ===
 
-    """);
+#region Утилитарные методы
+static void WriteBlock(string title, string data, Stopwatch stopwatch)
+{
+    const int borderLength = 77;
+    int upperBorderTailLength = borderLength - title.Length - 6;
+    int lowerBorderTailLength = borderLength - title.Length - 6 - 12;
 
-*/
+    Console.BackgroundColor = ConsoleColor.DarkYellow;
+    Console.ForegroundColor = ConsoleColor.Black;
+    Console.Write("-->> " + title + " " + new string('-', upperBorderTailLength));
+    Console.ResetColor();
+    Console.WriteLine();
+    Console.WriteLine(data);
+    Console.BackgroundColor = ConsoleColor.DarkYellow;
+    Console.ForegroundColor = ConsoleColor.Black;
+    Console.Write("--<< " + title + " " + new string('-', lowerBorderTailLength) + $" ({stopwatch.Elapsed:mm\\:ss\\.fff})");
+    Console.ResetColor();
+    Console.WriteLine("\n");
+}
+#endregion
