@@ -18,7 +18,7 @@ if (args is not [string urqlFilePath])
 TimeSpan totalTime = default;
 Stopwatch stopwatch = Stopwatch.StartNew();
 
-List<char> source = [.. FileUtilities.ReadFile(urqlFilePath)];
+List<char> source = [.. Utilities.ReadFile(urqlFilePath)];
 stopwatch.Stop();
 totalTime += stopwatch.Elapsed;
 Console.WriteLine($"""
@@ -99,7 +99,7 @@ Console.WriteLine($"Сумма времени всех этапов: \t{totalTim
 // тест цепочки
 Console.Write("Общее время единой цепочкой: \t");
 stopwatch.Restart();
-List<SubstitutionTree> result = FileUtilities.ReadFile(urqlFilePath)
+List<SubstitutionTree> result = Utilities.ReadFile(urqlFilePath)
     .ToEnumerableWithoutCarriageReturn()
     .ToPositionedEnumerable()
     .ToEnumerableWithoutComments()
@@ -113,7 +113,7 @@ Console.WriteLine($"{stopwatch.Elapsed}\n");
 stopwatch.Restart();
 List<List<(char Character, Position Position)>> urqlLines = [.. substitutionTrees.Select(substitutionTree => substitutionTree.ToRawUrql(new GameContextEmulation()).ToList())];
 stopwatch.Stop();
-WriteBlock(
+Utilities.WriteBlock(
     "Шаг 1. Эмуляция раскрытия подстановок",
     urqlLines.Select(line => line.ToJoinedString()),
     stopwatch);
@@ -121,34 +121,7 @@ WriteBlock(
 stopwatch.Restart();
 List<List<Token>> tokens = [.. urqlLines.Select(line => new UrqlLexer(line.Select(element => element.Character)).Scan().ToList())];
 stopwatch.Stop();
-WriteBlock(
+Utilities.WriteBlock(
     "Шаг 2. Эмуляция получения токенов",
     tokens.Select(line => line.ToJoinedString()),
     stopwatch);
-
-#region Утилитарные методы
-static void WriteBlock(string title, IEnumerable<string> dataLines, Stopwatch stopwatch)
-{
-    const int borderLength = 77;
-    int upperBorderTailLength = borderLength - title.Length - 6;
-    int lowerBorderTailLength = borderLength - title.Length - 6 - 12;
-
-    Console.BackgroundColor = ConsoleColor.DarkYellow;
-    Console.ForegroundColor = ConsoleColor.Black;
-    Console.Write("-->> " + title + " " + new string('-', upperBorderTailLength));
-    Console.ResetColor();
-    Console.WriteLine();
-
-    var numberedDataLines = dataLines.ToNumberedLines();
-    foreach (var line in numberedDataLines)
-    {
-        Console.WriteLine(line);
-    }
-    
-    Console.BackgroundColor = ConsoleColor.DarkYellow;
-    Console.ForegroundColor = ConsoleColor.Black;
-    Console.Write("--<< " + title + " " + new string('-', lowerBorderTailLength) + $" ({stopwatch.Elapsed:mm\\:ss\\.fff})");
-    Console.ResetColor();
-    Console.WriteLine("\n");
-}
-#endregion
