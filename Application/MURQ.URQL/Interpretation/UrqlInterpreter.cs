@@ -17,15 +17,15 @@ public class UrqlInterpreter
 
     public async Task RunUrqlLineAsync(CancellationToken cancellationToken)
     {
-        await RunStatement(cancellationToken);
+        await RunStatementAsync(cancellationToken);
     }
 
-    private async Task RunStatement(CancellationToken cancellationToken)
+    private async Task RunStatementAsync(CancellationToken cancellationToken)
     {
         switch (lookahead)
         {
             case PrintToken:
-                await RunPrintTerminal(cancellationToken);
+                await RunPrintTerminalAsync(cancellationToken);
                 break;
 
             default:
@@ -33,9 +33,10 @@ public class UrqlInterpreter
         }
     }
 
-    private async Task RunPrintTerminal(CancellationToken cancellationToken)
+    private async Task RunPrintTerminalAsync(CancellationToken cancellationToken)
     {
         PrintToken printToken = Match<PrintToken>();
+
         if (printToken.IsNewLineAtEnd)
             gameContext.PrintLine(printToken.Text);
         else
