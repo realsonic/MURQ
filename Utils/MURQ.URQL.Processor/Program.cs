@@ -78,7 +78,7 @@ stopwatch.Stop();
 totalTime += stopwatch.Elapsed;
 Console.WriteLine($"""
     -- Этап 5. Разбивка на строки ---------------------------- ({stopwatch.Elapsed:mm\:ss\.fff})
-    {lines.ToNumberedLines(line => line.ToJoinedString())}
+    {lines.ToJoinedNumberedLines(line => line.ToJoinedString())}
     ----------------------------------------------------------------------
 
     """);
@@ -89,7 +89,7 @@ stopwatch.Stop();
 totalTime += stopwatch.Elapsed;
 Console.WriteLine($"""
     -- Этап 6. Распознавание подстановок --------------------- ({stopwatch.Elapsed:mm\:ss\.fff})
-    {substitutionTrees.ToNumberedLines(Serializer.Serialize)}
+    {substitutionTrees.ToJoinedNumberedLines(Serializer.Serialize)}
     ----------------------------------------------------------------------
 
     """);
@@ -115,7 +115,7 @@ List<List<(char Character, Position Position)>> urqlLines = [.. substitutionTree
 stopwatch.Stop();
 WriteBlock(
     "Шаг 1. Эмуляция раскрытия подстановок",
-    urqlLines.ToNumberedLines(line => line.ToJoinedString()),
+    urqlLines.Select(line => line.ToJoinedString()),
     stopwatch);
 
 stopwatch.Restart();
@@ -123,13 +123,11 @@ List<List<Token>> tokens = [.. urqlLines.Select(line => new UrqlLexer(line.Selec
 stopwatch.Stop();
 WriteBlock(
     "Шаг 2. Эмуляция получения токенов",
-    tokens.ToNumberedLines(line => line.ToJoinedString()),
+    tokens.Select(line => line.ToJoinedString()),
     stopwatch);
 
-
-
 #region Утилитарные методы
-static void WriteBlock(string title, string data, Stopwatch stopwatch)
+static void WriteBlock(string title, IEnumerable<string> dataLines, Stopwatch stopwatch)
 {
     const int borderLength = 77;
     int upperBorderTailLength = borderLength - title.Length - 6;
@@ -140,7 +138,13 @@ static void WriteBlock(string title, string data, Stopwatch stopwatch)
     Console.Write("-->> " + title + " " + new string('-', upperBorderTailLength));
     Console.ResetColor();
     Console.WriteLine();
-    Console.WriteLine(data);
+
+    var numberedDataLines = dataLines.ToNumberedLines();
+    foreach (var line in numberedDataLines)
+    {
+        Console.WriteLine(line);
+    }
+    
     Console.BackgroundColor = ConsoleColor.DarkYellow;
     Console.ForegroundColor = ConsoleColor.Black;
     Console.Write("--<< " + title + " " + new string('-', lowerBorderTailLength) + $" ({stopwatch.Elapsed:mm\\:ss\\.fff})");
