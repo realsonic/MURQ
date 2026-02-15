@@ -1,4 +1,5 @@
-﻿using MURQ.URQL.Lexing;
+﻿using MURQ.URQL.Interpretation;
+using MURQ.URQL.Lexing;
 using MURQ.URQL.Lexing.EnumerableExtensions;
 using MURQ.URQL.Locations;
 using MURQ.URQL.Processor.Json;
@@ -119,9 +120,24 @@ Utilities.WriteBlock(
     stopwatch);
 
 stopwatch.Restart();
-List<List<Token>> tokens = [.. urqlLines.Select(line => new UrqlLexer(line.Select(element => element.Character)).Scan().ToList())];
+List<List<Token>> tokenLines = [.. urqlLines.Select(line => new UrqlLexer(line.Select(element => element.Character)).Scan().ToList())];
 stopwatch.Stop();
 Utilities.WriteBlock(
     "Шаг 2. Эмуляция получения токенов",
-    tokens.Select(line => line.ToJoinedString()),
+    tokenLines.Select(line => line.ToJoinedString()),
     stopwatch);
+
+Console.WriteLine("-->> Шаг 3. Эмуляция интерпретации ------------------------------------------");
+GameContextEmulation gameContextEmulation = new();
+gameContextEmulation.OnCommandExecuted += command => Console.Write(command);
+stopwatch.Restart();
+int lineNo = 0;
+foreach (List<Token> tokenLine in tokenLines)
+{
+    Console.Write($"[{++lineNo}] ");
+    UrqlInterpreter urqlInterpreter = new(tokenLine, gameContextEmulation);
+    await urqlInterpreter.RunUrqlLineAsync(default);
+    Console.WriteLine();
+}
+stopwatch.Stop();
+Console.WriteLine($"--<<------------------------------------------------------------- ({stopwatch.Elapsed:mm\\:ss\\.fff})");

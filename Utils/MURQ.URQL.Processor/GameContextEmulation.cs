@@ -5,6 +5,8 @@ using MURQ.Domain.Quests.Statements;
 
 class GameContextEmulation : IGameContext
 {
+    public event Action<string>? OnCommandExecuted;
+
     public void AddButton(string caption, LabelStatement? labelStatement)
     {
         throw new NotImplementedException();
@@ -42,11 +44,11 @@ class GameContextEmulation : IGameContext
 
     public void Print(string? text)
     {
-        throw new NotImplementedException();
+        OnCommandExecuted?.Invoke($"Print(\"{text}\"); ");
     }
 
     public void PrintLine(string? text = null)
     {
-        throw new NotImplementedException();
+        OnCommandExecuted?.Invoke($"PrintLine(\"{text}\"); ");
     }
 }
