@@ -8,7 +8,7 @@ namespace MURQ.Domain.Quests.Statements;
 [DebuggerDisplay("{DebuggerDisplay,nq}")]
 public class PrintStatement : Statement
 {
-    public UrqString? UrqString { get; init; }
+    public UrqString? UrqString { get; init; } // todo убрать UrqString из PrintStatement
 
     public bool IsNewLineAtEnd { get; init; }
 
