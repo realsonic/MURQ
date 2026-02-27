@@ -68,9 +68,9 @@ class Demo5GameContext : IGameContext
         throw new NotImplementedException();
     }
 
-    public void AssignVariable(string variableName, Value value)
+    public void AssignVariable(string name, Value value)
     {
-        throw new NotImplementedException();
+        _variables[name] = new Variable(name, value);
     }
 
     public void ClearScreen()
