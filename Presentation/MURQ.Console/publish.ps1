@@ -1,5 +1,5 @@
 <# Windows #>
-dotnet publish --os win --configuration Debug --self-contained true -p:PublishSingleFile=true -p:PublishTrimmed=true -p:EnableCompressionInSingleFile=true `
+dotnet publish --os win --configuration Debug --self-contained true -p:PublishSingleFile=true -p:PublishTrimmed=true -p:EnableCompressionInSingleFile=true -p:PublishAot=true `
 && [System.Console]::Beep(1000, 700) `
 && start .\bin\Debug\net9.0\win-x64\publish\ `
 <# ---------------------------------------- #>`
