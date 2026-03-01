@@ -12,9 +12,9 @@ using MURQ.URQL.Tokens;
 using System.Text;
 
 Console.OutputEncoding = Encoding.UTF8;
-Console.Title = "Мурка. Демо 5";
+Console.Title = "Мурка. Демо 6";
 
-IEnumerable<List<(char Character, Position Position)>> sourceLines = ReadFile(@"Demo5.qst")
+IEnumerable<List<(char Character, Position Position)>> sourceLines = ReadFile(@"Demo6.qst")
     .ToEnumerableWithoutCarriageReturn()
     .ToPositionedEnumerable()
     .ToEnumerableWithoutComments()
@@ -23,7 +23,7 @@ IEnumerable<List<(char Character, Position Position)>> sourceLines = ReadFile(@"
 
 List<SubstitutionTree> substitutionTrees = [.. ConvertToSubstitutionTrees(sourceLines)];
 
-Demo5GameContext gameContext = new();
+Demo6GameContext gameContext = new();
 
 foreach (var substitutionTree in substitutionTrees)
 {
@@ -61,7 +61,7 @@ static IEnumerable<SubstitutionTree> ConvertToSubstitutionTrees(IEnumerable<IEnu
     }
 }
 
-class Demo5GameContext : IGameContext
+class Demo6GameContext : IGameContext
 {
     public void AddButton(string caption, LabelStatement? labelStatement)
     {
@@ -102,5 +102,5 @@ class Demo5GameContext : IGameContext
 
     public void PrintLine(string? text = null) => Console.WriteLine(text);
 
-    private Dictionary<string, Variable> _variables = new(StringComparer.InvariantCultureIgnoreCase);
+    private readonly Dictionary<string, Variable> _variables = new(StringComparer.InvariantCultureIgnoreCase);
 }

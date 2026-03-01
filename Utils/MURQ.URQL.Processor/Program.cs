@@ -136,7 +136,7 @@ foreach (List<Token> tokenLine in tokenLines)
 {
     Console.Write($"[{++lineNo}] ");
     UrqlInterpreter urqlInterpreter = new(tokenLine, gameContextEmulation);
-    await urqlInterpreter.RunUrqlLineAsync(default);
+    await urqlInterpreter.RunStatementLineAsync(default);
     Console.WriteLine();
 }
 stopwatch.Stop();

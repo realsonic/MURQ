@@ -1,4 +1,5 @@
 ﻿using MURQ.Domain.Games;
+using MURQ.Domain.Games.Values;
 using MURQ.Domain.Quests.Expressions;
 using MURQ.Domain.Quests.Statements;
 using MURQ.Domain.Quests.UrqStrings;
@@ -11,15 +12,69 @@ namespace MURQ.URQL.Interpretation;
 
 public class UrqlInterpreter(IEnumerable<Token> tokens, IGameContext gameContext)
 {
-    public async Task RunUrqlLineAsync(CancellationToken cancellationToken)
+    /// <summary>
+    /// Грамматика:
+    /// <code>
+    /// statementLine = [ joinedStatements ];
+    /// </code>
+    /// </summary>
+    public async Task RunStatementLineAsync(CancellationToken cancellationToken)
     {
         MoveToNextTerminal();
 
-        await RunStatementAsync(cancellationToken);
+        if (_lookahead.IsStartOfStatement()) // 2ая линия
+        {
+            await RunJoinedStatementsAdaptedAsync(cancellationToken);
+        }
+        else if (_lookahead is null) // ϵ-продукция
+        {
+            return;
+        }
+
+        if (_lookahead is not null)
+            throw new UnexpectedElementException("Ожидался конец строки", _lookahead);
     }
 
     #region Run statements
 
+    /// <summary>
+    /// Грамматика:
+    /// <code>
+    /// joinedStatementsAdapted = statement, joinedStatementsRest;
+    /// </code>
+    /// </summary>
+    private async Task RunJoinedStatementsAdaptedAsync(CancellationToken cancellationToken)
+    {
+        await RunStatementAsync(cancellationToken);
+        await RunJoinedStatementsRestAsync(cancellationToken);
+    }
+
+    /// <summary>
+    /// Грамматика:
+    /// <code>
+    /// joinedStatementsRest = [? & ?, statement, joinedStatementsRest];
+    /// </code>
+    /// </summary>
+    private async Task RunJoinedStatementsRestAsync(CancellationToken cancellationToken)
+    {
+        if (_lookahead is StatementJoinToken) // 2ая ветка
+        {
+            Match<StatementJoinToken>();
+            await RunStatementAsync(cancellationToken);
+            await RunJoinedStatementsRestAsync(cancellationToken);
+        }
+        else
+        {
+            return; // ϵ-продукция
+        }
+    }
+
+    /// <summary>
+    /// Грамматика:
+    /// <code>
+    /// statement = assignVariableStatement | ifStatement | ? Label ? | ? Print ? | ? Button ? | ? End ? | ? ClearScreen ?;
+    /// </code>
+    /// </summary>
     private async Task RunStatementAsync(CancellationToken cancellationToken)
     {
         switch (_lookahead)
@@ -30,6 +85,10 @@ public class UrqlInterpreter(IEnumerable<Token> tokens, IGameContext gameContext
 
             case Token when _lookahead.IsStartOfAssignVariableStatement():
                 await RunAssignVariableStatementAsync(cancellationToken);
+                break;
+
+            case Token when _lookahead.IsStartOfIfStatement():
+                await RunIfThenStatement(cancellationToken);
                 break;
 
             default:
@@ -49,7 +108,29 @@ public class UrqlInterpreter(IEnumerable<Token> tokens, IGameContext gameContext
         await assignVariableStatement.RunAsync(gameContext, cancellationToken);
     }
 
+    /// <summary>
+    /// Грамматика:
+    /// <code>
+    /// ifStatement = ? If ?, relationExpression, ? Then ?, joinedStatements;
+    /// </code>
+    /// </summary>
+    /// <returns>Условный оператор <c>if-else</c></returns>
+    private async Task RunIfThenStatement(CancellationToken cancellationToken)
+    {
+        Match<IfToken>();
+
+        RelationExpression relationExpression = ParseRelationExpression();
+        Value relationResult = relationExpression.Calculate(gameContext);
+        if (relationResult.AsDecimal != 0)
+        {
+            Match<ThenToken>("в ветвлении if-then");
+            await RunJoinedStatementsAdaptedAsync(cancellationToken);
+        }
+    }
+
     #endregion
+
+    #region Parse
 
     #region Parse statements
 
@@ -74,6 +155,22 @@ public class UrqlInterpreter(IEnumerable<Token> tokens, IGameContext gameContext
         {
             VariableName = variableToken.Name,
             Expression = expression
+        };
+    }
+
+    #endregion
+
+    #region Parse expressions
+
+    private RelationExpression ParseRelationExpression()
+    {
+        Expression leftExpression = ParseValueExpression();
+        Match<EqualityToken>("в выражении сравнения значений");
+        Expression rightExpression = ParseValueExpression();
+
+        return new RelationExpression { 
+            LeftExpression = leftExpression, 
+            RightExpression = rightExpression
         };
     }
 
@@ -103,6 +200,8 @@ public class UrqlInterpreter(IEnumerable<Token> tokens, IGameContext gameContext
         return new StringLiteralExpression { Text = stringLiteralToken.Text };
     }
 
+    #endregion 
+    
     #endregion
 
     private TToken Match<TToken>(string? context = null) where TToken : Token

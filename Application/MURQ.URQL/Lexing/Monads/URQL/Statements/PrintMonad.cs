@@ -15,13 +15,13 @@ public record PrintMonad(PrintLexemeProgress LexemeProgress, PrintStatementVaria
         PrintLexemeProgress.JustAfterKeyword => character switch
         {
             ' ' or '\t' => new PrintMonad(PrintLexemeProgress.Text, StatementVariant, string.Empty, Lexeme + character, Location.EndAt(position)),
-            '\n' => new PrintToken(string.Empty, IsNewLineAtEnd(), Lexeme, Location).AsMonadWithRemain(character, position),
+            '&' or '\n' => new PrintToken(string.Empty, IsNewLineAtEnd(), Lexeme, Location).AsMonadWithRemain(character, position),
             _ => new UnknownLexemeMonad(Lexeme + character, Location.EndAt(position), WhitespaceExpected)
         },
 
         PrintLexemeProgress.Text => character switch
         {
-            '\n' => new PrintToken(Text, IsNewLineAtEnd(), Lexeme, Location).AsMonadWithRemain(character, position),
+            '&' or '\n' => new PrintToken(Text, IsNewLineAtEnd(), Lexeme, Location).AsMonadWithRemain(character, position),
             _ => new PrintMonad(PrintLexemeProgress.Text, StatementVariant, Text + character, Lexeme + character, Location.EndAt(position))
         },
 

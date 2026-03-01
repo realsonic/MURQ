@@ -14,6 +14,7 @@ public record RootMonad(Position Position) : UncompletedLexemeMonad(string.Empty
         '=' => new EqualityToken(character, position).AsMonad(),
         '_' => VariableMonad.Start(character, position),
         '"' => StringLiteralMonad.StartAfterOpeningQuote(character, position),
+        '&' => new StatementJoinToken(character.ToString(), Location.StartAt(position)).AsMonad(),
         _ when char.IsLetter(character) => WordMonad.Start(character, position),
         _ when char.IsDigit(character) => NumberMonad.Start(character, position),
         _ => new UnknownLexemeMonad(character.ToString(), Location.StartAt(position))
