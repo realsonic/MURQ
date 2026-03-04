@@ -17,13 +17,13 @@ public class UrqlInterpreter(IEnumerable<Token> tokens, IGameContext gameContext
     /// statementLine = [ joinedStatements ];
     /// </code>
     /// </summary>
-    public async Task RunStatementLineAsync(CancellationToken cancellationToken)
+    public async Task InterpretStatementLineAsync(CancellationToken cancellationToken)
     {
         MoveToNextTerminal();
 
         if (Lookahead.IsStartOfStatement()) // 2ая линия
         {
-            await RunJoinedStatementsAdaptedAsync(cancellationToken);
+            await InterpretJoinedStatementsAdaptedAsync(toRun: true, cancellationToken);
         }
         else if (Lookahead is null) // ϵ-продукция
         {
@@ -40,10 +40,10 @@ public class UrqlInterpreter(IEnumerable<Token> tokens, IGameContext gameContext
     /// joinedStatementsAdapted = statement, joinedStatementsRest;
     /// </code>
     /// </summary>
-    private async Task RunJoinedStatementsAdaptedAsync(CancellationToken cancellationToken)
+    private async Task InterpretJoinedStatementsAdaptedAsync(bool toRun, CancellationToken cancellationToken)
     {
-        await RunStatementAsync(cancellationToken);
-        await RunJoinedStatementsRestAsync(cancellationToken);
+        await InterpretStatementAsync(toRun, cancellationToken);
+        await InterpretJoinedStatementsRestAsync(toRun, cancellationToken);
     }
 
     /// <summary>
@@ -52,13 +52,13 @@ public class UrqlInterpreter(IEnumerable<Token> tokens, IGameContext gameContext
     /// joinedStatementsRest = [? & ?, statement, joinedStatementsRest];
     /// </code>
     /// </summary>
-    private async Task RunJoinedStatementsRestAsync(CancellationToken cancellationToken)
+    private async Task InterpretJoinedStatementsRestAsync(bool toRun, CancellationToken cancellationToken)
     {
         if (Lookahead is StatementJoinToken) // 2ая ветка
         {
             Match<StatementJoinToken>();
-            await RunStatementAsync(cancellationToken);
-            await RunJoinedStatementsRestAsync(cancellationToken);
+            await InterpretStatementAsync(toRun, cancellationToken);
+            await InterpretJoinedStatementsRestAsync(toRun, cancellationToken);
         }
         else
         {
@@ -72,20 +72,20 @@ public class UrqlInterpreter(IEnumerable<Token> tokens, IGameContext gameContext
     /// statement = assignVariableStatement | ifStatement | ? Label ? | ? Print ? | ? Button ? | ? End ? | ? ClearScreen ?;
     /// </code>
     /// </summary>
-    private async Task RunStatementAsync(CancellationToken cancellationToken)
+    private async Task InterpretStatementAsync(bool toRun, CancellationToken cancellationToken)
     {
         switch (Lookahead)
         {
             case PrintToken:
-                await RunPrintStatementAsync(cancellationToken);
+                await InterpretPrintStatementAsync(toRun, cancellationToken);
                 break;
 
             case Token when Lookahead.IsStartOfAssignVariableStatement():
-                await RunAssignVariableStatementAsync(cancellationToken);
+                await InterpretAssignVariableStatementAsync(toRun, cancellationToken);
                 break;
 
             case Token when Lookahead.IsStartOfIfStatement():
-                await RunIfThenStatement(cancellationToken);
+                await InterpretIfThenStatement(toRun, cancellationToken);
                 break;
 
             default:
@@ -93,16 +93,24 @@ public class UrqlInterpreter(IEnumerable<Token> tokens, IGameContext gameContext
         }
     }
 
-    private async Task RunPrintStatementAsync(CancellationToken cancellationToken)
+    private async Task InterpretPrintStatementAsync(bool toRun, CancellationToken cancellationToken)
     {
         PrintStatement printStatement = ParsePrintTerminal();
-        await printStatement.RunAsync(gameContext, cancellationToken);
+
+        if (toRun)
+        {
+            await printStatement.RunAsync(gameContext, cancellationToken);
+        }
     }
 
-    private async Task RunAssignVariableStatementAsync(CancellationToken cancellationToken)
+    private async Task InterpretAssignVariableStatementAsync(bool toRun, CancellationToken cancellationToken)
     {
         AssignVariableStatement assignVariableStatement = ParseAssignVariableStatement();
-        await assignVariableStatement.RunAsync(gameContext, cancellationToken);
+        
+        if (toRun)
+        {
+            await assignVariableStatement.RunAsync(gameContext, cancellationToken);
+        }
     }
 
     /// <summary>
@@ -112,16 +120,26 @@ public class UrqlInterpreter(IEnumerable<Token> tokens, IGameContext gameContext
     /// </code>
     /// </summary>
     /// <returns>Условный оператор <c>if-else</c></returns>
-    private async Task RunIfThenStatement(CancellationToken cancellationToken)
+    private async Task InterpretIfThenStatement(bool toRun, CancellationToken cancellationToken)
     {
         Match<IfToken>();
 
         RelationExpression relationExpression = ParseRelationExpression();
         Value relationResult = relationExpression.Calculate(gameContext);
-        if (relationResult.AsDecimal != 0)
+
+        Match<ThenToken>("в ветвлении if-then");
+
+        bool isConditionTrue = relationResult.AsDecimal != 0;
+
+        if (isConditionTrue)
         {
-            Match<ThenToken>("в ветвлении if-then");
-            await RunJoinedStatementsAdaptedAsync(cancellationToken);
+            await InterpretJoinedStatementsAdaptedAsync(toRun, cancellationToken);
+            //todo skip else
+        }
+        else
+        {
+            await InterpretJoinedStatementsAdaptedAsync(toRun: false, cancellationToken);
+            //todo run else
         }
     }
 }

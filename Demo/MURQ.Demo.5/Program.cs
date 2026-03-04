@@ -31,7 +31,7 @@ foreach (var substitutionTree in substitutionTrees)
     UrqlLexer urqlLexer = new(sourceLine);
     IEnumerable<Token> lineTokens = urqlLexer.Scan();
     UrqlInterpreter urqlInterpreter = new(lineTokens, gameContext);
-    await urqlInterpreter.RunStatementLineAsync(default);
+    await urqlInterpreter.InterpretStatementLineAsync(default);
 }
 
 Console.Write("\n>> Нажмите любую клавишу для выхода. <<");
