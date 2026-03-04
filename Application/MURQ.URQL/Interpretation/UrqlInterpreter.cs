@@ -2,7 +2,6 @@
 using MURQ.Domain.Games.Values;
 using MURQ.Domain.Quests.Expressions;
 using MURQ.Domain.Quests.Statements;
-using MURQ.Domain.Quests.UrqStrings;
 using MURQ.URQL.Interpretation.Exceptions;
 using MURQ.URQL.Tokens;
 using MURQ.URQL.Tokens.Statements;
@@ -10,7 +9,7 @@ using MURQ.URQL.Tokens.Statements.If;
 
 namespace MURQ.URQL.Interpretation;
 
-public class UrqlInterpreter(IEnumerable<Token> tokens, IGameContext gameContext)
+public class UrqlInterpreter(IEnumerable<Token> tokens, IGameContext gameContext) : UrqlParser(tokens)
 {
     /// <summary>
     /// Грамматика:
@@ -22,20 +21,18 @@ public class UrqlInterpreter(IEnumerable<Token> tokens, IGameContext gameContext
     {
         MoveToNextTerminal();
 
-        if (_lookahead.IsStartOfStatement()) // 2ая линия
+        if (Lookahead.IsStartOfStatement()) // 2ая линия
         {
             await RunJoinedStatementsAdaptedAsync(cancellationToken);
         }
-        else if (_lookahead is null) // ϵ-продукция
+        else if (Lookahead is null) // ϵ-продукция
         {
             return;
         }
 
-        if (_lookahead is not null)
-            throw new UnexpectedElementException("Ожидался конец строки", _lookahead);
+        if (Lookahead is not null)
+            throw new UnexpectedElementException("Ожидался конец строки", Lookahead);
     }
-
-    #region Run statements
 
     /// <summary>
     /// Грамматика:
@@ -57,7 +54,7 @@ public class UrqlInterpreter(IEnumerable<Token> tokens, IGameContext gameContext
     /// </summary>
     private async Task RunJoinedStatementsRestAsync(CancellationToken cancellationToken)
     {
-        if (_lookahead is StatementJoinToken) // 2ая ветка
+        if (Lookahead is StatementJoinToken) // 2ая ветка
         {
             Match<StatementJoinToken>();
             await RunStatementAsync(cancellationToken);
@@ -77,22 +74,22 @@ public class UrqlInterpreter(IEnumerable<Token> tokens, IGameContext gameContext
     /// </summary>
     private async Task RunStatementAsync(CancellationToken cancellationToken)
     {
-        switch (_lookahead)
+        switch (Lookahead)
         {
             case PrintToken:
                 await RunPrintStatementAsync(cancellationToken);
                 break;
 
-            case Token when _lookahead.IsStartOfAssignVariableStatement():
+            case Token when Lookahead.IsStartOfAssignVariableStatement():
                 await RunAssignVariableStatementAsync(cancellationToken);
                 break;
 
-            case Token when _lookahead.IsStartOfIfStatement():
+            case Token when Lookahead.IsStartOfIfStatement():
                 await RunIfThenStatement(cancellationToken);
                 break;
 
             default:
-                throw new UnexpectedElementException("Ожидалась инструкция", _lookahead);
+                throw new UnexpectedElementException("Ожидалась инструкция", Lookahead);
         }
     }
 
@@ -127,106 +124,4 @@ public class UrqlInterpreter(IEnumerable<Token> tokens, IGameContext gameContext
             await RunJoinedStatementsAdaptedAsync(cancellationToken);
         }
     }
-
-    #endregion
-
-    #region Parse
-
-    #region Parse statements
-
-    private PrintStatement ParsePrintTerminal()
-    {
-        PrintToken printToken = Match<PrintToken>();
-
-        return new PrintStatement
-        {
-            UrqString = new([new UrqStringTextPart(printToken.Text)]), // todo убрать UrqString из PrintStatement
-            IsNewLineAtEnd = printToken.IsNewLineAtEnd
-        };
-    }
-
-    private AssignVariableStatement ParseAssignVariableStatement()
-    {
-        VariableToken variableToken = Match<VariableToken>("в левой части присвоения значения переменной");
-        Match<EqualityToken>($"при присвоении значения переменной {variableToken.Name}");
-        Expression expression = ParseValueExpression();
-
-        return new AssignVariableStatement
-        {
-            VariableName = variableToken.Name,
-            Expression = expression
-        };
-    }
-
-    #endregion
-
-    #region Parse expressions
-
-    private RelationExpression ParseRelationExpression()
-    {
-        Expression leftExpression = ParseValueExpression();
-        Match<EqualityToken>("в выражении сравнения значений");
-        Expression rightExpression = ParseValueExpression();
-
-        return new RelationExpression { 
-            LeftExpression = leftExpression, 
-            RightExpression = rightExpression
-        };
-    }
-
-    private Expression ParseValueExpression() => _lookahead switch
-    {
-        VariableToken => ParseVariableExpressionTerminal(),
-        NumberToken => ParseNumberExpressionTerminal(),
-        StringLiteralToken => ParseStringLiteralExpressionTerminal(),
-        _ => throw new UnexpectedElementException("Ожидалась переменная, число или строка в кавычках", _lookahead)
-    };
-
-    private VariableExpression ParseVariableExpressionTerminal()
-    {
-        VariableToken variableToken = Match<VariableToken>();
-        return new VariableExpression { Name = variableToken.Name };
-    }
-
-    private DecimalConstantExpression ParseNumberExpressionTerminal()
-    {
-        NumberToken numberToken = Match<NumberToken>();
-        return new DecimalConstantExpression { Value = numberToken.Value };
-    }
-
-    private StringLiteralExpression ParseStringLiteralExpressionTerminal()
-    {
-        StringLiteralToken stringLiteralToken = Match<StringLiteralToken>();
-        return new StringLiteralExpression { Text = stringLiteralToken.Text };
-    }
-
-    #endregion 
-    
-    #endregion
-
-    private TToken Match<TToken>(string? context = null) where TToken : Token
-    {
-        if (_lookahead is TToken token)
-        {
-            MoveToNextTerminal();
-            return token;
-        }
-        else throw new UnexpectedTokenException<TToken>(_lookahead, context);
-    }
-
-    private void MoveToNextTerminal() => _lookahead = _tokenEnumerator!.MoveNext() ? _tokenEnumerator.Current : null;
-
-    private IEnumerator<Token> _tokenEnumerator = tokens.GetEnumerator();
-    private Token? _lookahead;
-}
-
-public static class TerminalStartExtensions
-{
-    public static bool IsStartOfStatement(this Token? token)
-        => token.IsStartOfAssignVariableStatement()
-        || token.IsStartOfIfStatement()
-        || token is StatementToken;
-
-    public static bool IsStartOfAssignVariableStatement(this Token? token) => token is VariableToken;
-    public static bool IsStartOfIfStatement(this Token? token) => token is IfToken;
 }
