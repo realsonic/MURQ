@@ -6,6 +6,7 @@ using MURQ.Domain.Games;
 using MURQ.Domain.Games.Values;
 using MURQ.Domain.Quests;
 using MURQ.Domain.Quests.Statements;
+using MURQ.URQL.Substitutions;
 
 namespace MURQ.EndToEndTests;
 
@@ -342,7 +343,7 @@ public class QstTests
     private static async Task<Game> LoadQuestIntoGame(string filePath)
     {
         string questSource = await File.ReadAllTextAsync(filePath);
-        UrqLoader urqLoader = new(new UrqStringLoader(new UrqStringLexer()));
+        UrqLoader urqLoader = new(new UrqStringLoader(new UrqStringLexer()), new SubstitutionParser(new SubstitutionLexer()));
         Quest quest = urqLoader.LoadQuest(questSource);
         Game game = new(quest);
         return game;

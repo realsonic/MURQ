@@ -1,6 +1,7 @@
 ﻿using MURQ.Application.UrqLoaders;
 using MURQ.Application.UrqLoaders.UrqStrings;
 using MURQ.Domain.Games;
+using MURQ.URQL.Substitutions;
 
 using System.Text;
 
@@ -8,7 +9,7 @@ Console.OutputEncoding = Encoding.UTF8;
 Console.Title = "Мурка. Демо 3";
 
 string questSource = await File.ReadAllTextAsync(@"Demo3.qst");
-var urqLoader = new UrqLoader(new UrqStringLoader(new UrqStringLexer()));
+var urqLoader = new UrqLoader(new UrqStringLoader(new UrqStringLexer()), new SubstitutionParser(new SubstitutionLexer()));
 var quest = urqLoader.LoadQuest(questSource);
 var game = new Game(quest);
 

@@ -1,13 +1,16 @@
 ﻿using System.Collections.Immutable;
 
 using MURQ.Common.Exceptions;
+using MURQ.Domain.Quests.QuestLines;
 using MURQ.Domain.Quests.Statements;
 
 namespace MURQ.Domain.Quests;
 
-public class Quest(IEnumerable<Statement> statements)
+public class Quest(IEnumerable<Statement> statements, IEnumerable<QuestLine> questLines = null) //todo убрать null
 {
     public IImmutableList<Statement> Statements { get; } = statements.ToImmutableList();
+
+    public List<QuestLine> QuestLines { get; } = [.. questLines];
 
     public Statement? StartingStatement => Statements.Count > 0 ? Statements[0] : null;
 

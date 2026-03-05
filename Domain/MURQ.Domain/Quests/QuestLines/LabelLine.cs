@@ -2,4 +2,4 @@
 
 namespace MURQ.Domain.Quests.QuestLines;
 
-public record LabelLine(Location Location) : QuestLine(Location);
+public record LabelLine(string Label, Location Location) : QuestLine(Location);

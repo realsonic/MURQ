@@ -2,16 +2,20 @@
 using MURQ.Common.Exceptions;
 using MURQ.Domain.Quests;
 using MURQ.Domain.Quests.Expressions;
+using MURQ.Domain.Quests.Locations;
+using MURQ.Domain.Quests.QuestLines;
 using MURQ.Domain.Quests.Statements;
 using MURQ.URQL.Lexing;
+using MURQ.URQL.Lexing.EnumerableExtensions;
 using MURQ.URQL.Parsing;
+using MURQ.URQL.Substitutions;
 using MURQ.URQL.SyntaxTree;
 using MURQ.URQL.SyntaxTree.Expressions;
 using MURQ.URQL.SyntaxTree.Statements;
 
 namespace MURQ.Application.UrqLoaders;
 
-public class UrqLoader(UrqStringLoader urqStringLoader)
+public class UrqLoader(UrqStringLoader urqStringLoader, SubstitutionParser substitutionParser)
 {
     public Quest LoadQuest(IEnumerable<char> source)
     {
@@ -20,6 +24,8 @@ public class UrqLoader(UrqStringLoader urqStringLoader)
 
         _questSto = parser.ParseQuest();
         ProduceAndCacheLabelStatements();
+
+        _questLines = LoadQuestLines(source);
 
         Quest quest = ProduceQuest();
         return quest;
@@ -38,10 +44,33 @@ public class UrqLoader(UrqStringLoader urqStringLoader)
         }
     }
 
+    private IEnumerable<QuestLine> LoadQuestLines(IEnumerable<char> source)
+    {
+        IEnumerable<List<(char Character, Position Position)>> sourceLines = source
+            .ToEnumerableWithoutCarriageReturn()
+            .ToPositionedEnumerable()
+            .ToEnumerableWithoutComments()
+            .ToEnumerableWithoutLineContinuations()
+            .SplitByLineBreaks();
+
+        foreach (List<(char Character, Position Position)> sourceLine in sourceLines)
+        {
+            (bool isLabel, string? label) = sourceLine.TryExtractLabel();
+            if (isLabel)
+            {
+                yield return new LabelLine(label ?? string.Empty, null); //todo location
+                continue;
+            }
+
+            CodeLine codeLine = substitutionParser.ParseLine(sourceLine);
+            yield return codeLine;
+        }
+    }
+
     private Quest ProduceQuest()
     {
         IEnumerable<Statement> statements = _questSto!.Statements.Select(ProduceStatement);
-        Quest quest = new(statements);
+        Quest quest = new(statements, _questLines!);
         return quest;
     }
 
@@ -120,5 +149,6 @@ public class UrqLoader(UrqStringLoader urqStringLoader)
             : null;
 
     private QuestSto? _questSto;
+    private IEnumerable<QuestLine>? _questLines;
     private readonly List<(LabelStatementSto LabelStatementSto, LabelStatement LabelStatement)> _labelStatementPairs = [];
 }
