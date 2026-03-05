@@ -1,6 +1,5 @@
 ﻿using FluentAssertions;
 
-using MURQ.URQL.Locations;
 using MURQ.URQL.Parsing;
 using MURQ.URQL.SyntaxTree;
 using MURQ.URQL.SyntaxTree.Expressions;
@@ -8,6 +7,7 @@ using MURQ.URQL.SyntaxTree.Statements;
 using MURQ.URQL.Tokens;
 using MURQ.URQL.Tokens.Statements.If;
 using MURQ.URQL.Tokens.Statements;
+using MURQ.Domain.Quests.Locations;
 
 namespace MURQ.URQL.Tests;
 

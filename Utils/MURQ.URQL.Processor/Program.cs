@@ -1,7 +1,7 @@
-﻿using MURQ.URQL.Interpretation;
+﻿using MURQ.Domain.Quests.Locations;
+using MURQ.URQL.Interpretation;
 using MURQ.URQL.Lexing;
 using MURQ.URQL.Lexing.EnumerableExtensions;
-using MURQ.URQL.Locations;
 using MURQ.URQL.Processor.Json;
 using MURQ.URQL.Substitutions;
 using MURQ.URQL.Tokens;

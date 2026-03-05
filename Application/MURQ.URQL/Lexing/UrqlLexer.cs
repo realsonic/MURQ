@@ -1,7 +1,7 @@
-﻿using MURQ.URQL.Lexing.EnumerableExtensions;
+﻿using MURQ.Domain.Quests.Locations;
+using MURQ.URQL.Lexing.EnumerableExtensions;
 using MURQ.URQL.Lexing.Monads;
 using MURQ.URQL.Lexing.Monads.URQL;
-using MURQ.URQL.Locations;
 using MURQ.URQL.Tokens;
 
 namespace MURQ.URQL.Lexing;

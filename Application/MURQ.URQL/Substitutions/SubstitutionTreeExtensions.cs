@@ -1,6 +1,6 @@
 ﻿using MURQ.Domain.Games;
 using MURQ.Domain.Quests.Expressions;
-using MURQ.URQL.Locations;
+using MURQ.Domain.Quests.Locations;
 
 using static MURQ.URQL.Substitutions.SubstitutionTree;
 using static MURQ.URQL.Substitutions.SubstitutionTree.SubstitutionNode;

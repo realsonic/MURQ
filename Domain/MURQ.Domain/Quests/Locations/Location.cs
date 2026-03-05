@@ -1,6 +1,6 @@
-﻿namespace MURQ.URQL.Locations;
+﻿namespace MURQ.Domain.Quests.Locations;
 
-public record Location(Position Start, Position End)
+public record Location(Position Start, Position End) //todo сделать struct
 {
     public static Location StartAt(Position position) => new(Start: position, End: position);
 

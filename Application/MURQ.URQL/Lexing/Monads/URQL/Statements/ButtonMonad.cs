@@ -1,4 +1,4 @@
-﻿using MURQ.URQL.Locations;
+﻿using MURQ.Domain.Quests.Locations;
 using MURQ.URQL.Tokens.Statements;
 
 using static MURQ.URQL.Lexing.Monads.URQL.Statements.ButtonMonad;

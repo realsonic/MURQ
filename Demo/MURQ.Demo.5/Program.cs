@@ -1,11 +1,11 @@
 ﻿using MURQ.Domain.Games;
 using MURQ.Domain.Games.Values;
 using MURQ.Domain.Games.Variables;
+using MURQ.Domain.Quests.Locations;
 using MURQ.Domain.Quests.Statements;
 using MURQ.URQL.Interpretation;
 using MURQ.URQL.Lexing;
 using MURQ.URQL.Lexing.EnumerableExtensions;
-using MURQ.URQL.Locations;
 using MURQ.URQL.Substitutions;
 using MURQ.URQL.Tokens;
 

@@ -1,5 +1,5 @@
-﻿using MURQ.URQL.Lexing.Monads.URQL.Statements;
-using MURQ.URQL.Locations;
+﻿using MURQ.Domain.Quests.Locations;
+using MURQ.URQL.Lexing.Monads.URQL.Statements;
 using MURQ.URQL.Tokens;
 
 namespace MURQ.URQL.Lexing.Monads.URQL;

@@ -1,4 +1,4 @@
-﻿using MURQ.URQL.Locations;
+﻿using MURQ.Domain.Quests.Locations;
 
 namespace MURQ.URQL.SyntaxTree.Statements;
 public record ClearScreenStatementSto(Location Location) : StatementSto

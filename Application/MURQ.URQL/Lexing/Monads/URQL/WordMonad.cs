@@ -1,6 +1,6 @@
-﻿using MURQ.URQL.Lexing.Monads.URQL.Statements;
+﻿using MURQ.Domain.Quests.Locations;
+using MURQ.URQL.Lexing.Monads.URQL.Statements;
 using MURQ.URQL.Lexing.Monads.URQL.Statements.If;
-using MURQ.URQL.Locations;
 
 namespace MURQ.URQL.Lexing.Monads.URQL;
 

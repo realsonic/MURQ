@@ -1,6 +1,6 @@
-﻿namespace MURQ.URQL.Locations;
+﻿namespace MURQ.Domain.Quests.Locations;
 
-public record Position(int Line, int Column)
+public record Position(int Line, int Column) //todo сделать struct
 {
     public static Position Initial { get; } = new Position(1, 1);
 

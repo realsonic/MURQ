@@ -1,4 +1,4 @@
-﻿using MURQ.URQL.Locations;
+﻿using MURQ.Domain.Quests.Locations;
 using MURQ.URQL.Substitutions;
 
 using System.Text.Encodings.Web;
