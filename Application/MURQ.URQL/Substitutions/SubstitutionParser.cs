@@ -1,12 +1,13 @@
 ﻿using MURQ.Domain.Quests.Locations;
+using MURQ.Domain.Quests.QuestLines;
+using MURQ.Domain.Quests.QuestLines.SubstitutionTrees;
 using MURQ.URQL.Substitutions.Tokens;
 
-using static MURQ.URQL.Substitutions.SubstitutionTree;
-
 namespace MURQ.URQL.Substitutions;
+
 public class SubstitutionParser(SubstitutionLexer substitutionLexer)
 {
-    public SubstitutionTree ParseLine(IEnumerable<(char Character, Position Position)> line)
+    public CodeLine ParseLine(IEnumerable<(char Character, Position Position)> line)
     {
         foreach (Token token in substitutionLexer.Scan(line))
         {
@@ -52,20 +53,20 @@ public class SubstitutionParser(SubstitutionLexer substitutionLexer)
         CollapseSubstituton();
     }
 
-    private SubstitutionTree PopSubstitutionTree()
+    private CodeLine PopSubstitutionTree()
     {
         // перекладываем стек в список частей подстановки
-        List<Node> substitutionLineParts = [];
+        List<TreeNode> substitutionLineParts = [];
         while (substitutionElementStack.TryPop(out SubstitutionElement? substitutionElement))
         {
-            Node substitutionLinePart = ConvertToNode(substitutionElement);
+            TreeNode substitutionLinePart = ConvertToNode(substitutionElement);
             substitutionLineParts.Add(substitutionLinePart);
         }
 
         // переворачиваем список
         substitutionLineParts.Reverse();
 
-        return new SubstitutionTree([.. substitutionLineParts]);
+        return new CodeLine([.. substitutionLineParts], null); // todo проставлять location
     }
 
     private void CollapseSubstituton()
@@ -115,21 +116,21 @@ public class SubstitutionParser(SubstitutionLexer substitutionLexer)
         }
     }
 
-    private Node ConvertToNode(SubstitutionElement substitutionElement)
+    private TreeNode ConvertToNode(SubstitutionElement substitutionElement)
     {
         switch (substitutionElement)
         {
             case StringOperand stringOperand:
-                return new StringNode(stringOperand.Text, stringOperand.Location);
+                return new CodeNode(stringOperand.Text, stringOperand.Location);
 
             case SubstitutionOperand substitutionOperand:
-                SubstitutionNode.SubstitutionModifierEnum modifier = substitutionOperand.Modifier switch
+                SubstitutionModifierEnum modifier = substitutionOperand.Modifier switch
                 {
-                    SubstitutionModifierEnum.None => SubstitutionNode.SubstitutionModifierEnum.None,
-                    SubstitutionModifierEnum.AsString => SubstitutionNode.SubstitutionModifierEnum.AsString,
+                    SubstitutionModifierEnum.None => SubstitutionModifierEnum.None,
+                    SubstitutionModifierEnum.AsString => SubstitutionModifierEnum.AsString,
                     _ => throw new NotImplementedException($"Модификатор подстановки {substitutionOperand.Modifier} пока не обрабатывается."),
                 };
-                Node[] substitutedLineParts = [.. substitutionOperand.Elements.Select(ConvertToNode)];
+                TreeNode[] substitutedLineParts = [.. substitutionOperand.Elements.Select(ConvertToNode)];
                 return new SubstitutionNode(modifier, substitutedLineParts, substitutionOperand.Location);
 
             case SubstitutionStartOperator substitutionStartOperator:
@@ -139,7 +140,7 @@ public class SubstitutionParser(SubstitutionLexer substitutionLexer)
                     SubstitutionModifierEnum.AsString => "#%",
                     _ => throw new NotImplementedException($"Модификатор подстановки {substitutionStartOperator.Modifier} пока не обрабатывается."),
                 };
-                return new StringNode(text, substitutionStartOperator.Location);
+                return new CodeNode(text, substitutionStartOperator.Location);
 
             default: throw new NotImplementedException($"Элемент подстановки {substitutionElement} пока не обратывается.");
         }
@@ -152,11 +153,4 @@ public class SubstitutionParser(SubstitutionLexer substitutionLexer)
     private record SubstitutionStartOperator(SubstitutionModifierEnum Modifier, Location Location) : SubstitutionElement(Location);
     private record SubstitutionStopOperator(Location Location) : SubstitutionElement(Location);
     private record SubstitutionOperand(SubstitutionModifierEnum Modifier, SubstitutionElement[] Elements, Location Location) : SubstitutionElement(Location);
-
-
-    private enum SubstitutionModifierEnum
-    {
-        None,
-        AsString
-    }
 }

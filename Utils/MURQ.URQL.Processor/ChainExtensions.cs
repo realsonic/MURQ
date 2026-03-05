@@ -1,9 +1,10 @@
 ﻿using MURQ.Domain.Quests.Locations;
+using MURQ.Domain.Quests.QuestLines;
 using MURQ.URQL.Substitutions;
 
 static class ChainExtensions
 {
-    public static IEnumerable<SubstitutionTree> ToSubstitutionTrees(this IEnumerable<IEnumerable<(char Character, Position Position)>> lines)
+    public static IEnumerable<CodeLine> ToCodeLines(this IEnumerable<IEnumerable<(char Character, Position Position)>> lines)
     {
         foreach (var line in lines)
         {

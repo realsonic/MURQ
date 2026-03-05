@@ -1,18 +1,18 @@
 ﻿using MURQ.Domain.Quests.Locations;
-using MURQ.URQL.Substitutions;
+using MURQ.Domain.Quests.QuestLines;
+using MURQ.Domain.Quests.QuestLines.SubstitutionTrees;
 
 using System.Text.Encodings.Web;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Text.Json.Serialization.Metadata;
 
-using static MURQ.URQL.Substitutions.SubstitutionTree;
-
 namespace MURQ.URQL.Processor.Json;
+
 internal class Serializer
 {
-    public static string Serialize(SubstitutionTree tree)
-        => JsonSerializer.Serialize(tree, jsonSerializerOptions);
+    public static string Serialize(CodeLine codeLine)
+        => JsonSerializer.Serialize(codeLine, jsonSerializerOptions);
 
     static readonly JsonSerializerOptions jsonSerializerOptions = new()
     {
@@ -27,7 +27,7 @@ internal class Serializer
 
         resolver.Modifiers.Add(typeInfo =>
         {
-            if (typeInfo.Type == typeof(Node))
+            if (typeInfo.Type == typeof(TreeNode))
             {
                 typeInfo.PolymorphismOptions = new JsonPolymorphismOptions
                 {
@@ -35,7 +35,7 @@ internal class Serializer
                     UnknownDerivedTypeHandling = JsonUnknownDerivedTypeHandling.FailSerialization,
                     DerivedTypes =
                     {
-                        new JsonDerivedType(typeof(StringNode), "String"),
+                        new JsonDerivedType(typeof(CodeNode), "String"),
                         new JsonDerivedType(typeof(SubstitutionNode), "Substitution")
                     }
                 };

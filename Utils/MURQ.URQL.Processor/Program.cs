@@ -1,4 +1,5 @@
 ﻿using MURQ.Domain.Quests.Locations;
+using MURQ.Domain.Quests.QuestLines;
 using MURQ.URQL.Interpretation;
 using MURQ.URQL.Lexing;
 using MURQ.URQL.Lexing.EnumerableExtensions;
@@ -85,12 +86,12 @@ Console.WriteLine($"""
     """);
 
 stopwatch.Restart();
-List<SubstitutionTree> substitutionTrees = [.. lines.ToSubstitutionTrees()];
+List<CodeLine> codeLines = [.. lines.ToCodeLines()];
 stopwatch.Stop();
 totalTime += stopwatch.Elapsed;
 Console.WriteLine($"""
     -- Этап 6. Распознавание подстановок --------------------- ({stopwatch.Elapsed:mm\:ss\.fff})
-    {substitutionTrees.ToJoinedNumberedLines(Serializer.Serialize)}
+    {codeLines.ToJoinedNumberedLines(Serializer.Serialize)}
     ----------------------------------------------------------------------
 
     """);
@@ -100,19 +101,19 @@ Console.WriteLine($"Сумма времени всех этапов: \t{totalTim
 // тест цепочки
 Console.Write("Общее время единой цепочкой: \t");
 stopwatch.Restart();
-List<SubstitutionTree> result = Utilities.ReadFile(urqlFilePath)
+List<CodeLine> result = Utilities.ReadFile(urqlFilePath)
     .ToEnumerableWithoutCarriageReturn()
     .ToPositionedEnumerable()
     .ToEnumerableWithoutComments()
     .ToEnumerableWithoutLineContinuations()
     .SplitByLineBreaks()
-    .ToSubstitutionTrees()
+    .ToCodeLines()
     .ToList();
 stopwatch.Stop();
 Console.WriteLine($"{stopwatch.Elapsed}\n");
 
 stopwatch.Restart();
-List<List<(char Character, Position Position)>> urqlLines = [.. substitutionTrees.Select(substitutionTree => substitutionTree.ToRawUrql(new GameContextEmulation()).ToList())];
+List<List<(char Character, Position Position)>> urqlLines = [.. codeLines.Select(substitutionTree => substitutionTree.ToCode(new GameContextEmulation()).ToList())];
 stopwatch.Stop();
 Utilities.WriteBlock(
     "Шаг 1. Эмуляция раскрытия подстановок",

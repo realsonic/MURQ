@@ -2,6 +2,7 @@
 using MURQ.Domain.Games.Values;
 using MURQ.Domain.Games.Variables;
 using MURQ.Domain.Quests.Locations;
+using MURQ.Domain.Quests.QuestLines;
 using MURQ.Domain.Quests.Statements;
 using MURQ.URQL.Interpretation;
 using MURQ.URQL.Lexing;
@@ -21,13 +22,13 @@ IEnumerable<List<(char Character, Position Position)>> sourceLines = ReadFile(@"
     .ToEnumerableWithoutLineContinuations()
     .SplitByLineBreaks();
 
-List<SubstitutionTree> substitutionTrees = [.. ConvertToSubstitutionTrees(sourceLines)];
+List<CodeLine> codeLines = [.. ConvertToCodeLines(sourceLines)];
 
 Demo5GameContext gameContext = new();
 
-foreach (var substitutionTree in substitutionTrees)
+foreach (var codeLine in codeLines)
 {
-    IEnumerable<char> sourceLine = substitutionTree.ToRawUrql(gameContext).Select(element => element.Character);
+    IEnumerable<char> sourceLine = codeLine.ToCode(gameContext).Select(element => element.Character);
     UrqlLexer urqlLexer = new(sourceLine);
     IEnumerable<Token> lineTokens = urqlLexer.Scan();
     UrqlInterpreter urqlInterpreter = new(lineTokens, gameContext);
@@ -52,7 +53,7 @@ static IEnumerable<char> ReadFile(string filePath)
     }
 }
 
-static IEnumerable<SubstitutionTree> ConvertToSubstitutionTrees(IEnumerable<IEnumerable<(char Character, Position Position)>> lines)
+static IEnumerable<CodeLine> ConvertToCodeLines(IEnumerable<IEnumerable<(char Character, Position Position)>> lines)
 {
     foreach (var line in lines)
     {
