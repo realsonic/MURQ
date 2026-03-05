@@ -1,0 +1,61 @@
+﻿using MURQ.Domain.Games;
+using MURQ.Domain.Games.Values;
+using MURQ.Domain.Quests.Expressions;
+using MURQ.Domain.Quests.Locations;
+using MURQ.Domain.Quests.QuestLines.SubstitutionTrees;
+
+namespace MURQ.Domain.Quests.QuestLines;
+
+public record CodeLine(TreeNode[] Nodes, Location Location) : QuestLine(Location)
+{
+    public IEnumerable<(char Character, Position Position)> ToCode(IGameContext gameContext)
+    {
+        foreach ((char Character, Position Position) codeCharacter in NodesToCode(Nodes, gameContext))
+            yield return codeCharacter;
+    }
+
+    private static IEnumerable<(char Character, Position Position)> NodesToCode(TreeNode[] treeNodes, IGameContext gameContext)
+    {
+        foreach (TreeNode treeNode in treeNodes)
+        {
+            switch (treeNode)
+            {
+                case CodeNode codeNode:
+                    foreach (char character in codeNode.Text)
+                    {
+                        yield return (character, null); // todo возвращать позицию | локацию
+                    }
+                    break;
+
+                case SubstitutionNode substitutionNode:
+                    IEnumerable<(char Character, Position Position)> rawCharacters = NodesToCode(substitutionNode.Nodes, gameContext);
+                    string variableName = string.Join(string.Empty, rawCharacters.Select(rawCharacter => rawCharacter.Character));
+
+                    Value value = CalculateVariable(gameContext, variableName); //todo заменить на выражение
+
+                    string stringValue = substitutionNode.Modifier switch
+                    {
+                        SubstitutionModifierEnum.None => value.AsDecimal.ToString(),
+                        SubstitutionModifierEnum.AsString => value.AsString,
+                        _ => throw new NotImplementedException($"Модификатор подстановки {substitutionNode.Modifier} пока не обрабатывается."),
+                    };
+
+                    foreach (char character in stringValue)
+                    {
+                        yield return (character, null); // todo возвращать позицию | локацию
+                    }
+
+                    break;
+
+                default:
+                    throw new NotImplementedException($"Элемент дерева подстановок типа {treeNode.GetType()} пока не обрабатывается.");
+            }
+        }
+    }
+
+    private static Value CalculateVariable(IGameContext gameContext, string variableName)
+    {
+        VariableExpression variableExpression = new() { Name = variableName };
+        return variableExpression.Calculate(gameContext);
+    }
+}
