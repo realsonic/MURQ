@@ -18,11 +18,11 @@ public interface IGameContext
     /// <param name="text">Текст.</param>
     void PrintLine(string? text = null);
 
-    void AddButton(string caption, LabelStatement? labelStatement);
+    void AddButton(string caption, string label);
     void EndLocation();
     void ClearScreen();
     void AssignVariable(string variableName, Value value);
     Variable? GetVariable(string variableName);
-    void Goto(LabelStatement? labelStatement);
+    void Goto(string label);
     void Perkill();
 }

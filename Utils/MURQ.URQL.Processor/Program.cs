@@ -1,11 +1,10 @@
-﻿using MURQ.Domain.Quests.Locations;
-using MURQ.Domain.Quests.QuestLines;
-using MURQ.URQL.Interpretation;
-using MURQ.URQL.Lexing;
-using MURQ.URQL.Lexing.EnumerableExtensions;
+﻿using MURQ.Domain.Quests.QuestLines;
+using MURQ.Domain.URQL.Interpretation;
+using MURQ.Domain.URQL.Lexing;
+using MURQ.Domain.URQL.Lexing.EnumerableExtensions;
+using MURQ.Domain.URQL.Locations;
+using MURQ.Domain.URQL.Tokens;
 using MURQ.URQL.Processor.Json;
-using MURQ.URQL.Substitutions;
-using MURQ.URQL.Tokens;
 
 using System.Diagnostics;
 
@@ -121,7 +120,7 @@ Utilities.WriteBlock(
     stopwatch);
 
 stopwatch.Restart();
-List<List<Token>> tokenLines = [.. urqlLines.Select(line => new UrqlLexer(line.Select(element => element.Character)).Scan().ToList())];
+List<List<Token>> tokenLines = [.. urqlLines.Select(line => new UrqlLexer(line).Scan().ToList())];
 stopwatch.Stop();
 Utilities.WriteBlock(
     "Шаг 2. Эмуляция получения токенов",

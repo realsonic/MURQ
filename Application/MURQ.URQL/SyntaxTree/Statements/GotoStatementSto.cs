@@ -1,4 +1,4 @@
-﻿using MURQ.Domain.Quests.Locations;
+﻿using MURQ.Domain.URQL.Locations;
 
 namespace MURQ.URQL.SyntaxTree.Statements;
 public record GotoStatementSto(string Label, Location Location) : StatementSto

@@ -1,34 +1,28 @@
-﻿using MURQ.Domain.Games;
+﻿using MURQ.Application.UrqLoaders;
+using MURQ.Domain.Games;
 using MURQ.Domain.Games.Values;
 using MURQ.Domain.Games.Variables;
-using MURQ.Domain.Quests.Locations;
+using MURQ.Domain.Quests;
 using MURQ.Domain.Quests.QuestLines;
-using MURQ.Domain.Quests.Statements;
-using MURQ.URQL.Interpretation;
-using MURQ.URQL.Lexing;
-using MURQ.URQL.Lexing.EnumerableExtensions;
+using MURQ.Domain.URQL.Interpretation;
+using MURQ.Domain.URQL.Lexing;
+using MURQ.Domain.URQL.Locations;
+using MURQ.Domain.URQL.Tokens;
 using MURQ.URQL.Substitutions;
-using MURQ.URQL.Tokens;
 
 using System.Text;
 
 Console.OutputEncoding = Encoding.UTF8;
 Console.Title = "Мурка. Демо 6";
 
-IEnumerable<List<(char Character, Position Position)>> sourceLines = ReadFile(@"Demo6.qst")
-    .ToEnumerableWithoutCarriageReturn()
-    .ToPositionedEnumerable()
-    .ToEnumerableWithoutComments()
-    .ToEnumerableWithoutLineContinuations()
-    .SplitByLineBreaks();
-
-List<CodeLine> codeLines = [.. ConvertToCodeLines(sourceLines)];
+UrqLoader urqLoader = new(new SubstitutionParser(new SubstitutionLexer()));
+Quest quest = urqLoader.LoadQuest(ReadFile(@"Demo6.qst"));
 
 Demo6GameContext gameContext = new();
 
-foreach (var substitutionTree in codeLines)
+foreach (CodeLine codeLine in quest.QuestLines.OfType<CodeLine>())
 {
-    IEnumerable<char> sourceLine = substitutionTree.ToCode(gameContext).Select(element => element.Character);
+    IEnumerable<(char Character, Position Position)> sourceLine = codeLine.ToCode(gameContext);
     UrqlLexer urqlLexer = new(sourceLine);
     IEnumerable<Token> lineTokens = urqlLexer.Scan();
     UrqlInterpreter urqlInterpreter = new(lineTokens, gameContext);
@@ -53,18 +47,9 @@ static IEnumerable<char> ReadFile(string filePath)
     }
 }
 
-static IEnumerable<CodeLine> ConvertToCodeLines(IEnumerable<IEnumerable<(char Character, Position Position)>> lines)
-{
-    foreach (var line in lines)
-    {
-        SubstitutionParser substitutionParser = new(new SubstitutionLexer());
-        yield return substitutionParser.ParseLine(line);
-    }
-}
-
 class Demo6GameContext : IGameContext
 {
-    public void AddButton(string caption, LabelStatement? labelStatement)
+    public void AddButton(string caption, string label)
     {
         throw new NotImplementedException();
     }
@@ -86,7 +71,7 @@ class Demo6GameContext : IGameContext
 
     public Variable? GetVariable(string variableName) => _variables.TryGetValue(variableName, out Variable? variable) ? variable : null;
 
-    public void Goto(LabelStatement? labelStatement)
+    public void Goto(string label)
     {
         throw new NotImplementedException();
     }

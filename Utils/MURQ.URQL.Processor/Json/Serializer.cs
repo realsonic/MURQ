@@ -1,6 +1,6 @@
-﻿using MURQ.Domain.Quests.Locations;
-using MURQ.Domain.Quests.QuestLines;
+﻿using MURQ.Domain.Quests.QuestLines;
 using MURQ.Domain.Quests.QuestLines.SubstitutionTrees;
+using MURQ.Domain.URQL.Locations;
 
 using System.Text.Encodings.Web;
 using System.Text.Json;

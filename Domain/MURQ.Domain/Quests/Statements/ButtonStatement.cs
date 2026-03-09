@@ -9,11 +9,11 @@ public class ButtonStatement : Statement
 {
     public required string Caption { get; init; }
 
-    public LabelStatement? LabelStatement { get; init; }
+    public required string Label { get; init; }
 
     public override Task RunAsync(IGameContext gameContext, CancellationToken cancellationToken)
     {
-        gameContext.AddButton(Caption, LabelStatement);
+        gameContext.AddButton(Caption, Label);
 
         return Task.CompletedTask;
     }

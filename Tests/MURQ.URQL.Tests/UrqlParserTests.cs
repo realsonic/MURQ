@@ -7,7 +7,7 @@ using MURQ.URQL.SyntaxTree.Statements;
 using MURQ.URQL.Tokens;
 using MURQ.URQL.Tokens.Statements.If;
 using MURQ.URQL.Tokens.Statements;
-using MURQ.Domain.Quests.Locations;
+using MURQ.Domain.URQL.Locations;
 
 namespace MURQ.URQL.Tests;
 

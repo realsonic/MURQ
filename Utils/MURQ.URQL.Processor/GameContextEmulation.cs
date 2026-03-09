@@ -1,13 +1,12 @@
 ﻿using MURQ.Domain.Games;
 using MURQ.Domain.Games.Values;
 using MURQ.Domain.Games.Variables;
-using MURQ.Domain.Quests.Statements;
 
 class GameContextEmulation : IGameContext
 {
     public event Action<string>? OnCommandExecuted;
 
-    public void AddButton(string caption, LabelStatement? labelStatement)
+    public void AddButton(string caption, string label)
     {
         throw new NotImplementedException();
     }
@@ -32,7 +31,7 @@ class GameContextEmulation : IGameContext
         return new Variable(variableName, new StringValue($"<Строковая переменная {variableName}>"));
     }
 
-    public void Goto(LabelStatement? labelStatement)
+    public void Goto(string label)
     {
         throw new NotImplementedException();
     }

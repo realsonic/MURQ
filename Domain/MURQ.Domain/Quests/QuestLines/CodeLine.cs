@@ -1,8 +1,8 @@
 ﻿using MURQ.Domain.Games;
 using MURQ.Domain.Games.Values;
 using MURQ.Domain.Quests.Expressions;
-using MURQ.Domain.Quests.Locations;
 using MURQ.Domain.Quests.QuestLines.SubstitutionTrees;
+using MURQ.Domain.URQL.Locations;
 
 namespace MURQ.Domain.Quests.QuestLines;
 

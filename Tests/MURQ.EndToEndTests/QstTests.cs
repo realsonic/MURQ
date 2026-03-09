@@ -1,11 +1,11 @@
 ﻿using FluentAssertions;
 
 using MURQ.Application.UrqLoaders;
-using MURQ.Application.UrqLoaders.UrqStrings;
 using MURQ.Domain.Games;
 using MURQ.Domain.Games.Values;
 using MURQ.Domain.Quests;
-using MURQ.Domain.Quests.Statements;
+using MURQ.Domain.Quests.QuestLines;
+using MURQ.Domain.Quests.QuestLines.SubstitutionTrees;
 using MURQ.URQL.Substitutions;
 
 namespace MURQ.EndToEndTests;
@@ -61,7 +61,7 @@ public class QstTests
         await sut.StartAsync();
 
         // Assert
-        List<string> labelList = [.. sut.Quest.Statements.OfType<LabelStatement>().Select(labelStatement => labelStatement.Label)];
+        List<string> labelList = [.. sut.Quest.QuestLines.OfType<LabelLine>().Select(labelLine => labelLine.Label)];
         labelList.Should().BeEquivalentTo([
             "Метка1",
             "Метка2",
@@ -128,7 +128,7 @@ public class QstTests
         sut.CurrentLocation.Name.Should().Be("1");
         sut.CurrentLocation.Text.Should().Be("Привет, мир! " + Environment.NewLine);
         sut.CurrentLocation.Buttons[0].Caption.Should().Be("Повторить!");
-        (sut.Quest.Statements[2] as ButtonStatement)!.LabelStatement!.Label.Should().Be("1");
+        ((sut.Quest.QuestLines[2] as CodeLine)!.Nodes[0] as CodeNode)!.Text.Should().Be("btn 1,Повторить! ");
     }
 
     [Fact(DisplayName = "cls очищает текст и кнопки локации и вызывает событие OnScreenCleared")]
@@ -223,7 +223,7 @@ public class QstTests
         await sut.StartAsync();
 
         // Assert
-        sut.CurrentLocation.Text.Should().Be("1&pln 2");
+        sut.CurrentLocation.Text.Should().Be("12");
     }
 
     [Fact(DisplayName = "Строковая переменная сравнивается со строковым литералом")]
@@ -343,7 +343,7 @@ public class QstTests
     private static async Task<Game> LoadQuestIntoGame(string filePath)
     {
         string questSource = await File.ReadAllTextAsync(filePath);
-        UrqLoader urqLoader = new(new UrqStringLoader(new UrqStringLexer()), new SubstitutionParser(new SubstitutionLexer()));
+        UrqLoader urqLoader = new(new SubstitutionParser(new SubstitutionLexer()));
         Quest quest = urqLoader.LoadQuest(questSource);
         Game game = new(quest);
         return game;

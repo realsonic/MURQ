@@ -1,32 +1,47 @@
-﻿using System.Collections.Immutable;
-
-using MURQ.Common.Exceptions;
-using MURQ.Domain.Quests.QuestLines;
-using MURQ.Domain.Quests.Statements;
+﻿using MURQ.Domain.Quests.QuestLines;
 
 namespace MURQ.Domain.Quests;
 
-public class Quest(IEnumerable<Statement> statements, IEnumerable<QuestLine> questLines = null) //todo убрать null
+public class Quest
 {
-    public IImmutableList<Statement> Statements { get; } = statements.ToImmutableList();
-
-    public List<QuestLine> QuestLines { get; } = [.. questLines];
-
-    public Statement? StartingStatement => Statements.Count > 0 ? Statements[0] : null;
-
-    public Statement? GetNextStatement(Statement? currentStatement)
+    public Quest(IEnumerable<QuestLine> questLines)
     {
-        if (currentStatement is null) return null;
-
-        int currentStatementIndex = Statements.IndexOf(currentStatement);
-
-        if (currentStatementIndex == -1)
-            throw new MurqException($"Инструкция {currentStatement} не принадлежит этому квесту.");
-
-        int nextStatementIndex = currentStatementIndex + 1;
-
-        return nextStatementIndex > MaxStatementIndex ? null : Statements[nextStatementIndex];
+        QuestLines = [.. questLines];
+        _currentQuestLineIndex = QuestLines.Count > 0 ? 0 : null;
     }
 
-    private int MaxStatementIndex => Statements.Count - 1;
+    public IReadOnlyList<QuestLine> QuestLines { get; }
+
+    public QuestLine? CurrentQuestLine => _currentQuestLineIndex is not null ? QuestLines[_currentQuestLineIndex.Value] : null;
+
+    public void NextQuestLine()
+    {
+        if (_currentQuestLineIndex is null)
+            return;
+
+        if (_currentQuestLineIndex == QuestLines.Count - 1)
+        {
+            _currentQuestLineIndex = null;
+            return;
+        }
+
+        _currentQuestLineIndex++;
+    }
+
+    public void GoToLabel(string label)
+    {
+        // todo Прикрутить кэш лейбл:индекс
+
+        IEnumerable<(QuestLine QuestLine, int RowNumber)> numberedLines = QuestLines.Select((questLine, rowNumber) => (QuestLine: questLine, RowNumber: rowNumber));
+
+        (LabelLine? labelLine, int? rowNumber) = numberedLines
+            .Where(line => line.QuestLine is LabelLine)
+            .Select(line => (LabelLine: line.QuestLine as LabelLine, line.RowNumber))
+            .FirstOrDefault(line => line.LabelLine!.Label.Equals(label, StringComparison.InvariantCultureIgnoreCase));
+
+        if (rowNumber is not null)
+            _currentQuestLineIndex = rowNumber;
+    }
+
+    private int? _currentQuestLineIndex;
 }

@@ -1,4 +1,4 @@
-﻿using MURQ.Domain.Quests.Locations;
+﻿using MURQ.Domain.URQL.Locations;
 
 using System.ComponentModel;
 

@@ -1,5 +1,5 @@
-﻿using MURQ.Domain.Quests.Locations;
-using MURQ.Domain.Quests.QuestLines;
+﻿using MURQ.Domain.Quests.QuestLines;
+using MURQ.Domain.URQL.Locations;
 using MURQ.URQL.Substitutions;
 
 static class ChainExtensions

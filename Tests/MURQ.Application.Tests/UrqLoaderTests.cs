@@ -1,7 +1,6 @@
 ﻿using FluentAssertions;
 
 using MURQ.Application.UrqLoaders;
-using MURQ.Application.UrqLoaders.UrqStrings;
 using MURQ.Domain.Quests;
 using MURQ.Domain.Quests.Statements;
 using MURQ.URQL.Substitutions;
@@ -18,7 +17,7 @@ public class UrqLoaderTests
             p Привет, 
             p мир!
             """;
-        UrqLoader sut = new(new UrqStringLoader(new UrqStringLexer()), new SubstitutionParser(new SubstitutionLexer()));
+        UrqLoader sut = new(new SubstitutionParser(new SubstitutionLexer()));
 
         // Act
         Quest quest = sut.LoadQuest(questSource);

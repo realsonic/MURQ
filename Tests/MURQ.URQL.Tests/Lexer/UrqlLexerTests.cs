@@ -1,7 +1,8 @@
 ﻿using FluentAssertions;
 
-using MURQ.URQL.Lexing;
-using MURQ.URQL.Tokens;
+using MURQ.Domain.URQL.Lexing;
+using MURQ.Domain.URQL.Lexing.EnumerableExtensions;
+using MURQ.Domain.URQL.Tokens;
 
 namespace MURQ.URQL.Tests.Lexer;
 public class UrqlLexerTests
@@ -10,7 +11,7 @@ public class UrqlLexerTests
     public void Whitespace_string_returns_no_tokens()
     {
         // Arrange
-        UrqlLexer sut = new(" \t  \r ");
+        UrqlLexer sut = new(" \t  \r ".ToEnumerableWithoutCarriageReturn().ToPositionedEnumerable());
 
         // Act
         var tokens = sut.Scan();
@@ -23,7 +24,7 @@ public class UrqlLexerTests
     public void New_line_characters_returns_NewLineToken()
     {
         // Arrange
-        UrqlLexer sut = new(" \n  \n\n ");
+        UrqlLexer sut = new(" \n  \n\n ".ToPositionedEnumerable());
 
         // Act
         var tokens = sut.Scan();
@@ -40,7 +41,7 @@ public class UrqlLexerTests
     public void Two_new_lines_gives_Line_3()
     {
         // Arrange
-        UrqlLexer sut = new(" \n \n ");
+        UrqlLexer sut = new(" \n \n ".ToPositionedEnumerable());
 
         // Act
         var tokens = sut.Scan();
