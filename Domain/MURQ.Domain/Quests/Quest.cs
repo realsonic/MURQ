@@ -8,6 +8,7 @@ public class Quest
     {
         QuestLines = [.. questLines];
         _currentQuestLineIndex = QuestLines.Count > 0 ? 0 : null;
+        CacheLabels();
     }
 
     public IReadOnlyList<QuestLine> QuestLines { get; }
@@ -30,18 +31,23 @@ public class Quest
 
     public void GoToLabel(string label)
     {
-        // todo Прикрутить кэш лейбл:индекс
-
-        IEnumerable<(QuestLine QuestLine, int RowNumber)> numberedLines = QuestLines.Select((questLine, rowNumber) => (QuestLine: questLine, RowNumber: rowNumber));
-
-        (LabelLine? labelLine, int? rowNumber) = numberedLines
-            .Where(line => line.QuestLine is LabelLine)
-            .Select(line => (LabelLine: line.QuestLine as LabelLine, line.RowNumber))
-            .FirstOrDefault(line => line.LabelLine!.Label.Equals(label, StringComparison.InvariantCultureIgnoreCase));
-
-        if (rowNumber is not null)
-            _currentQuestLineIndex = rowNumber;
+        if (_labelDictionary.TryGetValue(label, out int index))
+        {
+            _currentQuestLineIndex = index;
+        }
     }
 
+    private void CacheLabels()
+    {
+        for (int index = 0; index < QuestLines.Count; index++)
+        {
+            if (QuestLines[index] is LabelLine labelLine)
+            {
+                _labelDictionary.TryAdd(labelLine.Label, index);
+            }
+        }
+    }
+
+    private readonly Dictionary<string, int> _labelDictionary = new(StringComparer.InvariantCultureIgnoreCase);
     private int? _currentQuestLineIndex;
 }
