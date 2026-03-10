@@ -1,9 +1,9 @@
 ﻿using MURQ.Domain.Quests.QuestLines;
 using MURQ.Domain.Quests.QuestLines.SubstitutionTrees;
 using MURQ.Domain.URQL.Locations;
-using MURQ.URQL.Substitutions.Tokens;
+using MURQ.Domain.URQL.Substitutions.Tokens;
 
-namespace MURQ.URQL.Substitutions;
+namespace MURQ.Domain.URQL.Substitutions;
 
 public class SubstitutionParser(SubstitutionLexer substitutionLexer)
 {

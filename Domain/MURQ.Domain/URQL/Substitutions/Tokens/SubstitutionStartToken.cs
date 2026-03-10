@@ -1,8 +1,8 @@
 ﻿using MURQ.Domain.URQL.Locations;
 
-using static MURQ.URQL.Substitutions.Tokens.SubstitutionStartToken;
+using static MURQ.Domain.URQL.Substitutions.Tokens.SubstitutionStartToken;
 
-namespace MURQ.URQL.Substitutions.Tokens;
+namespace MURQ.Domain.URQL.Substitutions.Tokens;
 
 public record SubstitutionStartToken(ModifierEnum SubstitutionModifier, Location Location) : Token(Location)
 {

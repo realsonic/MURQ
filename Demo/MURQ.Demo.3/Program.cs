@@ -1,6 +1,6 @@
 ﻿using MURQ.Application.UrqLoaders;
 using MURQ.Domain.Games;
-using MURQ.URQL.Substitutions;
+using MURQ.Domain.URQL.Substitutions;
 
 using System.Text;
 

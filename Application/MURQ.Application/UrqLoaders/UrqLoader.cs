@@ -3,7 +3,7 @@ using MURQ.Domain.Quests.QuestLines;
 using MURQ.Domain.URQL;
 using MURQ.Domain.URQL.Lexing.EnumerableExtensions;
 using MURQ.Domain.URQL.Locations;
-using MURQ.URQL.Substitutions;
+using MURQ.Domain.URQL.Substitutions;
 
 namespace MURQ.Application.UrqLoaders;
 

@@ -8,7 +8,7 @@ using MURQ.Domain.URQL.Interpretation;
 using MURQ.Domain.URQL.Lexing;
 using MURQ.Domain.URQL.Locations;
 using MURQ.Domain.URQL.Tokens;
-using MURQ.URQL.Substitutions;
+using MURQ.Domain.URQL.Substitutions;
 
 using System.Text;
 

@@ -1,9 +1,9 @@
 ﻿using MURQ.Domain.URQL.Locations;
-using MURQ.URQL.Substitutions.Tokens;
+using MURQ.Domain.URQL.Substitutions.Tokens;
 
-using static MURQ.URQL.Substitutions.Tokens.SubstitutionStartToken;
+using static MURQ.Domain.URQL.Substitutions.Tokens.SubstitutionStartToken;
 
-namespace MURQ.URQL.Substitutions;
+namespace MURQ.Domain.URQL.Substitutions;
 public class SubstitutionLexer
 {
     internal IEnumerable<Token> Scan(IEnumerable<(char Character, Position Position)> line)

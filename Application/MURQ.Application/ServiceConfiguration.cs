@@ -3,7 +3,7 @@
 using MURQ.Application.Interfaces;
 using MURQ.Application.Services;
 using MURQ.Application.UrqLoaders;
-using MURQ.URQL.Substitutions;
+using MURQ.Domain.URQL.Substitutions;
 
 namespace MURQ.Application;
 public static class ServiceConfiguration

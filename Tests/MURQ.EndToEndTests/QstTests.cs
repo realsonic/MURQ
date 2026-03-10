@@ -6,7 +6,7 @@ using MURQ.Domain.Games.Values;
 using MURQ.Domain.Quests;
 using MURQ.Domain.Quests.QuestLines;
 using MURQ.Domain.Quests.QuestLines.SubstitutionTrees;
-using MURQ.URQL.Substitutions;
+using MURQ.Domain.URQL.Substitutions;
 
 namespace MURQ.EndToEndTests;
 

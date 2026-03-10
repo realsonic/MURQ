@@ -1,5 +1,5 @@
 ﻿using MURQ.Domain.URQL.Locations;
 
-namespace MURQ.URQL.Substitutions.Tokens;
+namespace MURQ.Domain.URQL.Substitutions.Tokens;
 
 public record SubstitutionStopToken(Location Location) : Token(Location);
