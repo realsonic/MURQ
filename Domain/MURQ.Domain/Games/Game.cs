@@ -4,6 +4,7 @@ using MURQ.Domain.Games.Variables;
 using MURQ.Domain.Quests;
 using MURQ.Domain.Quests.QuestLines;
 using MURQ.Domain.URQL.Interpretation;
+using MURQ.Domain.URQL.Interpretation.Exceptions;
 using MURQ.Domain.URQL.Lexing;
 using MURQ.Domain.URQL.Locations;
 
@@ -17,6 +18,8 @@ public class Game(Quest quest) : IGameContext
     public event EventHandler<OnTextPrintedEventArgs>? OnTextPrinted;
 
     public event Action? OnScreenCleared;
+
+    public event EventHandler<OnErrorEventArgs>? OnUrqlError;
 
     public Quest Quest { get; } = quest;
 
@@ -85,7 +88,14 @@ public class Game(Quest quest) : IGameContext
         UrqlLexer lexer = new(code); // todo заменить лексер на новый
         UrqlInterpreter interpreter = new(lexer.Scan(), this);
 
-        await interpreter.InterpretStatementLineAsync(cancellationToken);
+        try
+        {
+            await interpreter.InterpretStatementLineAsync(cancellationToken);
+        }
+        catch (InterpretationException ex)
+        {
+            ReportCodeLineError(codeLine, ex);
+        }
     }
 
     /// <inheritdoc/>
@@ -221,8 +231,6 @@ public class Game(Quest quest) : IGameContext
         return (ForegroundColor: (InterfaceColor)foreground, BackgroundColor: (InterfaceColor)background);
     }
 
-    private bool IsStarted => gameState is not GameState.InitialState;
-
     private Variable GetRandom(string variableName)
     {
         string rndLimitString = rndRegex.Match(variableName).Groups["number"].Value;
@@ -237,6 +245,13 @@ public class Game(Quest quest) : IGameContext
         int randomIntNumber = random.Next(1, rndLimit + 1);
         return new Variable(variableName, new NumberValue(randomIntNumber));
     }
+
+    private void ReportCodeLineError(CodeLine codeLine, InterpretationException ex)
+    {
+        OnUrqlError?.Invoke(this, new OnErrorEventArgs(ex, codeLine.Location));
+    }
+
+    private bool IsStarted => gameState is not GameState.InitialState;
 
     public class CurrentLocationView
     {
@@ -273,5 +288,11 @@ public class Game(Quest quest) : IGameContext
         public bool IsNewLineAtEnd { get; } = isNewLineAtEnd;
         public InterfaceColor ForegroundColor { get; } = foregroundColor;
         public InterfaceColor BackgroundColor { get; } = backgroundColor;
+    }
+
+    public class OnErrorEventArgs(Exception exception, Location location) : EventArgs
+    {
+        public Exception Exception { get; } = exception;
+        public Location Location { get; } = location;
     }
 }

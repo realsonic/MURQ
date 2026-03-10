@@ -32,8 +32,8 @@ public interface IUserInterface
     /// <summary>
     /// Вывести ошибку.
     /// </summary>
-    /// <param name="exception">Ошибка</param>
-    void PrintException(Exception exception);
+    /// <param name="message">Сообщение об ошибке</param>
+    void PrintError(string message);
 
     /// <summary>
     /// Очистить экран.
