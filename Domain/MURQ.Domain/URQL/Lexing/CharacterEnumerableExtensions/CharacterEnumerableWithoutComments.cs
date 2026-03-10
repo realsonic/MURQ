@@ -2,18 +2,18 @@
 
 using System.Collections;
 
-namespace MURQ.Domain.URQL.Lexing.EnumerableExtensions;
+namespace MURQ.Domain.URQL.Lexing.CharacterEnumerableExtensions;
 
-public class EnumerableWithoutComments(IEnumerable<(char Character, Position Position)> enumerable) : IEnumerable<(char Character, Position Position)>
+public class CharacterEnumerableWithoutComments(IEnumerable<PositionedCharacter> enumerable) : IEnumerable<PositionedCharacter>
 {
-    IEnumerator<(char Character, Position Position)> IEnumerable<(char Character, Position Position)>.GetEnumerator() => Enumerate().GetEnumerator();
+    IEnumerator<PositionedCharacter> IEnumerable<PositionedCharacter>.GetEnumerator() => Enumerate().GetEnumerator();
     IEnumerator IEnumerable.GetEnumerator() => Enumerate().GetEnumerator();
 
-    private IEnumerable<(char Character, Position Position)> Enumerate()
+    private IEnumerable<PositionedCharacter> Enumerate()
     {
         CommentState commentState = CommentState.NotInComment;
 
-        (char Character, Position Position)? postponedCharacter = null;
+        PositionedCharacter? postponedCharacter = null;
 
         foreach ((char character, Position position) in enumerable)
         {
@@ -27,11 +27,11 @@ public class EnumerableWithoutComments(IEnumerable<(char Character, Position Pos
                     else if (character is '/')
                     {
                         commentState = CommentState.MaybeMultilineCommentStarting;
-                        postponedCharacter = (character, position);
+                        postponedCharacter = new(character, position);
                     }
                     else
                     {
-                        yield return (character, position);
+                        yield return new(character, position);
                     }
                     break;
 
@@ -39,7 +39,7 @@ public class EnumerableWithoutComments(IEnumerable<(char Character, Position Pos
                     if (character is '\n')
                     {
                         commentState = CommentState.NotInComment;
-                        yield return (character, position);
+                        yield return new(character, position);
                     }
                     break;
 
@@ -54,7 +54,7 @@ public class EnumerableWithoutComments(IEnumerable<(char Character, Position Pos
                         commentState = CommentState.NotInComment;
                         yield return postponedCharacter ?? throw new LexingException($"Неожиданно не задан отложенный символ в состоянии {commentState}");
                         postponedCharacter = null;
-                        yield return (character, position);
+                        yield return new(character, position);
                     }
                     break;
 

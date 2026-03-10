@@ -2,17 +2,17 @@
 
 using System.Collections;
 
-namespace MURQ.Domain.URQL.Lexing.EnumerableExtensions;
-public class EnumerableWithoutLineContinuation(IEnumerable<(char Character, Position Position)> enumerable) : IEnumerable<(char Character, Position Position)>
+namespace MURQ.Domain.URQL.Lexing.CharacterEnumerableExtensions;
+public class CharacterEnumerableWithoutLineContinuation(IEnumerable<PositionedCharacter> enumerable) : IEnumerable<PositionedCharacter>
 {
-    IEnumerator<(char Character, Position Position)> IEnumerable<(char Character, Position Position)>.GetEnumerator() => Enumerate().GetEnumerator();
+    IEnumerator<PositionedCharacter> IEnumerable<PositionedCharacter>.GetEnumerator() => Enumerate().GetEnumerator();
     IEnumerator IEnumerable.GetEnumerator() => Enumerate().GetEnumerator();
 
-    private IEnumerable<(char Character, Position Position)> Enumerate()
+    private IEnumerable<PositionedCharacter> Enumerate()
     {
         ContinuationState breakState = ContinuationState.NotInContinuation;
 
-        Queue<(char Character, Position Position)> charQueue = new();
+        Queue<PositionedCharacter> charQueue = new();
 
         foreach ((char character, Position position) in enumerable)
         {
@@ -23,11 +23,11 @@ public class EnumerableWithoutLineContinuation(IEnumerable<(char Character, Posi
                     {
                         case '\n':
                             breakState = ContinuationState.NewLineMet;
-                            charQueue.Enqueue((character, position));
+                            charQueue.Enqueue(new(character, position));
                             break;
 
                         default:
-                            yield return (character, position);
+                            yield return new(character, position);
                             break;
                     }
                     break;
@@ -36,17 +36,17 @@ public class EnumerableWithoutLineContinuation(IEnumerable<(char Character, Posi
                     switch (character)
                     {
                         case ' ' or '\t':
-                            charQueue.Enqueue((character, position));
+                            charQueue.Enqueue(new(character, position));
                             break;
 
                         case '_':
-                            charQueue.Enqueue((character, position));
+                            charQueue.Enqueue(new(character, position));
                             breakState = ContinuationState.UnderscoreMet;
                             break;
 
                         default:
-                            charQueue.Enqueue((character, position));
-                            while (charQueue.TryDequeue(out (char, Position) @char))
+                            charQueue.Enqueue(new(character, position));
+                            while (charQueue.TryDequeue(out PositionedCharacter @char))
                             {
                                 yield return @char;
                             }
@@ -60,13 +60,13 @@ public class EnumerableWithoutLineContinuation(IEnumerable<(char Character, Posi
                     {
                         case ' ' or '\t':
                             charQueue.Clear();
-                            yield return (character, position);
+                            yield return new(character, position);
                             breakState = ContinuationState.NotInContinuation;
                             break;
 
                         default:
-                            charQueue.Enqueue((character, position));
-                            while (charQueue.TryDequeue(out (char, Position) @char))
+                            charQueue.Enqueue(new(character, position));
+                            while (charQueue.TryDequeue(out PositionedCharacter @char))
                             {
                                 yield return @char;
                             }
@@ -80,7 +80,7 @@ public class EnumerableWithoutLineContinuation(IEnumerable<(char Character, Posi
             }
         }
 
-        while (charQueue.TryDequeue(out (char, Position) @char))
+        while (charQueue.TryDequeue(out PositionedCharacter @char))
         {
             yield return @char;
         }

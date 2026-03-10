@@ -7,7 +7,7 @@ namespace MURQ.Domain.URQL.Substitutions;
 
 public class SubstitutionParser(SubstitutionLexer substitutionLexer)
 {
-    public CodeLine ParseLine(IEnumerable<(char Character, Position Position)> line)
+    public CodeLine ParseLine(IEnumerable<PositionedCharacter> line)
     {
         foreach (Token token in substitutionLexer.Scan(line))
         {
@@ -33,7 +33,7 @@ public class SubstitutionParser(SubstitutionLexer substitutionLexer)
     }
 
     private void PushString(StringToken token) 
-        => substitutionElementStack.Push(new StringOperand(token.Value, token.Location));
+        => substitutionElementStack.Push(new StringOperand(token.SourceCharacters, token.Location));
 
     private void PushSubstitutionStart(SubstitutionStartToken token)
     {
@@ -66,7 +66,8 @@ public class SubstitutionParser(SubstitutionLexer substitutionLexer)
         // переворачиваем список
         substitutionLineParts.Reverse();
 
-        return new CodeLine([.. substitutionLineParts], null); // todo проставлять location
+        Location location = Location.StartAt(substitutionLineParts.First().Location.Start).EndAt(substitutionLineParts.Last().Location.End);
+        return new CodeLine([.. substitutionLineParts], location);
     }
 
     private void CollapseSubstituton()
@@ -107,7 +108,7 @@ public class SubstitutionParser(SubstitutionLexer substitutionLexer)
         // иначе считаем закрывающий $ просто текстом
         else
         {
-            substitutionElements.Add(new StringOperand("$", substitutionStopOperator.Location));
+            substitutionElements.Add(new StringOperand([new PositionedCharacter('$', substitutionStopOperator.Location.Start)], substitutionStopOperator.Location));
 
             foreach (var substitutionElement in substitutionElements)
             {
@@ -121,7 +122,7 @@ public class SubstitutionParser(SubstitutionLexer substitutionLexer)
         switch (substitutionElement)
         {
             case StringOperand stringOperand:
-                return new CodeNode(stringOperand.Text, stringOperand.Location);
+                return new CodeNode(stringOperand.SourceCharacters, stringOperand.Location);
 
             case SubstitutionOperand substitutionOperand:
                 SubstitutionModifierEnum modifier = substitutionOperand.Modifier switch
@@ -134,13 +135,16 @@ public class SubstitutionParser(SubstitutionLexer substitutionLexer)
                 return new SubstitutionNode(modifier, substitutedLineParts, substitutionOperand.Location);
 
             case SubstitutionStartOperator substitutionStartOperator:
-                string text = substitutionStartOperator.Modifier switch
+                List<PositionedCharacter> characters = substitutionStartOperator.Modifier switch
                 {
-                    SubstitutionModifierEnum.None => "#",
-                    SubstitutionModifierEnum.AsString => "#%",
+                    SubstitutionModifierEnum.None => [new PositionedCharacter('#', substitutionStartOperator.Location.Start)],
+                    SubstitutionModifierEnum.AsString => [
+                        new PositionedCharacter('#', substitutionStartOperator.Location.Start),
+                        new PositionedCharacter('%', substitutionStartOperator.Location.End)
+                    ],
                     _ => throw new NotImplementedException($"Модификатор подстановки {substitutionStartOperator.Modifier} пока не обрабатывается."),
                 };
-                return new CodeNode(text, substitutionStartOperator.Location);
+                return new CodeNode(characters, substitutionStartOperator.Location);
 
             default: throw new NotImplementedException($"Элемент подстановки {substitutionElement} пока не обратывается.");
         }
@@ -149,7 +153,7 @@ public class SubstitutionParser(SubstitutionLexer substitutionLexer)
     readonly Stack<SubstitutionElement> substitutionElementStack = new();
 
     private abstract record SubstitutionElement(Location Location);
-    private record StringOperand(string Text, Location Location) : SubstitutionElement(Location);
+    private record StringOperand(List<PositionedCharacter> SourceCharacters, Location Location) : SubstitutionElement(Location);
     private record SubstitutionStartOperator(SubstitutionModifierEnum Modifier, Location Location) : SubstitutionElement(Location);
     private record SubstitutionStopOperator(Location Location) : SubstitutionElement(Location);
     private record SubstitutionOperand(SubstitutionModifierEnum Modifier, SubstitutionElement[] Elements, Location Location) : SubstitutionElement(Location);

@@ -1,8 +1,8 @@
 ﻿using System.Collections;
 
-namespace MURQ.Domain.URQL.Lexing.EnumerableExtensions;
+namespace MURQ.Domain.URQL.Lexing.CharacterEnumerableExtensions;
 
-public class EnumerableWithoutCarriageReturn(IEnumerable<char> enumerable) : IEnumerable<char>
+public class CharacterEnumerableWithoutCarriageReturn(IEnumerable<char> enumerable) : IEnumerable<char>
 {
     IEnumerator<char> IEnumerable<char>.GetEnumerator() => Enumerate().GetEnumerator();
     IEnumerator IEnumerable.GetEnumerator() => Enumerate().GetEnumerator();

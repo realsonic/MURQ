@@ -8,7 +8,7 @@ using MURQ.Domain.URQL.Tokens;
 
 namespace MURQ.Domain.URQL.Lexing;
 
-public class UrqlLexer(IEnumerable<(char Character, Position Position)> input)
+public class UrqlLexer(IEnumerable<OriginatedCharacter> input)
 {
     public Position CurrentPosition { get; private set; } = new(1, 0);
 
@@ -17,9 +17,15 @@ public class UrqlLexer(IEnumerable<(char Character, Position Position)> input)
         UncompletedLexemeMonad uncompletedMonad = new RootMonad(Position.Initial);
 
         //IEnumerable<(char, Position)> refinedEnumerable = GetRefinedEnumerable();
-        foreach ((char character, Position position) in input)
+        foreach (OriginatedCharacter originatedCharacter in input)
         {
-            LexemeMonad monad = uncompletedMonad + (character, position);
+            Position position = originatedCharacter.Origin switch
+            {
+                PositionOrigin positionOrigin => positionOrigin.Position,
+                LocationOrigin locationOrigin => locationOrigin.Location.Start, // todo заменить ниже на Origin
+                _ => throw new NotImplementedException($"{originatedCharacter.Origin.GetType()} пока не поддерживается")
+            };
+            LexemeMonad monad = uncompletedMonad + (originatedCharacter.Character, position);
 
             CurrentPosition = monad.Location.End;
 

@@ -2,4 +2,4 @@
 
 namespace MURQ.Domain.URQL.Substitutions.Tokens;
 
-public record StringToken(string Value, Location Location) : Token(Location);
+public record StringToken(List<PositionedCharacter> SourceCharacters, Location Location) : Token(Location);

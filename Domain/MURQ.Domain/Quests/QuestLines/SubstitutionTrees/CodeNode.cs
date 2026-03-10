@@ -2,5 +2,5 @@
 
 namespace MURQ.Domain.Quests.QuestLines.SubstitutionTrees;
 
-public record CodeNode(string Text, Location Location) : TreeNode(Location);
+public record CodeNode(List<PositionedCharacter> SourceCharacters, Location Location) : TreeNode(Location);
 

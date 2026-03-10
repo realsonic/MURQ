@@ -84,7 +84,7 @@ public class Game(Quest quest) : IGameContext
             return;
         }
 
-        IEnumerable<(char Character, Position Position)> code = codeLine.ToCode(this);
+        IEnumerable<OriginatedCharacter> code = codeLine.ToCode(this);
         UrqlLexer lexer = new(code); // todo заменить лексер на новый
         UrqlInterpreter interpreter = new(lexer.Scan(), this);
 

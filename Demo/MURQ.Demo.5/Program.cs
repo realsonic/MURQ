@@ -22,7 +22,7 @@ Demo5GameContext gameContext = new();
 
 foreach (var codeLine in quest.QuestLines.OfType<CodeLine>())
 {
-    IEnumerable<(char Character, Position Position)> sourceLine = codeLine.ToCode(gameContext);
+    IEnumerable<OriginatedCharacter> sourceLine = codeLine.ToCode(gameContext);
     UrqlLexer urqlLexer = new(sourceLine);
     IEnumerable<Token> lineTokens = urqlLexer.Scan();
     UrqlInterpreter urqlInterpreter = new(lineTokens, gameContext);

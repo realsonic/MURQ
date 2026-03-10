@@ -1,7 +1,7 @@
 ﻿using MURQ.Domain.Quests.QuestLines;
 using MURQ.Domain.URQL.Interpretation;
 using MURQ.Domain.URQL.Lexing;
-using MURQ.Domain.URQL.Lexing.EnumerableExtensions;
+using MURQ.Domain.URQL.Lexing.CharacterEnumerableExtensions;
 using MURQ.Domain.URQL.Locations;
 using MURQ.Domain.URQL.Tokens;
 using MURQ.URQL.Processor.Json;
@@ -41,7 +41,7 @@ Console.WriteLine($"""
     """);
 
 stopwatch.Restart();
-List<(char Character, Position Position)> positionedSource = [.. trimmedSource.ToPositionedEnumerable()];
+List<PositionedCharacter> positionedSource = [.. trimmedSource.ToPositionedEnumerable()];
 stopwatch.Stop();
 totalTime += stopwatch.Elapsed;
 Console.WriteLine($"""
@@ -52,34 +52,34 @@ Console.WriteLine($"""
     """);
 
 stopwatch.Restart();
-List<(char Character, Position Position)> uncommentedSource = [.. positionedSource.ToEnumerableWithoutComments()];
+List<PositionedCharacter> uncommentedSource = [.. positionedSource.ToEnumerableWithoutComments()];
 stopwatch.Stop();
 totalTime += stopwatch.Elapsed;
 Console.WriteLine($"""
     -- Этап 3. Удаление комментариев ------------------------- ({stopwatch.Elapsed:mm\:ss\.fff})
-    {uncommentedSource.ToJoinedString()}
+    {uncommentedSource.ToPlainString()}
     ----------------------------------------------------------------------
         
     """);
 
 stopwatch.Restart();
-List<(char Character, Position Position)> uncontinuedSource = [.. uncommentedSource.ToEnumerableWithoutLineContinuations()];
+List<PositionedCharacter> uncontinuedSource = [.. uncommentedSource.ToEnumerableWithoutLineContinuations()];
 stopwatch.Stop();
 totalTime += stopwatch.Elapsed;
 Console.WriteLine($"""
     -- Этап 4. Схлопывание переносов ------------------------- ({stopwatch.Elapsed:mm\:ss\.fff})
-    {uncontinuedSource.ToJoinedString()}
+    {uncontinuedSource.ToPlainString()}
     ----------------------------------------------------------------------
 
     """);
 
 stopwatch.Restart();
-List<List<(char Character, Position Position)>> lines = [.. uncontinuedSource.SplitByLineBreaks()];
+List<List<PositionedCharacter>> lines = [.. uncontinuedSource.SplitByLineBreaks()];
 stopwatch.Stop();
 totalTime += stopwatch.Elapsed;
 Console.WriteLine($"""
     -- Этап 5. Разбивка на строки ---------------------------- ({stopwatch.Elapsed:mm\:ss\.fff})
-    {lines.ToJoinedNumberedLines(line => line.ToJoinedString())}
+    {lines.ToJoinedNumberedLines(line => line.ToPlainString())}
     ----------------------------------------------------------------------
 
     """);
@@ -112,7 +112,7 @@ stopwatch.Stop();
 Console.WriteLine($"{stopwatch.Elapsed}\n");
 
 stopwatch.Restart();
-List<List<(char Character, Position Position)>> urqlLines = [.. codeLines.Select(substitutionTree => substitutionTree.ToCode(new GameContextEmulation()).ToList())];
+List<List<OriginatedCharacter>> urqlLines = [.. codeLines.Select(substitutionTree => substitutionTree.ToCode(new GameContextEmulation()).ToList())];
 stopwatch.Stop();
 Utilities.WriteBlock(
     "Шаг 1. Эмуляция раскрытия подстановок",

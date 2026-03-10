@@ -1,7 +1,7 @@
 ﻿using MURQ.Domain.Quests;
 using MURQ.Domain.Quests.QuestLines;
 using MURQ.Domain.URQL;
-using MURQ.Domain.URQL.Lexing.EnumerableExtensions;
+using MURQ.Domain.URQL.Lexing.CharacterEnumerableExtensions;
 using MURQ.Domain.URQL.Locations;
 using MURQ.Domain.URQL.Substitutions;
 
@@ -18,14 +18,14 @@ public class UrqLoader(SubstitutionParser substitutionParser)
 
     private IEnumerable<QuestLine> LoadQuestLines(IEnumerable<char> source)
     {
-        IEnumerable<List<(char Character, Position Position)>> sourceLines = source
+        IEnumerable<List<PositionedCharacter>> sourceLines = source
             .ToEnumerableWithoutCarriageReturn()
             .ToPositionedEnumerable()
             .ToEnumerableWithoutComments()
             .ToEnumerableWithoutLineContinuations()
             .SplitByLineBreaks();
 
-        foreach (List<(char Character, Position Position)> sourceLine in sourceLines)
+        foreach (List<PositionedCharacter> sourceLine in sourceLines)
         {
             if (sourceLine.IsLabelLine(out string? label))
             {
@@ -39,7 +39,7 @@ public class UrqLoader(SubstitutionParser substitutionParser)
         }
     }
 
-    private static LabelLine MakeLabelLine(List<(char Character, Position Position)> sourceLine, string? label)
+    private static LabelLine MakeLabelLine(List<PositionedCharacter> sourceLine, string? label)
     {
         Position startPosition = sourceLine.FirstOrDefault().Position;
 

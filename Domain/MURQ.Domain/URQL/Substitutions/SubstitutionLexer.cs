@@ -6,34 +6,34 @@ using static MURQ.Domain.URQL.Substitutions.Tokens.SubstitutionStartToken;
 namespace MURQ.Domain.URQL.Substitutions;
 public class SubstitutionLexer
 {
-    internal IEnumerable<Token> Scan(IEnumerable<(char Character, Position Position)> line)
+    internal IEnumerable<Token> Scan(IEnumerable<PositionedCharacter> line)
     {
         characterList.Clear();
         var lexemState = LexemState.StringInProgress;
         Position? substitutionStartPosition = null;
 
-        foreach ((char Character, Position Position) in line)
+        foreach (PositionedCharacter positionedCharacter in line)
         {
             switch (lexemState)
             {
                 case LexemState.StringInProgress:
-                    switch (Character)
+                    switch (positionedCharacter.Character)
                     {
                         case '#':
                             if (HasString())
                                 yield return PopStringAsToken();
                             lexemState = LexemState.SubstitutionStartMet;
-                            substitutionStartPosition = Position;
+                            substitutionStartPosition = positionedCharacter.Position;
                             break;
 
                         case '$':
                             if (HasString())
                                 yield return PopStringAsToken();
-                            yield return new SubstitutionStopToken(Location.StartAt(Position));
+                            yield return new SubstitutionStopToken(Location.StartAt(positionedCharacter.Position));
                             break;
 
                         default:
-                            PushCharacter((Character, Position));
+                            PushCharacter(positionedCharacter);
                             break;
                     }
                     break;
@@ -41,14 +41,14 @@ public class SubstitutionLexer
                 case LexemState.SubstitutionStartMet:
                     Position start = substitutionStartPosition ?? throw new InvalidOperationException($"Неожиданно не задана стартовая позиция для состояния {lexemState}.");
                     
-                    if (Character is '%')
+                    if (positionedCharacter.Character is '%')
                     {
-                        yield return new SubstitutionStartToken(ModifierEnum.AsString, new Location(start, Position));
+                        yield return new SubstitutionStartToken(ModifierEnum.AsString, new Location(start, positionedCharacter.Position));
                     }
                     else
                     {
                         yield return new SubstitutionStartToken(ModifierEnum.None, new Location(start, start));
-                        PushCharacter((Character, Position));
+                        PushCharacter(positionedCharacter);
                     }
                     lexemState = LexemState.StringInProgress;
                     substitutionStartPosition = null;
@@ -64,20 +64,20 @@ public class SubstitutionLexer
 
     private bool HasString() => characterList.Count > 0;
 
-    private void PushCharacter((char Character, Position Position) @char) => characterList.Add(@char);
+    private void PushCharacter(PositionedCharacter positionedCharacter) => characterList.Add(positionedCharacter);
 
     private StringToken PopStringAsToken()
     {
-        var @string = new string([.. characterList.Select(@char => @char.Character)]);
-        var start = characterList.First().Position;
-        var stop = characterList.Last().Position;
-
+        Position start = characterList.First().Position;
+        Position stop = characterList.Last().Position;
+        List<PositionedCharacter> sourceCharacters = [.. characterList];
+        
         characterList.Clear();
         
-        return new StringToken(@string, new Location(start, stop));
+        return new StringToken(sourceCharacters, new Location(start, stop));
     }
 
-    private readonly List<(char Character, Position Position)> characterList = [];
+    private readonly List<PositionedCharacter> characterList = [];
 
     private enum LexemState
     {

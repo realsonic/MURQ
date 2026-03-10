@@ -2,20 +2,20 @@
 
 using System.Collections;
 
-namespace MURQ.Domain.URQL.Lexing.EnumerableExtensions;
+namespace MURQ.Domain.URQL.Lexing.CharacterEnumerableExtensions;
 
-public class PositionedEnumerable(IEnumerable<char> enumerable) : IEnumerable<(char, Position)>
+public class PositionedEnumerable(IEnumerable<char> enumerable) : IEnumerable<PositionedCharacter>
 {
-    IEnumerator<(char, Position)> IEnumerable<(char, Position)>.GetEnumerator() => Enumerate().GetEnumerator();
+    IEnumerator<PositionedCharacter> IEnumerable<PositionedCharacter>.GetEnumerator() => Enumerate().GetEnumerator();
     IEnumerator IEnumerable.GetEnumerator() => Enumerate().GetEnumerator();
 
-    private IEnumerable<(char, Position)> Enumerate()
+    private IEnumerable<PositionedCharacter> Enumerate()
     {
         Position position = Position.Initial;
 
         foreach (char character in enumerable)
         {
-            yield return (character, position);
+            yield return new(character, position);
 
             position = character switch
             {

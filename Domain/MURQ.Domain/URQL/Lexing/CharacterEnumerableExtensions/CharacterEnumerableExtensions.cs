@@ -2,26 +2,26 @@
 
 using System.Text;
 
-namespace MURQ.Domain.URQL.Lexing.EnumerableExtensions;
+namespace MURQ.Domain.URQL.Lexing.CharacterEnumerableExtensions;
 
-public static class EnumerableExtensions
+public static class CharacterEnumerableExtensions
 {
     public static IEnumerable<char> ToEnumerableWithoutCarriageReturn(this IEnumerable<char> enumerable)
-        => new EnumerableWithoutCarriageReturn(enumerable);
+        => new CharacterEnumerableWithoutCarriageReturn(enumerable);
 
-    public static IEnumerable<(char Character, Position Position)> ToPositionedEnumerable(this IEnumerable<char> enumerable)
+    public static IEnumerable<PositionedCharacter> ToPositionedEnumerable(this IEnumerable<char> enumerable)
         => new PositionedEnumerable(enumerable);
 
-    public static IEnumerable<(char Character, Position Position)> ToEnumerableWithoutComments(this IEnumerable<(char Character, Position Position)> enumerable)
-        => new EnumerableWithoutComments(enumerable);
+    public static IEnumerable<PositionedCharacter> ToEnumerableWithoutComments(this IEnumerable<PositionedCharacter> enumerable)
+        => new CharacterEnumerableWithoutComments(enumerable);
 
-    public static IEnumerable<(char Character, Position Position)> ToEnumerableWithoutLineContinuations(this IEnumerable<(char Character, Position Position)> enumerable)
-        => new EnumerableWithoutLineContinuation(enumerable);
+    public static IEnumerable<PositionedCharacter> ToEnumerableWithoutLineContinuations(this IEnumerable<PositionedCharacter> enumerable)
+        => new CharacterEnumerableWithoutLineContinuation(enumerable);
 
-    public static IEnumerable<List<(char Character, Position Position)>> SplitByLineBreaks(this IEnumerable<(char Character, Position Position)> enumerable)
-        => new EnumerableByLineBreaks(enumerable);
+    public static IEnumerable<List<PositionedCharacter>> SplitByLineBreaks(this IEnumerable<PositionedCharacter> enumerable)
+        => new CharacterEnumerableByLineBreaks(enumerable);
 
-    public static bool IsLabelLine(this List<(char Character, Position Position)> sourceLine, out string? label)
+    public static bool IsLabelLine(this List<PositionedCharacter> sourceLine, out string? label)
     {
         IEnumerable<char> characters = sourceLine.Select(element => element.Character);
 
@@ -54,4 +54,9 @@ public static class EnumerableExtensions
         label = textBuilder.ToString();
         return isColonFound && textBuilder.Length > 0;
     }
+
+    public static string ToPlainString(this IEnumerable<PositionedCharacter> positionedCharacters) => string.Join(null, positionedCharacters.Select(pc => pc.Character));
+
+    public static IEnumerable<OriginatedCharacter> AsOriginatedCharacters(this IEnumerable<PositionedCharacter> positionedCharacters)
+        => positionedCharacters.Select(positionedCharacter => (OriginatedCharacter)positionedCharacter);
 }

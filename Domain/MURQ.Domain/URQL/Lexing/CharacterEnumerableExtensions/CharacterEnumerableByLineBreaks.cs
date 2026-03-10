@@ -2,15 +2,15 @@
 
 using System.Collections;
 
-namespace MURQ.Domain.URQL.Lexing.EnumerableExtensions;
-public class EnumerableByLineBreaks(IEnumerable<(char Character, Position Position)> enumerable) : IEnumerable<List<(char Character, Position Position)>>
+namespace MURQ.Domain.URQL.Lexing.CharacterEnumerableExtensions;
+public class CharacterEnumerableByLineBreaks(IEnumerable<PositionedCharacter> enumerable) : IEnumerable<List<PositionedCharacter>>
 {
-    public IEnumerator<List<(char Character, Position Position)>> GetEnumerator() => Enumerate().GetEnumerator();
+    public IEnumerator<List<PositionedCharacter>> GetEnumerator() => Enumerate().GetEnumerator();
     IEnumerator IEnumerable.GetEnumerator() => Enumerate().GetEnumerator();
 
-    private IEnumerable<List<(char Character, Position Position)>> Enumerate()
+    private IEnumerable<List<PositionedCharacter>> Enumerate()
     {
-        List<(char Character, Position Position)> line = [];
+        List<PositionedCharacter> line = [];
 
         foreach ((char character, Position position) in enumerable)
         {
@@ -24,7 +24,7 @@ public class EnumerableByLineBreaks(IEnumerable<(char Character, Position Positi
             }
             else
             {
-                line.Add((character, position));
+                line.Add(new(character, position));
             }
         }
 

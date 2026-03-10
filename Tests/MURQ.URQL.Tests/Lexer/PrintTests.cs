@@ -1,7 +1,7 @@
 ﻿using FluentAssertions;
 
 using MURQ.Domain.URQL.Lexing;
-using MURQ.Domain.URQL.Lexing.EnumerableExtensions;
+using MURQ.Domain.URQL.Lexing.CharacterEnumerableExtensions;
 using MURQ.Domain.URQL.Tokens;
 using MURQ.Domain.URQL.Tokens.Statements;
 
@@ -12,7 +12,7 @@ public class PrintTests
     public void P_space_newline_gives_PrintToken_with_empty_text()
     {
         // Arrange
-        UrqlLexer sut = new("p \n".ToPositionedEnumerable());
+        UrqlLexer sut = new("p \n".ToPositionedEnumerable().AsOriginatedCharacters());
 
         // Act
         var tokens = sut.Scan();
@@ -28,7 +28,7 @@ public class PrintTests
     public void P_with_text_gives_PrintToken_with_text()
     {
         // Arrange
-        UrqlLexer sut = new("p Привет!".ToPositionedEnumerable());
+        UrqlLexer sut = new("p Привет!".ToPositionedEnumerable().AsOriginatedCharacters());
 
         // Act
         var tokens = sut.Scan();
@@ -46,7 +46,7 @@ public class PrintTests
         UrqlLexer sut = new("""
             p Привет, 
             p мир!
-            """.ToEnumerableWithoutCarriageReturn().ToPositionedEnumerable());
+            """.ToEnumerableWithoutCarriageReturn().ToPositionedEnumerable().AsOriginatedCharacters());
 
         // Act
         var tokens = sut.Scan();

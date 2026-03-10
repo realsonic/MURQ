@@ -6,6 +6,7 @@ using MURQ.Domain.Games.Values;
 using MURQ.Domain.Quests;
 using MURQ.Domain.Quests.QuestLines;
 using MURQ.Domain.Quests.QuestLines.SubstitutionTrees;
+using MURQ.Domain.URQL.Lexing.CharacterEnumerableExtensions;
 using MURQ.Domain.URQL.Substitutions;
 
 namespace MURQ.EndToEndTests;
@@ -128,7 +129,7 @@ public class QstTests
         sut.CurrentLocation.Name.Should().Be("1");
         sut.CurrentLocation.Text.Should().Be("Привет, мир! " + Environment.NewLine);
         sut.CurrentLocation.Buttons[0].Caption.Should().Be("Повторить!");
-        ((sut.Quest.QuestLines[2] as CodeLine)!.Nodes[0] as CodeNode)!.Text.Should().Be("btn 1,Повторить! ");
+        ((sut.Quest.QuestLines[2] as CodeLine)!.Nodes[0] as CodeNode)!.SourceCharacters.ToPlainString().Should().Be("btn 1,Повторить! ");
     }
 
     [Fact(DisplayName = "cls очищает текст и кнопки локации и вызывает событие OnScreenCleared")]

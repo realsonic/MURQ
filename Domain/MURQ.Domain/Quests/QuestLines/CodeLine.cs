@@ -8,28 +8,28 @@ namespace MURQ.Domain.Quests.QuestLines;
 
 public record CodeLine(TreeNode[] Nodes, Location Location) : QuestLine(Location)
 {
-    public IEnumerable<(char Character, Position Position)> ToCode(IGameContext gameContext)
+    public IEnumerable<OriginatedCharacter> ToCode(IGameContext gameContext)
     {
-        foreach ((char Character, Position Position) codeCharacter in NodesToCode(Nodes, gameContext))
+        foreach (OriginatedCharacter codeCharacter in ConvertNodesToCode(Nodes, gameContext))
             yield return codeCharacter;
     }
 
-    private static IEnumerable<(char Character, Position Position)> NodesToCode(TreeNode[] treeNodes, IGameContext gameContext)
+    private static IEnumerable<OriginatedCharacter> ConvertNodesToCode(TreeNode[] treeNodes, IGameContext gameContext)
     {
         foreach (TreeNode treeNode in treeNodes)
         {
             switch (treeNode)
             {
                 case CodeNode codeNode:
-                    foreach (char character in codeNode.Text)
+                    foreach (PositionedCharacter sourceCharacter in codeNode.SourceCharacters)
                     {
-                        yield return (character, null); // todo возвращать позицию | локацию
+                        yield return new OriginatedCharacter(sourceCharacter.Character, new PositionOrigin(sourceCharacter.Position));
                     }
                     break;
 
                 case SubstitutionNode substitutionNode:
-                    IEnumerable<(char Character, Position Position)> rawCharacters = NodesToCode(substitutionNode.Nodes, gameContext);
-                    string variableName = string.Join(string.Empty, rawCharacters.Select(rawCharacter => rawCharacter.Character));
+                    IEnumerable<OriginatedCharacter> sourceCharacters = ConvertNodesToCode(substitutionNode.Nodes, gameContext);
+                    string variableName = string.Join(string.Empty, sourceCharacters.Select(rawCharacter => rawCharacter.Character));
 
                     Value value = CalculateVariable(gameContext, variableName); //todo заменить на выражение
 
@@ -42,7 +42,7 @@ public record CodeLine(TreeNode[] Nodes, Location Location) : QuestLine(Location
 
                     foreach (char character in stringValue)
                     {
-                        yield return (character, null); // todo возвращать позицию | локацию
+                        yield return new OriginatedCharacter(character, new LocationOrigin(substitutionNode.Location));
                     }
 
                     break;

@@ -17,7 +17,7 @@ internal class Serializer
     static readonly JsonSerializerOptions jsonSerializerOptions = new()
     {
         TypeInfoResolver = GetJsonTypeInfoResolver(),
-        Converters = { new JsonStringEnumConverter(), new ToStringConverter<Location>() },
+        Converters = { new JsonStringEnumConverter(), new LocationConverter() },
         Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping
     };
 
@@ -43,5 +43,18 @@ internal class Serializer
         });
 
         return resolver;
+    }
+}
+
+public class LocationConverter : JsonConverter<Location>
+{
+    public override Location Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+    {
+        throw new NotImplementedException();
+    }
+
+    public override void Write(Utf8JsonWriter writer, Location value, JsonSerializerOptions options)
+    {
+        writer.WriteStringValue(value.ToString());
     }
 }
