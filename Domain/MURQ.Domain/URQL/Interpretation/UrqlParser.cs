@@ -9,6 +9,27 @@ namespace MURQ.Domain.URQL.Interpretation;
 
 public class UrqlParser(IEnumerable<Token> tokens)
 {
+    #region Statements
+
+    /// <summary>
+    /// Грамматика:
+    /// <code>
+    /// assignVariableStatement = ? Variable ?, ? Equality ? (*""=""*), valueExpression;
+    /// </code>
+    /// </summary>
+    protected AssignVariableStatement ParseAssignVariableStatement()
+    {
+        VariableToken variableToken = Match<VariableToken>("в левой части присвоения значения переменной");
+        Match<EqualityToken>($"при присвоении значения переменной {variableToken.Name}");
+        Expression expression = ParseValueExpression();
+
+        return new AssignVariableStatement
+        {
+            VariableName = variableToken.Name,
+            Expression = expression
+        };
+    }
+
     protected PrintStatement ParsePrintTerminal()
     {
         PrintToken printToken = Match<PrintToken>();
@@ -45,18 +66,40 @@ public class UrqlParser(IEnumerable<Token> tokens)
         return new EndStatement();
     }
 
-    protected AssignVariableStatement ParseAssignVariableStatement()
+    protected ClearScreenStatement ParseClearScreenTerminal()
     {
-        VariableToken variableToken = Match<VariableToken>("в левой части присвоения значения переменной");
-        Match<EqualityToken>($"при присвоении значения переменной {variableToken.Name}");
-        Expression expression = ParseValueExpression();
-
-        return new AssignVariableStatement
-        {
-            VariableName = variableToken.Name,
-            Expression = expression
-        };
+        Match<ClearScreenToken>();
+        return new ClearScreenStatement();
     }
+
+    protected GotoStatement ParseGotoTerminal()
+    {
+        GotoToken gotoToken = Match<GotoToken>();
+
+        string label = gotoToken.Label.Trim();
+        if (label == string.Empty)
+        {
+            throw new ParseException($"Метка безусловного перехода пустая: {gotoToken}");
+        }
+
+        return new GotoStatement { Label = label };
+    }
+
+    protected PerkillStatement ParsePerkillTerminal()
+    {
+        Match<PerkillToken>();
+        return new PerkillStatement();
+    }
+
+    protected PauseStatement ParsePauseTerminal()
+    {
+        PauseToken pauseToken = Match<PauseToken>();
+        return new PauseStatement { Duration = pauseToken.Duration };
+    }
+
+    #endregion
+
+    #region Expressions
 
     protected DecimalConstantExpression ParseNumberExpressionTerminal()
     {
@@ -64,6 +107,12 @@ public class UrqlParser(IEnumerable<Token> tokens)
         return new DecimalConstantExpression { Value = numberToken.Value };
     }
 
+    /// <summary>
+    /// Грамматика:
+    /// <code>
+    /// relationExpression = valueExpression, ? Equality ? (*""=""*), valueExpression;
+    /// </code>
+    /// </summary>
     protected RelationExpression ParseRelationExpression()
     {
         Expression leftExpression = ParseValueExpression();
@@ -83,6 +132,12 @@ public class UrqlParser(IEnumerable<Token> tokens)
         return new StringLiteralExpression { Text = stringLiteralToken.Text };
     }
 
+    /// <summary>
+    /// Грамматика:
+    /// <code>
+    /// valueExpression = ? Variable ? | ? Number ? | ? StringLiteral ?;
+    /// </code>
+    /// </summary>
     protected Expression ParseValueExpression() => Lookahead switch
     {
         VariableToken => ParseVariableExpressionTerminal(),
@@ -96,6 +151,8 @@ public class UrqlParser(IEnumerable<Token> tokens)
         VariableToken variableToken = Match<VariableToken>();
         return new VariableExpression { Name = variableToken.Name };
     }
+
+    #endregion
 
     protected TToken Match<TToken>(string? context = null) where TToken : Token
     {

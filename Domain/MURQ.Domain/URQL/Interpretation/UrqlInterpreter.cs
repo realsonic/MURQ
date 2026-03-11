@@ -69,13 +69,21 @@ public class UrqlInterpreter(IEnumerable<Token> tokens, IGameContext gameContext
     /// <summary>
     /// Грамматика:
     /// <code>
-    /// statement = assignVariableStatement | ifStatement | ? Label ? | ? Print ? | ? Button ? | ? End ? | ? ClearScreen ?;
+    /// statement = assignVariableStatement | ifStatement | ? Print ? | ? Button ? | ? End ? | ? ClearScreen ? | ? Goto ? | ? Perkill ? | ? Pause ?;
     /// </code>
     /// </summary>
     private async Task InterpretStatementAsync(bool toRun, CancellationToken cancellationToken)
     {
         switch (Lookahead)
         {
+            case Token when Lookahead.IsStartOfIfStatement():
+                await InterpretIfThenStatement(toRun, cancellationToken);
+                break;
+            
+            case Token when Lookahead.IsStartOfAssignVariableStatement():
+                await InterpretAssignVariableStatementAsync(toRun, cancellationToken);
+                break;
+
             case PrintToken:
                 await InterpretPrintStatementAsync(toRun, cancellationToken);
                 break;
@@ -88,16 +96,63 @@ public class UrqlInterpreter(IEnumerable<Token> tokens, IGameContext gameContext
                 await InterpretEndStatementAsync(toRun, cancellationToken);
                 break;
 
-            case Token when Lookahead.IsStartOfAssignVariableStatement():
-                await InterpretAssignVariableStatementAsync(toRun, cancellationToken);
+            case ClearScreenToken:
+                await InterpretClearScreenStatementAdync(toRun, cancellationToken);
                 break;
 
-            case Token when Lookahead.IsStartOfIfStatement():
-                await InterpretIfThenStatement(toRun, cancellationToken);
+            case GotoToken:
+                await InterpretGotoStatementAsync(toRun, cancellationToken);
+                break;
+
+            case PerkillToken:
+                await InterpretPerkillStatementAsync(toRun, cancellationToken);
+                break;
+
+            case PauseToken:
+                await InterpretPauseStatementAsync(toRun, cancellationToken);
                 break;
 
             default:
                 throw new UnexpectedElementException("Ожидалась инструкция", Lookahead);
+        }
+    }
+
+    private async Task InterpretAssignVariableStatementAsync(bool toRun, CancellationToken cancellationToken)
+    {
+        AssignVariableStatement assignVariableStatement = ParseAssignVariableStatement();
+
+        if (toRun)
+        {
+            await assignVariableStatement.RunAsync(gameContext, cancellationToken);
+        }
+    }
+
+    /// <summary>
+    /// Грамматика:
+    /// <code>
+    /// ifStatement = ? If ?, relationExpression, ? Then ?, joinedStatements;
+    /// </code>
+    /// </summary>
+    private async Task InterpretIfThenStatement(bool toRun, CancellationToken cancellationToken)
+    {
+        Match<IfToken>();
+
+        RelationExpression relationExpression = ParseRelationExpression();
+        Value relationResult = relationExpression.Calculate(gameContext);
+
+        Match<ThenToken>("в ветвлении if-then");
+
+        bool isConditionTrue = relationResult.AsDecimal != 0;
+
+        if (isConditionTrue)
+        {
+            await InterpretJoinedStatementsAdaptedAsync(toRun, cancellationToken);
+            //todo skip else
+        }
+        else
+        {
+            await InterpretJoinedStatementsAdaptedAsync(toRun: false, cancellationToken);
+            //todo run else
         }
     }
 
@@ -131,43 +186,43 @@ public class UrqlInterpreter(IEnumerable<Token> tokens, IGameContext gameContext
         }
     }
 
-    private async Task InterpretAssignVariableStatementAsync(bool toRun, CancellationToken cancellationToken)
+    private async Task InterpretClearScreenStatementAdync(bool toRun, CancellationToken cancellationToken)
     {
-        AssignVariableStatement assignVariableStatement = ParseAssignVariableStatement();
-        
+        ClearScreenStatement clearScreenStatement = ParseClearScreenTerminal();
+
         if (toRun)
         {
-            await assignVariableStatement.RunAsync(gameContext, cancellationToken);
+            await clearScreenStatement.RunAsync(gameContext, cancellationToken);
         }
     }
 
-    /// <summary>
-    /// Грамматика:
-    /// <code>
-    /// ifStatement = ? If ?, relationExpression, ? Then ?, joinedStatements;
-    /// </code>
-    /// </summary>
-    /// <returns>Условный оператор <c>if-else</c></returns>
-    private async Task InterpretIfThenStatement(bool toRun, CancellationToken cancellationToken)
+    private async Task InterpretGotoStatementAsync(bool toRun, CancellationToken cancellationToken)
     {
-        Match<IfToken>();
+        GotoStatement gotoStatement = ParseGotoTerminal();
 
-        RelationExpression relationExpression = ParseRelationExpression();
-        Value relationResult = relationExpression.Calculate(gameContext);
-
-        Match<ThenToken>("в ветвлении if-then");
-
-        bool isConditionTrue = relationResult.AsDecimal != 0;
-
-        if (isConditionTrue)
+        if (toRun)
         {
-            await InterpretJoinedStatementsAdaptedAsync(toRun, cancellationToken);
-            //todo skip else
+            await gotoStatement.RunAsync(gameContext, cancellationToken);
         }
-        else
+    }
+
+    private async Task InterpretPerkillStatementAsync(bool toRun, CancellationToken cancellationToken)
+    {
+        PerkillStatement perkillStatement = ParsePerkillTerminal();
+
+        if (toRun)
         {
-            await InterpretJoinedStatementsAdaptedAsync(toRun: false, cancellationToken);
-            //todo run else
+            await perkillStatement.RunAsync(gameContext, cancellationToken);
+        }
+    }
+
+    private async Task InterpretPauseStatementAsync(bool toRun, CancellationToken cancellationToken)
+    {
+        PauseStatement pauseStatement = ParsePauseTerminal();
+
+        if (toRun)
+        {
+            await pauseStatement.RunAsync(gameContext, cancellationToken);
         }
     }
 }
