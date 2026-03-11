@@ -152,8 +152,11 @@ public class Game(Quest quest) : IGameContext
             return;
 
         ClearCurrentView();
-        Quest.GoToLabel(label);
-        ChangeCurrentLocationName(label);
+
+        if (Quest.TryGoToLabel(label, out string? resultLabel))
+        {
+            ChangeCurrentLocationName(resultLabel);
+        }
 
         await InterpretQuestLinesAsync(cancellationToken);
     }
@@ -163,7 +166,7 @@ public class Game(Quest quest) : IGameContext
         if (string.IsNullOrWhiteSpace(label))
             return;
 
-        Quest.GoToLabel(label);
+        Quest.TryGoToLabel(label, out _);
     }
 
     private void ClearCurrentView()

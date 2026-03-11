@@ -1,5 +1,7 @@
 ﻿using MURQ.Domain.Quests.QuestLines;
 
+using System.Diagnostics.CodeAnalysis;
+
 namespace MURQ.Domain.Quests;
 
 public class Quest
@@ -29,12 +31,21 @@ public class Quest
         _currentQuestLineIndex++;
     }
 
-    public void GoToLabel(string label)
+    public bool TryGoToLabel(string targetLabel, [NotNullWhen(true)] out string? resultLabel)
     {
-        if (_labelDictionary.TryGetValue(label, out int index))
+        if (_labelDictionary.TryGetValue(targetLabel, out int index))
         {
-            _currentQuestLineIndex = index;
+            if (QuestLines[index] is LabelLine labelLine)
+            {
+                _currentQuestLineIndex = index;
+
+                resultLabel = labelLine.Label;
+                return true;
+            }
         }
+
+        resultLabel = null;
+        return false;
     }
 
     private void CacheLabels()
