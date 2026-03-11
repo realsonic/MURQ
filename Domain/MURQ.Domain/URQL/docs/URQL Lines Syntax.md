@@ -12,7 +12,6 @@ joinedStatements =
 statement =
     assignVariableStatement
   | ifStatement
-  | ? Label ?
   | ? Print ?
   | ? Button ?
   | ? End ?
@@ -23,7 +22,7 @@ statement =
 
 assignVariableStatement = ? Variable ?,  ? Equality ? (*""=""*), valueExpression;
 
-ifStatement = ? If ?, relationExpression, ? Then ?, joinedStatements;
+ifStatement = ? If ?, relationExpression, ? Then ?, joinedStatements, [ ? Else ?, joinedStatements ];
 
 valueExpression = ? Variable ? | ? Number ? | ? StringLiteral ?;
 

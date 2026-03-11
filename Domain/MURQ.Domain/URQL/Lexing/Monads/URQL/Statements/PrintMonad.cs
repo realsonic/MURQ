@@ -22,6 +22,7 @@ public record PrintMonad(PrintLexemeProgress LexemeProgress, PrintStatementVaria
         PrintLexemeProgress.Text => character switch
         {
             '&' or '\n' => new PrintToken(Text, IsNewLineAtEnd(), Lexeme, Location).AsMonadWithRemain(character, position),
+            // todo добавить else как терминатор
             _ => new PrintMonad(PrintLexemeProgress.Text, StatementVariant, Text + character, Lexeme + character, Location.EndAt(position))
         },
 

@@ -4,8 +4,8 @@ using System.ComponentModel;
 
 namespace MURQ.Domain.URQL.Tokens.Statements.If;
 
-[Description("ветвление (if)")]
+[Description("ветвление if-then-else (if)")]
 public record IfToken(string Lexeme, Location Location) : Token(Lexeme, Location)
 {
-    public override string GetDescription() => "ветвление (if)";
+    public override string GetDescription() => "ветвление if-then-else (if)";
 }

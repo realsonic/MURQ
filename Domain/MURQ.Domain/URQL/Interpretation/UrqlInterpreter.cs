@@ -23,7 +23,7 @@ public class UrqlInterpreter(IEnumerable<Token> tokens, IGameContext gameContext
 
         if (Lookahead.IsStartOfStatement()) // 2ая линия
         {
-            await InterpretJoinedStatementsAdaptedAsync(toRun: true, cancellationToken);
+            await InterpretJoinedStatementsAdaptedAsync(InterpretationMode.Run, cancellationToken);
         }
         else if (Lookahead is null) // ϵ-продукция
         {
@@ -40,10 +40,10 @@ public class UrqlInterpreter(IEnumerable<Token> tokens, IGameContext gameContext
     /// joinedStatementsAdapted = statement, joinedStatementsRest;
     /// </code>
     /// </summary>
-    private async Task InterpretJoinedStatementsAdaptedAsync(bool toRun, CancellationToken cancellationToken)
+    private async Task InterpretJoinedStatementsAdaptedAsync(InterpretationMode interpretationMode, CancellationToken cancellationToken)
     {
-        await InterpretStatementAsync(toRun, cancellationToken);
-        await InterpretJoinedStatementsRestAsync(toRun, cancellationToken);
+        await InterpretStatementAsync(interpretationMode, cancellationToken);
+        await InterpretJoinedStatementsRestAsync(interpretationMode, cancellationToken);
     }
 
     /// <summary>
@@ -52,13 +52,13 @@ public class UrqlInterpreter(IEnumerable<Token> tokens, IGameContext gameContext
     /// joinedStatementsRest = [? & ?, statement, joinedStatementsRest];
     /// </code>
     /// </summary>
-    private async Task InterpretJoinedStatementsRestAsync(bool toRun, CancellationToken cancellationToken)
+    private async Task InterpretJoinedStatementsRestAsync(InterpretationMode interpretationMode, CancellationToken cancellationToken)
     {
         if (Lookahead is StatementJoinToken) // 2ая ветка
         {
             Match<StatementJoinToken>();
-            await InterpretStatementAsync(toRun, cancellationToken);
-            await InterpretJoinedStatementsRestAsync(toRun, cancellationToken);
+            await InterpretStatementAsync(interpretationMode, cancellationToken);
+            await InterpretJoinedStatementsRestAsync(interpretationMode, cancellationToken);
         }
         else
         {
@@ -72,44 +72,44 @@ public class UrqlInterpreter(IEnumerable<Token> tokens, IGameContext gameContext
     /// statement = assignVariableStatement | ifStatement | ? Print ? | ? Button ? | ? End ? | ? ClearScreen ? | ? Goto ? | ? Perkill ? | ? Pause ?;
     /// </code>
     /// </summary>
-    private async Task InterpretStatementAsync(bool toRun, CancellationToken cancellationToken)
+    private async Task InterpretStatementAsync(InterpretationMode interpretationMode, CancellationToken cancellationToken)
     {
         switch (Lookahead)
         {
             case Token when Lookahead.IsStartOfIfStatement():
-                await InterpretIfThenStatement(toRun, cancellationToken);
+                await InterpretIfThenStatement(interpretationMode, cancellationToken);
                 break;
             
             case Token when Lookahead.IsStartOfAssignVariableStatement():
-                await InterpretAssignVariableStatementAsync(toRun, cancellationToken);
+                await InterpretAssignVariableStatementAsync(interpretationMode, cancellationToken);
                 break;
 
             case PrintToken:
-                await InterpretPrintStatementAsync(toRun, cancellationToken);
+                await InterpretPrintStatementAsync(interpretationMode, cancellationToken);
                 break;
 
             case ButtonToken:
-                await InterpretButtonStatementAsync(toRun, cancellationToken);
+                await InterpretButtonStatementAsync(interpretationMode, cancellationToken);
                 break;
 
             case EndToken:
-                await InterpretEndStatementAsync(toRun, cancellationToken);
+                await InterpretEndStatementAsync(interpretationMode, cancellationToken);
                 break;
 
             case ClearScreenToken:
-                await InterpretClearScreenStatementAdync(toRun, cancellationToken);
+                await InterpretClearScreenStatementAdync(interpretationMode, cancellationToken);
                 break;
 
             case GotoToken:
-                await InterpretGotoStatementAsync(toRun, cancellationToken);
+                await InterpretGotoStatementAsync(interpretationMode, cancellationToken);
                 break;
 
             case PerkillToken:
-                await InterpretPerkillStatementAsync(toRun, cancellationToken);
+                await InterpretPerkillStatementAsync(interpretationMode, cancellationToken);
                 break;
 
             case PauseToken:
-                await InterpretPauseStatementAsync(toRun, cancellationToken);
+                await InterpretPauseStatementAsync(interpretationMode, cancellationToken);
                 break;
 
             default:
@@ -117,11 +117,11 @@ public class UrqlInterpreter(IEnumerable<Token> tokens, IGameContext gameContext
         }
     }
 
-    private async Task InterpretAssignVariableStatementAsync(bool toRun, CancellationToken cancellationToken)
+    private async Task InterpretAssignVariableStatementAsync(InterpretationMode interpretationMode, CancellationToken cancellationToken)
     {
         AssignVariableStatement assignVariableStatement = ParseAssignVariableStatement();
 
-        if (toRun)
+        if (interpretationMode is InterpretationMode.Run)
         {
             await assignVariableStatement.RunAsync(gameContext, cancellationToken);
         }
@@ -130,10 +130,10 @@ public class UrqlInterpreter(IEnumerable<Token> tokens, IGameContext gameContext
     /// <summary>
     /// Грамматика:
     /// <code>
-    /// ifStatement = ? If ?, relationExpression, ? Then ?, joinedStatements;
+    /// ifStatement = ? If ?, relationExpression, ? Then ?, joinedStatements, [ ? Else ?, joinedStatements ];
     /// </code>
     /// </summary>
-    private async Task InterpretIfThenStatement(bool toRun, CancellationToken cancellationToken)
+    private async Task InterpretIfThenStatement(InterpretationMode interpretationMode, CancellationToken cancellationToken)
     {
         Match<IfToken>();
 
@@ -146,83 +146,103 @@ public class UrqlInterpreter(IEnumerable<Token> tokens, IGameContext gameContext
 
         if (isConditionTrue)
         {
-            await InterpretJoinedStatementsAdaptedAsync(toRun, cancellationToken);
-            //todo skip else
+            // выполняем then
+            await InterpretJoinedStatementsAdaptedAsync(interpretationMode, cancellationToken);
+
+            // пропускаем else
+            if (Lookahead is ElseToken)
+            {
+                Match<ElseToken>();
+                await InterpretJoinedStatementsAdaptedAsync(InterpretationMode.ParseNotRun, cancellationToken);
+            }
         }
         else
         {
-            await InterpretJoinedStatementsAdaptedAsync(toRun: false, cancellationToken);
-            //todo run else
+            // пропускаем then
+            await InterpretJoinedStatementsAdaptedAsync(InterpretationMode.ParseNotRun, cancellationToken);
+
+            //todo выполняем else
+            if (Lookahead is ElseToken)
+            {
+                Match<ElseToken>();
+                await InterpretJoinedStatementsAdaptedAsync(interpretationMode, cancellationToken);
+            }
         }
     }
 
-    private async Task InterpretPrintStatementAsync(bool toRun, CancellationToken cancellationToken)
+    private async Task InterpretPrintStatementAsync(InterpretationMode interpretationMode, CancellationToken cancellationToken)
     {
         PrintStatement printStatement = ParsePrintTerminal();
 
-        if (toRun)
+        if (interpretationMode is InterpretationMode.Run)
         {
             await printStatement.RunAsync(gameContext, cancellationToken);
         }
     }
 
-    private async Task InterpretButtonStatementAsync(bool toRun, CancellationToken cancellationToken)
+    private async Task InterpretButtonStatementAsync(InterpretationMode interpretationMode, CancellationToken cancellationToken)
     {
         ButtonStatement buttonStatement = ParseButtonTerminal();
 
-        if (toRun)
+        if (interpretationMode is InterpretationMode.Run)
         {
             await buttonStatement.RunAsync(gameContext, cancellationToken);
         }
     }
 
-    private async Task InterpretEndStatementAsync(bool toRun, CancellationToken cancellationToken)
+    private async Task InterpretEndStatementAsync(InterpretationMode interpretationMode, CancellationToken cancellationToken)
     {
         EndStatement endStatement = ParseEndTerminal();
 
-        if (toRun)
+        if (interpretationMode is InterpretationMode.Run)
         {
             await endStatement.RunAsync(gameContext, cancellationToken);
         }
     }
 
-    private async Task InterpretClearScreenStatementAdync(bool toRun, CancellationToken cancellationToken)
+    private async Task InterpretClearScreenStatementAdync(InterpretationMode interpretationMode, CancellationToken cancellationToken)
     {
         ClearScreenStatement clearScreenStatement = ParseClearScreenTerminal();
 
-        if (toRun)
+        if (interpretationMode is InterpretationMode.Run)
         {
             await clearScreenStatement.RunAsync(gameContext, cancellationToken);
         }
     }
 
-    private async Task InterpretGotoStatementAsync(bool toRun, CancellationToken cancellationToken)
+    private async Task InterpretGotoStatementAsync(InterpretationMode interpretationMode, CancellationToken cancellationToken)
     {
         GotoStatement gotoStatement = ParseGotoTerminal();
 
-        if (toRun)
+        if (interpretationMode is InterpretationMode.Run)
         {
             await gotoStatement.RunAsync(gameContext, cancellationToken);
         }
     }
 
-    private async Task InterpretPerkillStatementAsync(bool toRun, CancellationToken cancellationToken)
+    private async Task InterpretPerkillStatementAsync(InterpretationMode interpretationMode, CancellationToken cancellationToken)
     {
         PerkillStatement perkillStatement = ParsePerkillTerminal();
 
-        if (toRun)
+        if (interpretationMode is InterpretationMode.Run)
         {
             await perkillStatement.RunAsync(gameContext, cancellationToken);
         }
     }
 
-    private async Task InterpretPauseStatementAsync(bool toRun, CancellationToken cancellationToken)
+    private async Task InterpretPauseStatementAsync(InterpretationMode interpretationMode, CancellationToken cancellationToken)
     {
         PauseStatement pauseStatement = ParsePauseTerminal();
 
-        if (toRun)
+        if (interpretationMode is InterpretationMode.Run)
         {
             await pauseStatement.RunAsync(gameContext, cancellationToken);
         }
+    }
+
+    private enum InterpretationMode
+    {
+        Run,
+        ParseNotRun
     }
 }
