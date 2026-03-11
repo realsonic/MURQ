@@ -1,5 +1,6 @@
 ﻿using MURQ.Domain.URQL.Locations;
 
+using System.Diagnostics.CodeAnalysis;
 using System.Text;
 
 namespace MURQ.Domain.URQL.Lexing.CharacterEnumerableExtensions;
@@ -21,23 +22,21 @@ public static class CharacterEnumerableExtensions
     public static IEnumerable<List<PositionedCharacter>> SplitByLineBreaks(this IEnumerable<PositionedCharacter> enumerable)
         => new CharacterEnumerableByLineBreaks(enumerable);
 
-    public static bool IsLabelLine(this List<PositionedCharacter> sourceLine, out string? label)
+    public static bool IsLabelLine(this List<PositionedCharacter> sourceLine, [NotNullWhen(true)] out string? label)
     {
-        IEnumerable<char> characters = sourceLine.Select(element => element.Character);
-
         bool isColonFound = false;
         StringBuilder textBuilder = new();
 
-        foreach (char @char in characters)
+        foreach (PositionedCharacter positionedCharacter in sourceLine)
         {
             if (!isColonFound)
             {
                 // До двоеточия пропускаем только пробелы и табуляции
-                if (@char == ' ' || @char == '\t')
+                if (positionedCharacter.Character is ' ' or '\t')
                     continue;
-                else if (@char == ':')
+                else if (positionedCharacter.Character == ':')
                     isColonFound = true;
-                else // Символ не пробел/таб и не двоеточие — ошибка
+                else // Символ не пробел/таб и не двоеточие — не метка
                 {
                     label = null;
                     return false;
@@ -46,13 +45,13 @@ public static class CharacterEnumerableExtensions
             else
             {
                 // После двоеточия собираем все символы
-                textBuilder.Append(@char);
+                textBuilder.Append(positionedCharacter);
             }
         }
 
         // Проверяем, что двоеточие было найдено и после него есть текст
-        label = textBuilder.ToString();
-        return isColonFound && textBuilder.Length > 0;
+        label = isColonFound ? textBuilder.ToString() : null;
+        return isColonFound;
     }
 
     public static string ToPlainString(this IEnumerable<PositionedCharacter> positionedCharacters) => string.Join(null, positionedCharacters.Select(pc => pc.Character));

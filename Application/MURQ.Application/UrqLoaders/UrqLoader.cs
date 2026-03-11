@@ -39,12 +39,15 @@ public class UrqLoader(SubstitutionParser substitutionParser)
         }
     }
 
-    private static LabelLine MakeLabelLine(List<PositionedCharacter> sourceLine, string? label)
+    private static LabelLine MakeLabelLine(List<PositionedCharacter> sourceLine, string label)
     {
         Position startPosition = sourceLine.FirstOrDefault().Position;
 
-        if (string.IsNullOrWhiteSpace(label))
+        string trimmedlabel = label.Trim();
+        if (trimmedlabel == string.Empty)
+        {
             throw new UrqlException($"Метка пустая ({label}) на строке {startPosition.Line}");
+        }
 
         Position endPosition = sourceLine.LastOrDefault().Position;
 
