@@ -51,7 +51,7 @@ public class UrqLoader(SubstitutionParser substitutionParser)
 
         Position endPosition = sourceLine.LastOrDefault().Position;
 
-        LabelLine labelLine = new(label, Location.StartAt(startPosition).EndAt(endPosition));
+        LabelLine labelLine = new(trimmedlabel, Location.StartAt(startPosition).EndAt(endPosition));
         return labelLine;
     }
 }

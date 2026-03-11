@@ -25,7 +25,7 @@ public static class CharacterEnumerableExtensions
     public static bool IsLabelLine(this List<PositionedCharacter> sourceLine, [NotNullWhen(true)] out string? label)
     {
         bool isColonFound = false;
-        StringBuilder textBuilder = new();
+        StringBuilder labelTextBuilder = new();
 
         foreach (PositionedCharacter positionedCharacter in sourceLine)
         {
@@ -45,12 +45,12 @@ public static class CharacterEnumerableExtensions
             else
             {
                 // После двоеточия собираем все символы
-                textBuilder.Append(positionedCharacter);
+                labelTextBuilder.Append(positionedCharacter.Character);
             }
         }
 
         // Проверяем, что двоеточие было найдено и после него есть текст
-        label = isColonFound ? textBuilder.ToString() : null;
+        label = isColonFound ? labelTextBuilder.ToString() : null;
         return isColonFound;
     }
 

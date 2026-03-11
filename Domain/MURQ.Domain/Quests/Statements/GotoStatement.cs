@@ -4,7 +4,7 @@ using System.Diagnostics;
 
 namespace MURQ.Domain.Quests.Statements;
 
-[DebuggerDisplay("goto {LabelStatement?.Label,nq}")]
+[DebuggerDisplay("goto {Label,nq}")]
 public class GotoStatement : Statement
 {
     public required string Label { get; init; }
