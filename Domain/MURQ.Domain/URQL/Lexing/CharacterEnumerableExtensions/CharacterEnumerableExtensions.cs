@@ -54,7 +54,8 @@ public static class CharacterEnumerableExtensions
         return isColonFound;
     }
 
-    public static string ToPlainString(this IEnumerable<PositionedCharacter> positionedCharacters) => string.Join(null, positionedCharacters.Select(pc => pc.Character));
+    public static string ToPlainString(this IEnumerable<PositionedCharacter> positionedCharacters) => string.Concat(positionedCharacters.Select(pc => pc.Character));
+    public static string ToPlainString(this IEnumerable<OriginatedCharacter> originatedCharacters) => string.Concat(originatedCharacters.Select(pc => pc.Character));
 
     public static IEnumerable<OriginatedCharacter> AsOriginatedCharacters(this IEnumerable<PositionedCharacter> positionedCharacters)
         => positionedCharacters.Select(positionedCharacter => (OriginatedCharacter)positionedCharacter);

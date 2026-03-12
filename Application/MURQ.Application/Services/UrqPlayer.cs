@@ -93,23 +93,23 @@ public class UrqPlayer(IQuestSource questSource, IUserInterface userInterface, I
         string version = versionProvider.Version;
         userInterface.SetTitle($"MURQ.Console {version}");
         var versionWithPrefix = $"v.{version}";
-        
+
         // Обычная версия:
-        /*userInterface.PrintLine($"""
+        userInterface.PrintLine($"""
 
                 /\_/\
                ( o.o )
             |   >   < 
-             | /     \     {versionWithPrefix,10} 
+             | /     \     {versionWithPrefix,10}
              _(___ __ )_ _____ _____
             |     |  |  | ___ |     | 
             | | | |  |  |    -|  |  | 
             |_|_|_|_____|__|__|__  _| 
                                  |__|
 
-        """);*/
+        """);
 
-        // Новогодняя версия:
+        /*// Новогодняя версия:
         userInterface.PrintLine($"""           
 
                           *
@@ -124,7 +124,7 @@ public class UrqPlayer(IQuestSource questSource, IUserInterface userInterface, I
             |_|_|_|_____|__|__|__  _|
                                  |__|
 
-        """);
+        """);*/
     }
 
     private void PrintQuestInfo(string? questName, TimeSpan loadDuration)

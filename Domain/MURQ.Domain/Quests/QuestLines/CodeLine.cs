@@ -2,6 +2,7 @@
 using MURQ.Domain.Games.Values;
 using MURQ.Domain.Quests.Expressions;
 using MURQ.Domain.Quests.QuestLines.SubstitutionTrees;
+using MURQ.Domain.URQL.Lexing.CharacterEnumerableExtensions;
 using MURQ.Domain.URQL.Locations;
 
 namespace MURQ.Domain.Quests.QuestLines;
@@ -29,7 +30,8 @@ public record CodeLine(TreeNode[] Nodes, Location Location) : QuestLine(Location
 
                 case SubstitutionNode substitutionNode:
                     IEnumerable<OriginatedCharacter> sourceCharacters = ConvertNodesToCode(substitutionNode.Nodes, gameContext);
-                    string variableName = string.Join(string.Empty, sourceCharacters.Select(rawCharacter => rawCharacter.Character));
+                    
+                    string variableName = sourceCharacters.ToPlainString().Trim();
 
                     Value value = CalculateVariable(gameContext, variableName); //todo заменить на выражение
 

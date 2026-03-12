@@ -13,7 +13,6 @@ static class ChainExtensions
         }
     }
 
-    public static string ToJoinedString<T>(this IEnumerable<T> chars) => string.Join(null, chars);
     public static string ToJoinedNumberedLines<T>(this IEnumerable<T> elements, Func<T, string> convertElement)
         => string.Join("\n", elements.Select((element, number) => $"[{number + 1}] {convertElement(element)}"));
     public static IEnumerable<string> ToNumberedLines<T>(this IEnumerable<T> elements, Func<T, string>? convertElement = null) where T : notnull

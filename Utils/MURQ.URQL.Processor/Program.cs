@@ -24,7 +24,7 @@ stopwatch.Stop();
 totalTime += stopwatch.Elapsed;
 Console.WriteLine($"""
     -- Исходный файл ----------------------------------------- ({stopwatch.Elapsed:mm\:ss\.fff})
-    {source.ToJoinedString()}
+    {string.Concat(source)}
     ----------------------------------------------------------------------
 
     """);
@@ -35,7 +35,7 @@ stopwatch.Stop();
 totalTime += stopwatch.Elapsed;
 Console.WriteLine($"""
     -- Этап 1. Удаление ненужных символов -------------------- ({stopwatch.Elapsed:mm\:ss\.fff})
-    {trimmedSource.ToJoinedString()}
+    {string.Concat(trimmedSource)}
     ----------------------------------------------------------------------
         
     """);
@@ -116,7 +116,7 @@ List<List<OriginatedCharacter>> urqlLines = [.. codeLines.Select(substitutionTre
 stopwatch.Stop();
 Utilities.WriteBlock(
     "Шаг 1. Эмуляция раскрытия подстановок",
-    urqlLines.Select(line => line.ToJoinedString()),
+    urqlLines.Select(line => string.Concat(line)),
     stopwatch);
 
 stopwatch.Restart();
@@ -124,7 +124,7 @@ List<List<Token>> tokenLines = [.. urqlLines.Select(line => new UrqlLexer(line).
 stopwatch.Stop();
 Utilities.WriteBlock(
     "Шаг 2. Эмуляция получения токенов",
-    tokenLines.Select(line => line.ToJoinedString()),
+    tokenLines.Select(line => string.Concat(line)),
     stopwatch);
 
 Console.WriteLine("-->> Шаг 3. Эмуляция интерпретации ------------------------------------------");
