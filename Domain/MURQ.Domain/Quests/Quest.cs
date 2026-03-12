@@ -6,38 +6,39 @@ namespace MURQ.Domain.Quests;
 
 public class Quest
 {
-    public Quest(IEnumerable<QuestLine> questLines)
+    public Quest(IEnumerable<QuestLine> lines)
     {
-        QuestLines = [.. questLines];
-        _currentQuestLineIndex = QuestLines.Count > 0 ? 0 : null;
+        Lines = [.. lines];
+        _currentLineIndex = Lines.Count > 0 ? 0 : null;
         CacheLabels();
     }
 
-    public IReadOnlyList<QuestLine> QuestLines { get; }
+    public IReadOnlyList<QuestLine> Lines { get; }
 
-    public QuestLine? CurrentQuestLine => _currentQuestLineIndex is not null ? QuestLines[_currentQuestLineIndex.Value] : null;
+    public QuestLine? CurrentLine => _currentLineIndex is not null ? Lines[_currentLineIndex.Value] : null;
+    public void ClearCurrentLine() => _currentLineIndex = null;
 
-    public void NextQuestLine()
+    public void NextLine()
     {
-        if (_currentQuestLineIndex is null)
+        if (_currentLineIndex is null)
             return;
 
-        if (_currentQuestLineIndex == QuestLines.Count - 1)
+        if (_currentLineIndex == Lines.Count - 1)
         {
-            _currentQuestLineIndex = null;
+            _currentLineIndex = null;
             return;
         }
 
-        _currentQuestLineIndex++;
+        _currentLineIndex++;
     }
 
     public bool TryGoToLabel(string targetLabel, [NotNullWhen(true)] out string? resultLabel)
     {
         if (_labelDictionary.TryGetValue(targetLabel, out int index))
         {
-            if (QuestLines[index] is LabelLine labelLine)
+            if (Lines[index] is LabelLine labelLine)
             {
-                _currentQuestLineIndex = index;
+                _currentLineIndex = index;
 
                 resultLabel = labelLine.Label;
                 return true;
@@ -50,9 +51,9 @@ public class Quest
 
     private void CacheLabels()
     {
-        for (int index = 0; index < QuestLines.Count; index++)
+        for (int index = 0; index < Lines.Count; index++)
         {
-            if (QuestLines[index] is LabelLine labelLine)
+            if (Lines[index] is LabelLine labelLine)
             {
                 _labelDictionary.TryAdd(labelLine.Label, index);
             }
@@ -60,5 +61,5 @@ public class Quest
     }
 
     private readonly Dictionary<string, int> _labelDictionary = new(StringComparer.InvariantCultureIgnoreCase);
-    private int? _currentQuestLineIndex;
+    private int? _currentLineIndex;
 }

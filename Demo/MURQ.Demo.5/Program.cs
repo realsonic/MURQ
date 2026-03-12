@@ -20,7 +20,7 @@ Quest quest = urqLoader.LoadQuest(ReadFile(@"Demo5.qst"));
 
 Demo5GameContext gameContext = new();
 
-foreach (var codeLine in quest.QuestLines.OfType<CodeLine>())
+foreach (var codeLine in quest.Lines.OfType<CodeLine>())
 {
     IEnumerable<OriginatedCharacter> sourceLine = codeLine.ToCode(gameContext);
     UrqlLexer urqlLexer = new(sourceLine);

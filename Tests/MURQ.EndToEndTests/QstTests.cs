@@ -62,7 +62,7 @@ public class QstTests
         await sut.StartAsync();
 
         // Assert
-        List<string> labelList = [.. sut.Quest.QuestLines.OfType<LabelLine>().Select(labelLine => labelLine.Label)];
+        List<string> labelList = [.. sut.Quest.Lines.OfType<LabelLine>().Select(labelLine => labelLine.Label)];
         labelList.Should().BeEquivalentTo([
             "Метка1",
             "Метка2",
@@ -129,7 +129,7 @@ public class QstTests
         sut.CurrentLocation.Name.Should().Be("1");
         sut.CurrentLocation.Text.Should().Be("Привет, мир! " + Environment.NewLine);
         sut.CurrentLocation.Buttons[0].Caption.Should().Be("Повторить!");
-        ((sut.Quest.QuestLines[2] as CodeLine)!.Nodes[0] as CodeNode)!.SourceCharacters.ToPlainString().Should().Be("btn 1,Повторить! ");
+        ((sut.Quest.Lines[2] as CodeLine)!.Nodes[0] as CodeNode)!.SourceCharacters.ToPlainString().Should().Be("btn 1,Повторить! ");
     }
 
     [Fact(DisplayName = "cls очищает текст и кнопки локации и вызывает событие OnScreenCleared")]

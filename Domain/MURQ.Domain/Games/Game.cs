@@ -66,19 +66,19 @@ public class Game(Quest quest) : IGameContext
         while (gameState == GameState.RunningStatements && !cancellationToken.IsCancellationRequested)
         {
             await InterpretCurrentQuestLineAsync(cancellationToken);
-            Quest.NextQuestLine();
+            Quest.NextLine();
         }
     }
 
     private async Task InterpretCurrentQuestLineAsync(CancellationToken cancellationToken)
     {
-        if (Quest.CurrentQuestLine is null)
+        if (Quest.CurrentLine is null)
         {
             gameState = GameState.WaitingUserInput;
             return;
         }
 
-        QuestLine questLine = Quest.CurrentQuestLine;
+        QuestLine questLine = Quest.CurrentLine;
         if (questLine is not CodeLine codeLine)
         {
             return;
@@ -120,7 +120,11 @@ public class Game(Quest quest) : IGameContext
     });
 
     /// <inheritdoc/>
-    void IGameContext.EndLocation() => gameState = GameState.WaitingUserInput;
+    void IGameContext.EndLocation()
+    {
+        Quest.ClearCurrentLine();
+        gameState = GameState.WaitingUserInput;
+    }
 
     /// <inheritdoc/>
     void IGameContext.ClearScreen()
@@ -156,9 +160,8 @@ public class Game(Quest quest) : IGameContext
         if (Quest.TryGoToLabel(label, out string? resultLabel))
         {
             ChangeCurrentLocationName(resultLabel);
+            await InterpretQuestLinesAsync(cancellationToken);
         }
-
-        await InterpretQuestLinesAsync(cancellationToken);
     }
 
     private void JumpByGoto(string label)
