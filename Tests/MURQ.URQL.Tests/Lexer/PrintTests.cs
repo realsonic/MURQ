@@ -12,7 +12,7 @@ public class PrintTests
     public void P_space_newline_gives_PrintToken_with_empty_text()
     {
         // Arrange
-        UrqlLexer sut = new("p \n".ToPositionedEnumerable().AsOriginatedCharacters());
+        UrqlMonadLexer sut = new("p \n".ToPositionedEnumerable().AsOriginatedCharacters());
 
         // Act
         var tokens = sut.Scan();
@@ -28,7 +28,7 @@ public class PrintTests
     public void P_with_text_gives_PrintToken_with_text()
     {
         // Arrange
-        UrqlLexer sut = new("p Привет!".ToPositionedEnumerable().AsOriginatedCharacters());
+        UrqlMonadLexer sut = new("p Привет!".ToPositionedEnumerable().AsOriginatedCharacters());
 
         // Act
         var tokens = sut.Scan();
@@ -43,7 +43,7 @@ public class PrintTests
     public void Two_p_with_text_gives_two_PrintToken_with_text()
     {
         // Arrange
-        UrqlLexer sut = new("""
+        UrqlMonadLexer sut = new("""
             p Привет, 
             p мир!
             """.ToEnumerableWithoutCarriageReturn().ToPositionedEnumerable().AsOriginatedCharacters());

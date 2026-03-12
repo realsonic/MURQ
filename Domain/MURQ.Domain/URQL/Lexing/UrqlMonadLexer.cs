@@ -3,12 +3,9 @@ using MURQ.Domain.URQL.Lexing.Monads.URQL;
 using MURQ.Domain.URQL.Locations;
 using MURQ.Domain.URQL.Tokens;
 
-
-//using MURQ.URQL.Lexing.EnumerableExtensions;
-
 namespace MURQ.Domain.URQL.Lexing;
 
-public class UrqlLexer(IEnumerable<OriginatedCharacter> input)
+public class UrqlMonadLexer(IEnumerable<OriginatedCharacter> input)
 {
     public Position CurrentPosition { get; private set; } = new(1, 0);
 
@@ -16,7 +13,6 @@ public class UrqlLexer(IEnumerable<OriginatedCharacter> input)
     {
         UncompletedLexemeMonad uncompletedMonad = new RootMonad(Position.Initial);
 
-        //IEnumerable<(char, Position)> refinedEnumerable = GetRefinedEnumerable();
         foreach (OriginatedCharacter originatedCharacter in input)
         {
             Position position = originatedCharacter.Origin switch
@@ -60,11 +56,6 @@ public class UrqlLexer(IEnumerable<OriginatedCharacter> input)
                 throw new LexingException($"Неизвестная лексема \"{unknown.Lexeme}\" на {unknown.Location}{GetErrorMessageAppendix(unknown.ErrorMessage)}");
         }
     }
-
-    /*private IEnumerable<(char, Position)> GetRefinedEnumerable() => input
-        .ToEnumerableWithoutCarriageReturn()
-        .ToPositionedEnumerable()
-        .ToEnumerableWithoutComments();*/
 
     private static string GetErrorMessageAppendix(string? errorMessage) => errorMessage switch
     {

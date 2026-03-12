@@ -120,7 +120,7 @@ Utilities.WriteBlock(
     stopwatch);
 
 stopwatch.Restart();
-List<List<Token>> tokenLines = [.. urqlLines.Select(line => new UrqlLexer(line).Scan().ToList())];
+List<List<Token>> tokenLines = [.. urqlLines.Select(line => new UrqlMonadLexer(line).Scan().ToList())];
 stopwatch.Stop();
 Utilities.WriteBlock(
     "Шаг 2. Эмуляция получения токенов",
