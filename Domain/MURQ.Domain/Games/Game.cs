@@ -3,8 +3,8 @@ using MURQ.Domain.Games.Values;
 using MURQ.Domain.Games.Variables;
 using MURQ.Domain.Quests;
 using MURQ.Domain.Quests.QuestLines;
+using MURQ.Domain.URQL;
 using MURQ.Domain.URQL.Interpretation;
-using MURQ.Domain.URQL.Interpretation.Exceptions;
 using MURQ.Domain.URQL.Lexing;
 using MURQ.Domain.URQL.Locations;
 
@@ -85,14 +85,14 @@ public class Game(Quest quest) : IGameContext
         }
 
         IEnumerable<OriginatedCharacter> code = codeLine.ToCode(this);
-        UrqlMonadLexer lexer = new(code); // todo заменить лексер на новый
+        UrqlLexer lexer = new(code);
         UrqlInterpreter interpreter = new(lexer.Scan(), this);
 
         try
         {
             await interpreter.InterpretStatementLineAsync(cancellationToken);
         }
-        catch (InterpretationException ex)
+        catch (UrqlException ex)
         {
             ReportCodeLineError(codeLine, ex);
         }
@@ -252,7 +252,7 @@ public class Game(Quest quest) : IGameContext
         return new Variable(variableName, new NumberValue(randomIntNumber));
     }
 
-    private void ReportCodeLineError(CodeLine codeLine, InterpretationException ex)
+    private void ReportCodeLineError(CodeLine codeLine, UrqlException ex)
     {
         OnUrqlError?.Invoke(this, new OnErrorEventArgs(ex, codeLine.Location));
     }

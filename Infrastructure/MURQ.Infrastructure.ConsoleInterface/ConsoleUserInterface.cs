@@ -6,8 +6,6 @@ using System.Text;
 
 using static MURQ.Application.Interfaces.IUserInterface;
 
-using UrqlException = MURQ.Domain.URQL.UrqlException; //todo упростить после удаления Application.URQL
-
 namespace MURQ.Infrastructure.ConsoleInterface;
 
 public class ConsoleUserInterface : IUserInterface, IDisposable

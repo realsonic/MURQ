@@ -1,4 +1,5 @@
-﻿using MURQ.Domain.URQL.Locations;
+﻿using MURQ.Domain.URQL.Lexing.Exceptions;
+using MURQ.Domain.URQL.Locations;
 
 using System.Collections;
 
