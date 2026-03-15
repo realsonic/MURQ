@@ -1,8 +1,7 @@
 ﻿using MURQ.Domain.Games;
 using MURQ.Domain.Games.Values;
-using MURQ.Domain.Quests.Expressions;
 using MURQ.Domain.Quests.QuestLines.SubstitutionTrees;
-using MURQ.Domain.URQL.Lexing.CharacterEnumerableExtensions;
+using MURQ.Domain.URQL.Interpretation;
 using MURQ.Domain.URQL.Locations;
 
 namespace MURQ.Domain.Quests.QuestLines;
@@ -30,10 +29,10 @@ public record CodeLine(TreeNode[] Nodes, Location Location) : QuestLine(Location
 
                 case SubstitutionNode substitutionNode:
                     IEnumerable<OriginatedCharacter> sourceCharacters = ConvertNodesToCode(substitutionNode.Nodes, gameContext);
-                    
-                    string variableName = sourceCharacters.ToPlainString().Trim();
-
-                    Value value = CalculateVariable(gameContext, variableName); //todo заменить на выражение
+                    ExpressionCalculator expressionCalculator = new(sourceCharacters, gameContext);
+                    Value? value = expressionCalculator.Calculate();
+                    if (value is null)
+                        continue;
 
                     string stringValue = substitutionNode.Modifier switch
                     {
@@ -53,11 +52,5 @@ public record CodeLine(TreeNode[] Nodes, Location Location) : QuestLine(Location
                     throw new NotImplementedException($"Элемент дерева подстановок типа {treeNode.GetType()} пока не обрабатывается.");
             }
         }
-    }
-
-    private static Value CalculateVariable(IGameContext gameContext, string variableName)
-    {
-        VariableExpression variableExpression = new() { Name = variableName };
-        return variableExpression.Calculate(gameContext);
     }
 }
