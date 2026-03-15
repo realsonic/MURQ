@@ -3,6 +3,7 @@ using MURQ.Domain.URQL.Lexing.Exceptions;
 using MURQ.Domain.URQL.Locations;
 using MURQ.Domain.URQL.Tokens;
 using MURQ.Domain.URQL.Tokens.Statements;
+using MURQ.Domain.URQL.Tokens.Statements.If;
 
 using System.Text;
 
@@ -16,14 +17,23 @@ public class UrqlLexer(IEnumerable<OriginatedCharacter> source)
 
         while (Lookahead is not null)
         {
-            switch (Lookahead.Value.Character)
+            char character = Lookahead.Value.Character;
+            switch (character)
             {
                 case ' ' or '\t':
                     Match();
                     break;
 
-                case char when char.IsLetter(Lookahead.Value.Character):
+                case char when char.IsLetter(character):
                     yield return ParseWord();
+                    break;
+
+                case char when char.IsDigit(character):
+                    yield return ParseNumberLiteral();
+                    break;
+
+                case '"':
+                    yield return ParseStringLiteral();
                     break;
 
                 case '_':
@@ -34,12 +44,9 @@ public class UrqlLexer(IEnumerable<OriginatedCharacter> source)
                     yield return ParseEquality();
                     break;
 
-                /*  TODO
-                        '"' => StringLiteralMonad.StartAfterOpeningQuote(character, position),
-                        '&' => new StatementJoinToken(character.ToString(), Location.StartAt(position)).AsMonad(),
-                        _ when char.IsDigit(character) => NumberMonad.Start(character, position),
-
-                 */
+                case '&':
+                    yield return ParseStatementJoin();
+                    break;
 
                 default: throw new UnknownLexemeException(GetLexemeData());
             }
@@ -54,19 +61,19 @@ public class UrqlLexer(IEnumerable<OriginatedCharacter> source)
     private Token ParseWord()
     {
         StringBuilder wordBuilder = new();
-
         bool isTerminated = false;
         while (Lookahead is not null && !isTerminated)
         {
-            switch (Lookahead.Value.Character)
+            char character = Lookahead.Value.Character;
+            switch (character)
             {
-                case char when char.IsLetter(Lookahead.Value.Character):
-                    wordBuilder.Append(Lookahead.Value.Character);
+                case char when char.IsLetter(character):
+                    wordBuilder.Append(character);
                     Match();
                     continue;
 
                 case '_':
-                case char when char.IsDigit(Lookahead.Value.Character):
+                case char when char.IsDigit(character):
                     return ParseVariable(wordBuilder.ToString());
 
                 default:
@@ -75,9 +82,6 @@ public class UrqlLexer(IEnumerable<OriginatedCharacter> source)
             }
         }
 
-        if (_lexeme.Count is 0)
-            throw new InvalidOperationException($"Лексема оказалась пустой!");
-
         string collectedWord = wordBuilder.ToString();
         return collectedWord.ToLower() switch
         {
@@ -85,14 +89,13 @@ public class UrqlLexer(IEnumerable<OriginatedCharacter> source)
             "pln" => ParsePrintAfterKeyword(true),
             "btn" => ParseButtonAfterBtn(),
             "end" => ParseEndAfterEnd(),
-            //TODO
-            //"cls" =>
-            //"if" => n
-            //"then" =>
-            //"else" =>
+            "cls" => ParseClearScreenAfterCls(),
+            "if" => ParseIfAfterIf(),
+            "then" => ParseThenAfterThen(),
+            "else" => ParseElseAfterThen(),
             "goto" => ParseGotoAfterGoto(),
-            //"perkill"
-            //"pause" =
+            "perkill" => ParsePerkillAfterPerkill(),
+            "pause" => ParsePauseAfterPause(),
             _ => ParseVariable(collectedWord)
         };
     }
@@ -100,57 +103,33 @@ public class UrqlLexer(IEnumerable<OriginatedCharacter> source)
     private PrintToken ParsePrintAfterKeyword(bool isNewLine)
     {
         // После p/pln разрешён пробел либо конец
-        if (Lookahead?.Character is ' ' or '\t')
-        {
-            Match();
-        }
-        else if (Lookahead is not null)
-            throw new LexingException($"После команды p/pln ожидался пробел или табуляция.", GetLexemeData());
+        AllowSpaceOrTab("p/pln");
 
         // Собираем текст
-        StringBuilder textBuilder = new();
-        bool isTerminated = false;
-        while (Lookahead is not null && !isTerminated)
-        {
-            switch (Lookahead.Value.Character)
-            {
-                case '&':
-                    isTerminated = true;
-                    break;
-
-                // todo добавить else как терминатор, если мы внутри if - или(!) в парсере
-
-                default:
-                    textBuilder.Append(Lookahead.Value.Character);
-                    Match();
-                    break;
-            }
-        }
+        string text = ParseTextTillTermination();
 
         (string lexeme, Location location) = GetLexemeData();
-        return new PrintToken(textBuilder.ToString(), isNewLine, lexeme, location);
+        return new PrintToken(text, isNewLine, lexeme, location);
     }
 
     private ButtonToken ParseButtonAfterBtn()
     {
         // После btn разрешён пробел или табуляция
-        if (Lookahead?.Character is ' ' or '\t')
-            Match();
-        else
-            throw new LexingException($"После btn ожидался пробел или табуляция.", GetLexemeData());
+        AllowSpaceOrTab("btn");
 
         // Собираем метку
         StringBuilder labelBuilder = new();
         bool isCommaMet = false;
         while (Lookahead is not null && !isCommaMet)
         {
-            if (Lookahead.Value.Character is ',')
+            char character = Lookahead.Value.Character;
+            if (character is ',')
             {
                 isCommaMet = true;
             }
             else
             {
-                labelBuilder.Append(Lookahead.Value.Character);
+                labelBuilder.Append(character);
             }
 
             Match();
@@ -160,27 +139,10 @@ public class UrqlLexer(IEnumerable<OriginatedCharacter> source)
             throw new LexingException($"В команде btn после метки ожидалась запятая.", GetLexemeData());
 
         // Собираем надпись
-        StringBuilder captionBuilder = new();
-        bool isTerminated = false;
-        while (Lookahead is not null && !isTerminated)
-        {
-            switch (Lookahead.Value.Character)
-            {
-                case '&':
-                    isTerminated = true;
-                    break;
-
-                // todo добавить else как терминатор, если мы внутри if - или(!) в парсере
-
-                default:
-                    captionBuilder.Append(Lookahead.Value.Character);
-                    Match();
-                    break;
-            }
-        }
+        string caption = ParseTextTillTermination();
 
         (string lexeme, Location location) = GetLexemeData();
-        return new ButtonToken(labelBuilder.ToString().Trim(), captionBuilder.ToString(), lexeme, location);
+        return new ButtonToken(labelBuilder.ToString().Trim(), caption, lexeme, location);
     }
 
     private EndToken ParseEndAfterEnd()
@@ -189,19 +151,158 @@ public class UrqlLexer(IEnumerable<OriginatedCharacter> source)
         return new EndToken(lexeme, location);
     }
 
+    private ClearScreenToken ParseClearScreenAfterCls()
+    {
+        (string lexeme, Location location) = GetLexemeData();
+        return new ClearScreenToken(lexeme, location);
+    }
+
+    private IfToken ParseIfAfterIf()
+    {
+        (string lexeme, Location location) = GetLexemeData();
+        return new IfToken(lexeme, location);
+    }
+
+    private ThenToken ParseThenAfterThen()
+    {
+        (string lexeme, Location location) = GetLexemeData();
+        return new ThenToken(lexeme, location);
+    }
+
+    private ElseToken ParseElseAfterThen()
+    {
+        (string lexeme, Location location) = GetLexemeData();
+        return new ElseToken(lexeme, location);
+    }
+
     private GotoToken ParseGotoAfterGoto()
     {
         // После goto разрешён пробел или табуляция
-        if (Lookahead?.Character is ' ' or '\t')
-            Match();
-        else
-            throw new LexingException($"После goto ожидался пробел или табуляция.", GetLexemeData());
+        AllowSpaceOrTab("goto");
 
-        StringBuilder labelBuilder = new();
+        // Собираем метку
+        var label = ParseTextTillTermination();
+
+        (string lexeme, Location location) = GetLexemeData();
+        return new GotoToken(label.Trim(), lexeme, location);
+    }
+
+    private PerkillToken ParsePerkillAfterPerkill()
+    {
+        (string lexeme, Location location) = GetLexemeData();
+        return new PerkillToken(lexeme, location);
+    }
+
+    private PauseToken ParsePauseAfterPause()
+    {
+        AllowSpaceOrTab("pause");
+
+        decimal duration = ParseNumber();
+
+        (string lexeme, Location location) = GetLexemeData();
+        return new PauseToken((int)duration, lexeme, location);
+    }
+
+    private VariableToken ParseVariable(string collectedName)
+    {
+        StringBuilder nameBuilder = new(collectedName);
         bool isTerminated = false;
         while (Lookahead is not null && !isTerminated)
         {
-            switch (Lookahead.Value.Character)
+            char character = Lookahead.Value.Character;
+            switch (character)
+            {
+                case char when char.IsLetter(character):
+                case char when char.IsDigit(character):
+                case '_':
+                    nameBuilder.Append(character);
+                    Match();
+                    continue;
+
+                default:
+                    isTerminated = true;
+                    break;
+            }
+        }
+
+        (string lexeme, Location location) = GetLexemeData();
+        return new VariableToken(nameBuilder.ToString(), lexeme, location);
+    }
+
+    private EqualityToken ParseEquality()
+    {
+        Match('=');
+
+        (string lexeme, Location location) = GetLexemeData();
+        return new EqualityToken(lexeme, location);
+    }
+
+    private StatementJoinToken ParseStatementJoin()
+    {
+        Match('&');
+
+        (string lexeme, Location location) = GetLexemeData();
+        return new StatementJoinToken(lexeme, location);
+    }
+
+    private StringLiteralToken ParseStringLiteral()
+    {
+        Match('"');
+
+        // Собираем текст внутри кавычек
+        StringBuilder textBuilder = new();
+        bool isTerminated = false;
+        while (Lookahead is not null && !isTerminated)
+        {
+            char character = Lookahead.Value.Character;
+            switch (character)
+            {
+                case '"':
+                    isTerminated = true;
+                    Match('"');
+                    break;
+
+                default:
+                    textBuilder.Append(character);
+                    Match();
+                    break;
+            }
+        }
+
+        (string lexeme, Location location) = GetLexemeData();
+        return new StringLiteralToken(textBuilder.ToString(), lexeme, location);
+    }
+
+    private NumberToken ParseNumberLiteral()
+    {
+        decimal number = ParseNumber();
+        (string lexeme, Location location) = GetLexemeData();
+        return new NumberToken(number, lexeme, location);
+    }
+
+    private void AllowSpaceOrTab(string commandName)
+    {
+        switch (Lookahead?.Character)
+        {
+            case ' ' or '\t':
+                Match();
+                break;
+
+            default:
+                if (Lookahead is not null)
+                    throw new LexingException($"После команды {commandName} ожидался пробел или табуляция.", GetLexemeData());
+                break;
+        }
+    }
+
+    private string ParseTextTillTermination()
+    {
+        StringBuilder textBuilder = new();
+        bool isTerminated = false;
+        while (Lookahead is not null && !isTerminated)
+        {
+            char character = Lookahead.Value.Character;
+            switch (character)
             {
                 case '&':
                     isTerminated = true;
@@ -210,24 +311,40 @@ public class UrqlLexer(IEnumerable<OriginatedCharacter> source)
                 // todo добавить else как терминатор, если мы внутри if - или(!) в парсере
 
                 default:
-                    labelBuilder.Append(Lookahead.Value.Character);
+                    textBuilder.Append(character);
                     Match();
                     break;
             }
         }
-
-        (string lexeme, Location location) = GetLexemeData();
-        return new GotoToken(labelBuilder.ToString().Trim(), lexeme, location);
+        return textBuilder.ToString();
     }
 
-    private VariableToken ParseVariable(string collectedName)
+    private decimal ParseNumber()
     {
-        throw new NotImplementedException();
-    }
+        // Собираем число    
+        StringBuilder numberBuilder = new();
+        bool isTerminated = false;
+        while (Lookahead is not null && !isTerminated)
+        {
+            char character = Lookahead.Value.Character;
+            switch (character)
+            {
+                case char when char.IsDigit(character):
+                    numberBuilder.Append(character);
+                    Match();
+                    break;
 
-    private EqualityToken ParseEquality()
-    {
-        throw new NotImplementedException();
+                default:
+                    isTerminated = true;
+                    break;
+            }
+        }
+
+        // Превращаем в число
+        string numberString = numberBuilder.ToString();
+        return decimal.TryParse(numberString, out decimal number)
+            ? number
+            : throw new LexingException($"{numberString} не подходит как число.");
     }
 
     private (string Lexeme, Location Location)? TryGetLexemeData()
@@ -247,10 +364,13 @@ public class UrqlLexer(IEnumerable<OriginatedCharacter> source)
     private (string Lexeme, Location Location) GetLexemeData()
         => TryGetLexemeData() ?? throw new InvalidOperationException("Лексема оказалось пустой!");
 
-    private void Match()
+    private void Match(char? expectedCharacter = null)
     {
         if (Lookahead is null)
             throw new InvalidOperationException($"Следующий символ ({nameof(Lookahead)}) оказался пустой!");
+
+        if (expectedCharacter is not null && Lookahead.Value.Character != expectedCharacter)
+            throw new LexingException($"Следущий символ ожидался '{expectedCharacter}', а встретился '{Lookahead.Value.Character}'.");
 
         _lexeme.Add(Lookahead.Value);
         MoveToNextCharacter();
