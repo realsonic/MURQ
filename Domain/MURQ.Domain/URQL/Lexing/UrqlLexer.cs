@@ -21,7 +21,7 @@ public class UrqlLexer(IEnumerable<OriginatedCharacter> source)
             switch (character)
             {
                 case ' ' or '\t':
-                    Match();
+                    Match(character);
                     break;
 
                 case char when char.IsLetter(character):
@@ -69,7 +69,7 @@ public class UrqlLexer(IEnumerable<OriginatedCharacter> source)
             {
                 case char when char.IsLetter(character):
                     wordBuilder.Append(character);
-                    Match();
+                    Match(character);
                     continue;
 
                 case '_':
@@ -132,11 +132,11 @@ public class UrqlLexer(IEnumerable<OriginatedCharacter> source)
                 labelBuilder.Append(character);
             }
 
-            Match();
+            Match(character);
         }
 
         if (!isCommaMet)
-            throw new LexingException($"В команде btn после метки ожидалась запятая.", GetLexemeData());
+            throw new LexingException($"В команде btn после метки ожидалась запятая", GetLexemeData());
 
         // Собираем надпись
         string caption = ParseTextTillTermination();
@@ -212,11 +212,10 @@ public class UrqlLexer(IEnumerable<OriginatedCharacter> source)
             char character = Lookahead.Value.Character;
             switch (character)
             {
-                case char when char.IsLetter(character):
-                case char when char.IsDigit(character):
+                case char when char.IsLetterOrDigit(character):
                 case '_':
                     nameBuilder.Append(character);
-                    Match();
+                    Match(character);
                     continue;
 
                 default:
@@ -259,15 +258,16 @@ public class UrqlLexer(IEnumerable<OriginatedCharacter> source)
             {
                 case '"':
                     isTerminated = true;
-                    Match('"');
                     break;
 
                 default:
                     textBuilder.Append(character);
-                    Match();
+                    Match(character);
                     break;
             }
         }
+
+        Match('"');
 
         (string lexeme, Location location) = GetLexemeData();
         return new StringLiteralToken(textBuilder.ToString(), lexeme, location);
@@ -285,12 +285,12 @@ public class UrqlLexer(IEnumerable<OriginatedCharacter> source)
         switch (Lookahead?.Character)
         {
             case ' ' or '\t':
-                Match();
+                Match(Lookahead.Value.Character);
                 break;
 
             default:
                 if (Lookahead is not null)
-                    throw new LexingException($"После команды {commandName} ожидался пробел или табуляция.", GetLexemeData());
+                    throw new LexingException($"После команды {commandName} ожидался пробел или табуляция", GetLexemeData());
                 break;
         }
     }
@@ -312,7 +312,7 @@ public class UrqlLexer(IEnumerable<OriginatedCharacter> source)
 
                 default:
                     textBuilder.Append(character);
-                    Match();
+                    Match(character);
                     break;
             }
         }
@@ -331,7 +331,7 @@ public class UrqlLexer(IEnumerable<OriginatedCharacter> source)
             {
                 case char when char.IsDigit(character):
                     numberBuilder.Append(character);
-                    Match();
+                    Match(character);
                     break;
 
                 default:
@@ -344,7 +344,7 @@ public class UrqlLexer(IEnumerable<OriginatedCharacter> source)
         string numberString = numberBuilder.ToString();
         return decimal.TryParse(numberString, out decimal number)
             ? number
-            : throw new LexingException($"{numberString} не подходит как число.");
+            : throw new LexingException($"{numberString} не подходит как число", GetLexemeData());
     }
 
     private (string Lexeme, Location Location)? TryGetLexemeData()
@@ -364,13 +364,13 @@ public class UrqlLexer(IEnumerable<OriginatedCharacter> source)
     private (string Lexeme, Location Location) GetLexemeData()
         => TryGetLexemeData() ?? throw new InvalidOperationException("Лексема оказалось пустой!");
 
-    private void Match(char? expectedCharacter = null)
+    private void Match(char expectedCharacter)
     {
         if (Lookahead is null)
-            throw new InvalidOperationException($"Следующий символ ({nameof(Lookahead)}) оказался пустой!");
+            throw new LexingException($"Ожидался '{expectedCharacter}', а встретился конец строки", GetLexemeData());
 
-        if (expectedCharacter is not null && Lookahead.Value.Character != expectedCharacter)
-            throw new LexingException($"Следущий символ ожидался '{expectedCharacter}', а встретился '{Lookahead.Value.Character}'.");
+        if (Lookahead.Value.Character != expectedCharacter)
+            throw new LexingException($"Ожидался '{expectedCharacter}', а встретился '{Lookahead.Value.Character}'", GetLexemeData());
 
         _lexeme.Add(Lookahead.Value);
         MoveToNextCharacter();
