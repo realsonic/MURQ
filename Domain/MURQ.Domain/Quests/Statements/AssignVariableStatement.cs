@@ -2,7 +2,11 @@
 using MURQ.Domain.Games.Values;
 using MURQ.Domain.Quests.Expressions;
 
+using System.Diagnostics;
+
 namespace MURQ.Domain.Quests.Statements;
+
+[DebuggerDisplay("{VariableName,nq} = {Expression,nq}")]
 public class AssignVariableStatement : Statement
 {
     public required string VariableName { get; init; }

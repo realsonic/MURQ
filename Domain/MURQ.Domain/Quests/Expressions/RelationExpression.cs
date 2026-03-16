@@ -1,8 +1,11 @@
 ﻿using MURQ.Domain.Games;
 using MURQ.Domain.Games.Values;
 
+using System.Diagnostics;
+
 namespace MURQ.Domain.Quests.Expressions;
 
+[DebuggerDisplay("{LeftExpression} = {RightExpression}")]
 public class RelationExpression : Expression
 {
     public required Expression LeftExpression { get; init; }
