@@ -159,7 +159,7 @@ public class UrqPlayer(IQuestSource questSource, IUserInterface userInterface, I
     {
         MurqException murqException => murqException switch
         {
-            UrqlException => $"Ошибка при загрузке URQL: {exception.Message}",
+            UrqlException => $"Ошибка URQL: {exception.Message}",
             _ => exception.Message
         },
         _ => $"""

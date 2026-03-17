@@ -48,7 +48,7 @@ public class UrqlLexer(IEnumerable<OriginatedCharacter> source)
                     yield return ParseStatementJoin();
                     break;
 
-                default: throw new UnknownLexemeException(GetLexemeData());
+                default: throw new UnknownLexemeException((Lexeme: Lookahead.Value.Character.ToString(), Location: Lookahead.Value.Origin.GetLocation()));
             }
 
             _lexeme.Clear();
@@ -362,7 +362,7 @@ public class UrqlLexer(IEnumerable<OriginatedCharacter> source)
     }
 
     private (string Lexeme, Location Location) GetLexemeData()
-        => TryGetLexemeData() ?? throw new InvalidOperationException("Лексема оказалось пустой!");
+        => TryGetLexemeData() ?? throw new InvalidOperationException("Лексема оказалось пустой");
 
     private void Match(char expectedCharacter)
     {
