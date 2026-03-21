@@ -49,7 +49,7 @@ public static class CharacterEnumerableExtensions
             }
         }
 
-        // Проверяем, что двоеточие было найдено и после него есть текст
+        // Проверяем, что двоеточие было найдено
         label = isColonFound ? labelTextBuilder.ToString() : null;
         return isColonFound;
     }
