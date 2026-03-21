@@ -8,7 +8,6 @@ namespace MURQ.Domain.URQL.Interpretation;
 
 public class ExpressionCalculator(IEnumerable<OriginatedCharacter> sourceCharacters, IGameContext gameContext) : UrqlParser(new UrqlLexer(sourceCharacters).Scan())
 {
-
     public Value? Calculate()
     {
         MoveToNextTerminal();
