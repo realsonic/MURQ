@@ -3,7 +3,7 @@
 using MURQ.Application.Interfaces;
 using MURQ.Application.Services;
 using MURQ.Application.UrqLoaders;
-using MURQ.Application.UrqLoaders.UrqStrings;
+using MURQ.Domain.URQL.Substitutions;
 
 namespace MURQ.Application;
 public static class ServiceConfiguration
@@ -14,6 +14,6 @@ public static class ServiceConfiguration
 
     private static IServiceCollection AddUrqLoaders(this IServiceCollection services) => services
         .AddTransient<UrqLoader>()
-        .AddTransient<UrqStringLoader>()
-        .AddTransient<UrqStringLexer>();
+        .AddTransient<SubstitutionParser>()
+        .AddTransient<SubstitutionLexer>();
 }

@@ -1,4 +1,4 @@
-﻿using MURQ.URQL.Locations;
+﻿using MURQ.Domain.URQL.Locations;
 using MURQ.URQL.SyntaxTree.Expressions;
 
 namespace MURQ.URQL.SyntaxTree.Statements;

@@ -12,7 +12,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\Domain\MURQ.Domain\MURQ.Domain.csproj" />
-    <ProjectReference Include="..\MURQ.URQL\MURQ.URQL.csproj" />
   </ItemGroup>
 
 </Project>

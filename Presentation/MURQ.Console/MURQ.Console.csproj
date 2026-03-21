@@ -2,10 +2,10 @@
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFramework>net9.0</TargetFramework>
+    <TargetFramework>net10.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
-	<VersionPrefix>0.7.1</VersionPrefix>
+	<VersionPrefix>0.8.0</VersionPrefix>
 	<VersionSuffix>$([System.DateTime]::Now.toString(`yyyyMMdd`))</VersionSuffix>
   </PropertyGroup>
 
@@ -25,13 +25,12 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="9.0.4" />
-    <PackageReference Include="Microsoft.Extensions.Hosting" Version="9.0.4" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="10.0.4" />
+    <PackageReference Include="Microsoft.Extensions.Hosting" Version="10.0.4" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\..\Application\MURQ.Application\MURQ.Application.csproj" />
-    <ProjectReference Include="..\..\Application\MURQ.URQL\MURQ.URQL.csproj" />
     <ProjectReference Include="..\..\Domain\MURQ.Domain\MURQ.Domain.csproj" />
     <ProjectReference Include="..\..\Infrastructure\MURQ.Infrastructure\MURQ.Infrastructure.csproj" />
   </ItemGroup>

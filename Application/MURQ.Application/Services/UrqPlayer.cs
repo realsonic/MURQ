@@ -1,6 +1,10 @@
 ﻿using MURQ.Application.Interfaces;
+using MURQ.Common.Exceptions;
 using MURQ.Domain.Games;
 using MURQ.Domain.Quests;
+using MURQ.Domain.URQL;
+
+using System.Diagnostics;
 
 using static MURQ.Application.Interfaces.IUserInterface;
 
@@ -30,13 +34,16 @@ public class UrqPlayer(IQuestSource questSource, IUserInterface userInterface, I
 
     private async Task<Game> LoadQuestAndStartGame(CancellationToken cancellationToken)
     {
+        Stopwatch stopwatch = Stopwatch.StartNew();
         (Quest quest, string questName) = await questSource.GetQuestAsync(cancellationToken);
+        stopwatch.Stop();
 
         var game = new Game(quest);
         game.OnTextPrinted += Game_OnTextPrinted;
         game.OnScreenCleared += userInterface.ClearSceen;
+        game.OnUrqlError += Game_OnUrqlError;
 
-        PrintQuestName(questName);
+        PrintQuestInfo(questName, stopwatch.Elapsed);
 
         await game.StartAsync(cancellationToken);
 
@@ -49,6 +56,11 @@ public class UrqPlayer(IQuestSource questSource, IUserInterface userInterface, I
             userInterface.PrintLine(e.Text, e.ForegroundColor, e.BackgroundColor);
         else
             userInterface.Print(e.Text, e.ForegroundColor, e.BackgroundColor);
+    }
+
+    private void Game_OnUrqlError(object? sender, Game.OnErrorEventArgs e)
+    {
+        ReportException(e.Exception);
     }
 
     private async Task RunPlayCycle(CancellationToken cancellationToken)
@@ -81,23 +93,23 @@ public class UrqPlayer(IQuestSource questSource, IUserInterface userInterface, I
         string version = versionProvider.Version;
         userInterface.SetTitle($"MURQ.Console {version}");
         var versionWithPrefix = $"v.{version}";
-        
+
         // Обычная версия:
-        /*userInterface.PrintLine($"""
+        userInterface.PrintLine($"""
 
                 /\_/\
                ( o.o )
             |   >   < 
-             | /     \     {versionWithPrefix,10} 
+             | /     \     {versionWithPrefix,10}
              _(___ __ )_ _____ _____
             |     |  |  | ___ |     | 
             | | | |  |  |    -|  |  | 
             |_|_|_|_____|__|__|__  _| 
                                  |__|
 
-        """);*/
+        """);
 
-        // Новогодняя версия:
+        /*// Новогодняя версия:
         userInterface.PrintLine($"""           
 
                           *
@@ -112,12 +124,12 @@ public class UrqPlayer(IQuestSource questSource, IUserInterface userInterface, I
             |_|_|_|_____|__|__|__  _|
                                  |__|
 
-        """);
+        """);*/
     }
 
-    private void PrintQuestName(string? questName)
+    private void PrintQuestInfo(string? questName, TimeSpan loadDuration)
     {
-        userInterface.PrintLine($"{questName}");
+        userInterface.PrintLine($"{questName}, загружен за {loadDuration:mm\\:ss\\.fff}.");
         userInterface.PrintLine();
     }
 
@@ -141,7 +153,22 @@ public class UrqPlayer(IQuestSource questSource, IUserInterface userInterface, I
         userInterface.WaitAnyKey();
     }
 
-    private void ReportException(Exception ex) => userInterface.PrintException(ex);
+    private void ReportException(Exception ex) => userInterface.PrintError(ClassifyExceptionMessage(ex));
+
+    private static string ClassifyExceptionMessage(Exception exception) => exception switch
+    {
+        MurqException murqException => murqException switch
+        {
+            UrqlException => $"Ошибка URQL: {exception.Message}",
+            _ => exception.Message
+        },
+        _ => $"""
+            Непредвиденная ошибка: {exception.Message}.
+            
+            Сообщите разработчикам детали:
+            {exception}
+            """
+    };
 
     private Game? game;
 }

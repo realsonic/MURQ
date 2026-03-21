@@ -1,4 +1,4 @@
-﻿using MURQ.URQL.Locations;
+﻿using MURQ.Domain.URQL.Locations;
 
 namespace MURQ.URQL.SyntaxTree.Statements;
 public record PrintStatementSto(string Text, bool IsNewLineAtEnd, Location Location) : StatementSto

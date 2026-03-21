@@ -1,29 +1,65 @@
-﻿using System.Collections.Immutable;
+﻿using MURQ.Domain.Quests.QuestLines;
 
-using MURQ.Common.Exceptions;
-using MURQ.Domain.Quests.Statements;
+using System.Diagnostics.CodeAnalysis;
 
 namespace MURQ.Domain.Quests;
 
-public class Quest(IEnumerable<Statement> statements)
+public class Quest
 {
-    public IImmutableList<Statement> Statements { get; } = statements.ToImmutableList();
-
-    public Statement? StartingStatement => Statements.Count > 0 ? Statements[0] : null;
-
-    public Statement? GetNextStatement(Statement? currentStatement)
+    public Quest(IEnumerable<QuestLine> lines)
     {
-        if (currentStatement is null) return null;
-
-        int currentStatementIndex = Statements.IndexOf(currentStatement);
-
-        if (currentStatementIndex == -1)
-            throw new MurqException($"Инструкция {currentStatement} не принадлежит этому квесту.");
-
-        int nextStatementIndex = currentStatementIndex + 1;
-
-        return nextStatementIndex > MaxStatementIndex ? null : Statements[nextStatementIndex];
+        Lines = [.. lines];
+        _currentLineIndex = Lines.Count > 0 ? 0 : null;
+        CacheLabels();
     }
 
-    private int MaxStatementIndex => Statements.Count - 1;
+    public IReadOnlyList<QuestLine> Lines { get; }
+
+    public QuestLine? CurrentLine => _currentLineIndex is not null ? Lines[_currentLineIndex.Value] : null;
+    public void ClearCurrentLine() => _currentLineIndex = null;
+
+    public void NextLine()
+    {
+        if (_currentLineIndex is null)
+            return;
+
+        if (_currentLineIndex == Lines.Count - 1)
+        {
+            _currentLineIndex = null;
+            return;
+        }
+
+        _currentLineIndex++;
+    }
+
+    public bool TryGoToLabel(string targetLabel, [NotNullWhen(true)] out string? resultLabel)
+    {
+        if (_labelDictionary.TryGetValue(targetLabel, out int index))
+        {
+            if (Lines[index] is LabelLine labelLine)
+            {
+                _currentLineIndex = index;
+
+                resultLabel = labelLine.Label;
+                return true;
+            }
+        }
+
+        resultLabel = null;
+        return false;
+    }
+
+    private void CacheLabels()
+    {
+        for (int index = 0; index < Lines.Count; index++)
+        {
+            if (Lines[index] is LabelLine labelLine)
+            {
+                _labelDictionary.TryAdd(labelLine.Label, index);
+            }
+        }
+    }
+
+    private readonly Dictionary<string, int> _labelDictionary = new(StringComparer.InvariantCultureIgnoreCase);
+    private int? _currentLineIndex;
 }

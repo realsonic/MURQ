@@ -1,7 +1,6 @@
 ﻿using MURQ.Application.Interfaces;
 using MURQ.Common.Exceptions;
 using MURQ.Domain.Games;
-using MURQ.URQL;
 
 using System.Text;
 
@@ -60,11 +59,11 @@ public class ConsoleUserInterface : IUserInterface, IDisposable
     public void PrintHighlighted(string? text) => Print(text, InterfaceColor.Black, InterfaceColor.DarkYellow);
 
     /// <inheritdoc/>
-    public void PrintException(Exception exception)
+    public void PrintError(string message)
     {
         Console.Beep();
         PrintLine();
-        PrintLine($" [ОШИБКА] {ClassifyExceptionMessage(exception)} ", InterfaceColor.Black, InterfaceColor.Red);
+        PrintLine($" [ОШИБКА] {message} ", InterfaceColor.Black, InterfaceColor.Red);
         PrintLine();
     }
 
@@ -143,21 +142,6 @@ public class ConsoleUserInterface : IUserInterface, IDisposable
             }
         }
     }
-
-    private static string ClassifyExceptionMessage(Exception exception) => exception switch
-    {
-        MurqException murqException => murqException switch
-        {
-            UrqlException => $"Ошибка при загрузке URQL: {exception.Message}",
-            _ => exception.Message
-        },
-        _ => $"""
-            Непредвиденная ошибка: {exception.Message}.
-            
-            Сообщите разработчикам детали:
-            {exception}
-            """
-    };
 
     public void Dispose()
     {

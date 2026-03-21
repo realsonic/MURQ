@@ -401,3 +401,4 @@ FodyWeavers.xsd
 /.vscode
 **/launchSettings.json
 /Presentation/MURQ.Console/Quests/*.qst
+/Utils/MURQ.URQL.Processor/Quests/*.qst

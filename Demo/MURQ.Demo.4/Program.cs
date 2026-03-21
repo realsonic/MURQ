@@ -1,7 +1,7 @@
 ﻿using MURQ.Application.UrqLoaders;
-using MURQ.Application.UrqLoaders.UrqStrings;
 using MURQ.Domain.Games;
 using MURQ.Domain.Quests;
+using MURQ.Domain.URQL.Substitutions;
 
 using System.Text;
 
@@ -11,7 +11,7 @@ Console.Title = "Мурка. Демо 4: poiske.qst";
 Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
 
 string questSource = await File.ReadAllTextAsync(@"poiske.qst", Encoding.GetEncoding("Windows-1251"));
-UrqLoader urqLoader = new(new UrqStringLoader(new UrqStringLexer()));
+UrqLoader urqLoader = new(new SubstitutionParser(new SubstitutionLexer()));
 Quest quest = urqLoader.LoadQuest(questSource);
 
 var game = new Game(quest);

@@ -2,7 +2,11 @@
 using MURQ.Domain.Games.Values;
 using MURQ.Domain.Games.Variables;
 using MURQ.Domain.Quests;
-using MURQ.Domain.Quests.Statements;
+using MURQ.Domain.Quests.QuestLines;
+using MURQ.Domain.URQL;
+using MURQ.Domain.URQL.Interpretation;
+using MURQ.Domain.URQL.Lexing;
+using MURQ.Domain.URQL.Locations;
 
 using System.Text;
 using System.Text.RegularExpressions;
@@ -14,6 +18,8 @@ public class Game(Quest quest) : IGameContext
     public event EventHandler<OnTextPrintedEventArgs>? OnTextPrinted;
 
     public event Action? OnScreenCleared;
+
+    public event EventHandler<OnErrorEventArgs>? OnUrqlError;
 
     public Quest Quest { get; } = quest;
 
@@ -48,10 +54,48 @@ public class Game(Quest quest) : IGameContext
     {
         if (IsStarted) throw new MurqException("Игра уже запущена, второй раз запустить нельзя.");
 
-        SeedSystemVariables();
+        SeedSystemVariables(); //todo заменить не фоллбеки
         ClearCurrentView();
-        SetNextStatementToStarting();
-        await RunStatementsAsync(cancellationToken);
+        await InterpretQuestLinesAsync(cancellationToken);
+    }
+
+    private async Task InterpretQuestLinesAsync(CancellationToken cancellationToken)
+    {
+        gameState = GameState.RunningStatements;
+
+        while (gameState == GameState.RunningStatements && !cancellationToken.IsCancellationRequested)
+        {
+            await InterpretCurrentQuestLineAsync(cancellationToken);
+            Quest.NextLine();
+        }
+    }
+
+    private async Task InterpretCurrentQuestLineAsync(CancellationToken cancellationToken)
+    {
+        if (Quest.CurrentLine is null)
+        {
+            gameState = GameState.WaitingUserInput;
+            return;
+        }
+
+        QuestLine questLine = Quest.CurrentLine;
+        if (questLine is not CodeLine codeLine)
+        {
+            return;
+        }
+
+        IEnumerable<OriginatedCharacter> code = codeLine.ToCode(this);
+        UrqlLexer lexer = new(code);
+        UrqlInterpreter interpreter = new(lexer.Scan(), this);
+
+        try
+        {
+            await interpreter.InterpretStatementLineAsync(cancellationToken);
+        }
+        catch (UrqlException ex)
+        {
+            ReportCodeLineError(codeLine, ex);
+        }
     }
 
     /// <inheritdoc/>
@@ -69,14 +113,18 @@ public class Game(Quest quest) : IGameContext
     }
 
     /// <inheritdoc/>
-    void IGameContext.AddButton(string caption, LabelStatement? labelStatement) => currentScreenButtons.Add(new Button
+    void IGameContext.AddButton(string caption, string label) => currentScreenButtons.Add(new Button
     {
         Caption = caption,
-        OnButtonPressedAsync = (cancellationToken) => JumpByButtonAsync(labelStatement, cancellationToken)
+        OnButtonPressedAsync = (cancellationToken) => JumpByButtonAsync(label, cancellationToken)
     });
 
     /// <inheritdoc/>
-    void IGameContext.EndLocation() => SetModeWaitingUserInput();
+    void IGameContext.EndLocation()
+    {
+        Quest.ClearCurrentLine();
+        gameState = GameState.WaitingUserInput;
+    }
 
     /// <inheritdoc/>
     void IGameContext.ClearScreen()
@@ -94,7 +142,7 @@ public class Game(Quest quest) : IGameContext
 
     public Variable? GetVariable(string variableName) => GetPseudoVariable(variableName) ?? GetTrueVariable(variableName);
 
-    void IGameContext.Goto(LabelStatement? labelStatement) => JumpByGoto(labelStatement);
+    void IGameContext.Goto(string label) => JumpByGoto(label);
 
     void IGameContext.Perkill()
     {
@@ -102,22 +150,26 @@ public class Game(Quest quest) : IGameContext
         SeedSystemVariables();
     }
 
-    private async Task JumpByButtonAsync(LabelStatement? labelStatement, CancellationToken cancellationToken)
+    private async Task JumpByButtonAsync(string label, CancellationToken cancellationToken)
     {
-        if (labelStatement is null) return;
+        if (string.IsNullOrWhiteSpace(label))
+            return;
 
         ClearCurrentView();
-        SetCurrentLabel(labelStatement);
-        UpdateCurrentLocationName(labelStatement.Label);
 
-        await RunStatementsAsync(cancellationToken);
+        if (Quest.TryGoToLabel(label, out string? resultLabel))
+        {
+            ChangeCurrentLocationName(resultLabel);
+            await InterpretQuestLinesAsync(cancellationToken);
+        }
     }
 
-    private void JumpByGoto(LabelStatement? labelStatement)
+    private void JumpByGoto(string label)
     {
-        if (labelStatement is null) return;
+        if (string.IsNullOrWhiteSpace(label))
+            return;
 
-        SetCurrentLabel(labelStatement);
+        Quest.TryGoToLabel(label, out _);
     }
 
     private void ClearCurrentView()
@@ -126,39 +178,10 @@ public class Game(Quest quest) : IGameContext
         currentScreenButtons.Clear();
     }
 
-    private void UpdateCurrentLocationName(string name)
+    private void ChangeCurrentLocationName(string name)
     {
         previousLocationName = currentLocationName;
         currentLocationName = name;
-    }
-
-    private async Task RunStatementsAsync(CancellationToken cancellationToken)
-    {
-        SetModeRunningStatements();
-        while (IsRunningStatements && !cancellationToken.IsCancellationRequested)
-        {
-            await RunCurrentStatementAsync(cancellationToken);
-            PromoteNextStatement();
-        }
-    }
-
-    private async Task RunCurrentStatementAsync(CancellationToken cancellationToken)
-    {
-        if (currentStatement is null)
-        {
-            SetModeWaitingUserInput();
-            return;
-        }
-
-        await currentStatement.RunAsync(this, cancellationToken);
-    }
-
-    private void SetCurrentLabel(LabelStatement? labelStatement)
-    {
-        if (labelStatement is not null)
-        {
-            SetCurrentStatement(labelStatement);
-        }
     }
 
     private void SeedSystemVariables()
@@ -214,16 +237,6 @@ public class Game(Quest quest) : IGameContext
         return (ForegroundColor: (InterfaceColor)foreground, BackgroundColor: (InterfaceColor)background);
     }
 
-    private void PromoteNextStatement() => currentStatement = Quest.GetNextStatement(currentStatement);
-
-    private void SetNextStatementToStarting() => currentStatement = Quest.StartingStatement;
-    private void SetModeRunningStatements() => gameState = GameState.RunningStatements;
-    private void SetModeWaitingUserInput() => gameState = GameState.WaitingUserInput;
-    private void SetCurrentStatement(Statement statement) => currentStatement = statement;
-
-    private bool IsStarted => gameState is not GameState.InitialState;
-    private bool IsRunningStatements => gameState == GameState.RunningStatements;
-
     private Variable GetRandom(string variableName)
     {
         string rndLimitString = rndRegex.Match(variableName).Groups["number"].Value;
@@ -238,6 +251,13 @@ public class Game(Quest quest) : IGameContext
         int randomIntNumber = random.Next(1, rndLimit + 1);
         return new Variable(variableName, new NumberValue(randomIntNumber));
     }
+
+    private void ReportCodeLineError(CodeLine codeLine, UrqlException ex)
+    {
+        OnUrqlError?.Invoke(this, new OnErrorEventArgs(ex, codeLine.Location));
+    }
+
+    private bool IsStarted => gameState is not GameState.InitialState;
 
     public class CurrentLocationView
     {
@@ -255,7 +275,6 @@ public class Game(Quest quest) : IGameContext
     }
 
     private GameState gameState = GameState.InitialState;
-    private Statement? currentStatement;
     private readonly StringBuilder currentLocationText = new();
     private readonly List<Button> currentScreenButtons = [];
     private string? currentLocationName;
@@ -275,5 +294,11 @@ public class Game(Quest quest) : IGameContext
         public bool IsNewLineAtEnd { get; } = isNewLineAtEnd;
         public InterfaceColor ForegroundColor { get; } = foregroundColor;
         public InterfaceColor BackgroundColor { get; } = backgroundColor;
+    }
+
+    public class OnErrorEventArgs(Exception exception, Location location) : EventArgs
+    {
+        public Exception Exception { get; } = exception;
+        public Location Location { get; } = location;
     }
 }
