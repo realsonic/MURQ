@@ -161,7 +161,7 @@ public class UrqlInterpreter(IEnumerable<Token> tokens, IGameContext gameContext
             // пропускаем then
             await InterpretJoinedStatementsAdaptedAsync(InterpretationMode.ParseNotRun, cancellationToken);
 
-            //todo выполняем else
+            // выполняем else
             if (Lookahead is ElseToken)
             {
                 Match<ElseToken>();
