@@ -86,7 +86,7 @@ public class Game(Quest quest) : IGameContext
 
         IEnumerable<OriginatedCharacter> code = codeLine.ToCode(this);
         UrqlLexer lexer = new(code);
-        UrqlInterpreter interpreter = new(lexer.Scan(), this);
+        UrqlInterpreter interpreter = new(lexer, this);
 
         try
         {

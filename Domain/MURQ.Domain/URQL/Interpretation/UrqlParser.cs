@@ -1,13 +1,14 @@
 ﻿using MURQ.Domain.Quests.Expressions;
 using MURQ.Domain.Quests.Statements;
 using MURQ.Domain.URQL.Interpretation.Exceptions;
+using MURQ.Domain.URQL.Lexing;
 using MURQ.Domain.URQL.Tokens;
 using MURQ.Domain.URQL.Tokens.Statements;
 using MURQ.Domain.URQL.Tokens.Statements.If;
 
 namespace MURQ.Domain.URQL.Interpretation;
 
-public class UrqlParser(IEnumerable<Token> tokens)
+public class UrqlParser(UrqlLexer urqlLexer)
 {
     #region Statements
 
@@ -154,6 +155,18 @@ public class UrqlParser(IEnumerable<Token> tokens)
 
     #endregion
 
+    protected void EnterThen()
+    {
+        _thenCount++;
+        urqlLexer.IsElseOpenTextTerminator = _thenCount > 0;
+    }
+
+    protected void ExitThen()
+    {
+        _thenCount--;
+        urqlLexer.IsElseOpenTextTerminator = _thenCount > 0;
+    }
+
     protected TToken Match<TToken>(string? context = null) where TToken : Token
     {
         if (Lookahead is TToken token)
@@ -168,7 +181,13 @@ public class UrqlParser(IEnumerable<Token> tokens)
 
     protected Token? Lookahead { get; private set; }
 
-    private readonly IEnumerator<Token> _tokenEnumerator = tokens.GetEnumerator();
+    private readonly IEnumerator<Token> _tokenEnumerator = urqlLexer.Scan().GetEnumerator();
+
+    /// <summary>
+    /// Счётчик вложенностей <c>then</c>.
+    /// Служит для определения <c>else</c> как терминатора открытого текста.
+    /// </summary>
+    private int _thenCount = 0;
 }
 
 public static class TerminalStartExtensions

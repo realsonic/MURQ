@@ -132,10 +132,11 @@ GameContextEmulation gameContextEmulation = new();
 gameContextEmulation.OnCommandExecuted += command => Console.Write(command);
 stopwatch.Restart();
 int lineNo = 0;
-foreach (List<Token> tokenLine in tokenLines)
+foreach (List<OriginatedCharacter> urqlLine in urqlLines)
 {
     Console.Write($"[{++lineNo}] ");
-    UrqlInterpreter urqlInterpreter = new(tokenLine, gameContextEmulation);
+    UrqlLexer urqlLexer = new(urqlLine);
+    UrqlInterpreter urqlInterpreter = new(urqlLexer, gameContextEmulation);
     await urqlInterpreter.InterpretStatementLineAsync(default);
     Console.WriteLine();
 }

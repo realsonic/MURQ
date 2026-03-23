@@ -3,13 +3,14 @@ using MURQ.Domain.Games.Values;
 using MURQ.Domain.Quests.Expressions;
 using MURQ.Domain.Quests.Statements;
 using MURQ.Domain.URQL.Interpretation.Exceptions;
+using MURQ.Domain.URQL.Lexing;
 using MURQ.Domain.URQL.Tokens;
 using MURQ.Domain.URQL.Tokens.Statements;
 using MURQ.Domain.URQL.Tokens.Statements.If;
 
 namespace MURQ.Domain.URQL.Interpretation;
 
-public class UrqlInterpreter(IEnumerable<Token> tokens, IGameContext gameContext) : UrqlParser(tokens)
+public class UrqlInterpreter(UrqlLexer urqlLexer, IGameContext gameContext) : UrqlParser(urqlLexer)
 {
     /// <summary>
     /// Грамматика:
@@ -79,7 +80,7 @@ public class UrqlInterpreter(IEnumerable<Token> tokens, IGameContext gameContext
             case Token when Lookahead.IsStartOfIfStatement():
                 await InterpretIfThenStatement(interpretationMode, cancellationToken);
                 break;
-            
+
             case Token when Lookahead.IsStartOfAssignVariableStatement():
                 await InterpretAssignVariableStatementAsync(interpretationMode, cancellationToken);
                 break;
@@ -140,33 +141,25 @@ public class UrqlInterpreter(IEnumerable<Token> tokens, IGameContext gameContext
         RelationExpression relationExpression = ParseRelationExpression();
         Value relationResult = relationExpression.Calculate(gameContext);
 
-        Match<ThenToken>("в ветвлении if-then");
-
         bool isConditionTrue = relationResult.AsDecimal != 0;
 
-        if (isConditionTrue)
+        // then
+        EnterThen();
+        try
         {
-            // выполняем then
-            await InterpretJoinedStatementsAdaptedAsync(interpretationMode, cancellationToken);
-
-            // пропускаем else
-            if (Lookahead is ElseToken)
-            {
-                Match<ElseToken>();
-                await InterpretJoinedStatementsAdaptedAsync(InterpretationMode.ParseNotRun, cancellationToken);
-            }
+            Match<ThenToken>("в ветвлении if-then");
+            await InterpretJoinedStatementsAdaptedAsync(isConditionTrue ? interpretationMode : InterpretationMode.ParseNotRun, cancellationToken);
         }
-        else
+        finally
         {
-            // пропускаем then
-            await InterpretJoinedStatementsAdaptedAsync(InterpretationMode.ParseNotRun, cancellationToken);
+            ExitThen();
+        }
 
-            // выполняем else
-            if (Lookahead is ElseToken)
-            {
-                Match<ElseToken>();
-                await InterpretJoinedStatementsAdaptedAsync(interpretationMode, cancellationToken);
-            }
+        // else
+        if (Lookahead is ElseToken)
+        {
+            Match<ElseToken>();
+            await InterpretJoinedStatementsAdaptedAsync(isConditionTrue ? InterpretationMode.ParseNotRun : interpretationMode, cancellationToken);
         }
     }
 
