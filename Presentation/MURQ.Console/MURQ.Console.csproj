@@ -6,7 +6,8 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
 	<VersionPrefix>0.8.0</VersionPrefix>
-	<VersionSuffix>$([System.DateTime]::Now.toString(`yyyyMMdd`))</VersionSuffix>
+    <VersionSuffix></VersionSuffix>
+	<SourceRevisionId>$([System.DateTime]::Now.ToString("yyMMdd.HHmm"))</SourceRevisionId>
   </PropertyGroup>
 
   <ItemGroup>

@@ -93,6 +93,11 @@ public class UrqPlayer(IQuestSource questSource, IUserInterface userInterface, I
         string version = versionProvider.Version;
         userInterface.SetTitle($"MURQ.Console {version}");
         var versionWithPrefix = $"v.{version}";
+        var versionSuffix = versionProvider.VersionSuffix;
+        if (!string.IsNullOrWhiteSpace(versionSuffix))
+        {
+            versionSuffix = $"-{versionSuffix}";
+        }
 
         // Обычная версия:
         userInterface.PrintLine($"""
@@ -100,7 +105,7 @@ public class UrqPlayer(IQuestSource questSource, IUserInterface userInterface, I
                 /\_/\
                ( o.o )
             |   >   < 
-             | /     \     {versionWithPrefix,10}
+             | /     \     {versionWithPrefix,10}{versionSuffix}
              _(___ __ )_ _____ _____
             |     |  |  | ___ |     | 
             | | | |  |  |    -|  |  | 
@@ -117,7 +122,7 @@ public class UrqPlayer(IQuestSource questSource, IUserInterface userInterface, I
                 /\_/\   //' \
                ( o.o ) /   ' \
             |   >   <  //   `\
-             | /     \/    {versionWithPrefix,8}
+             | /     \/    {versionWithPrefix,8}{versionSuffix}
              _(___ __ )_'_____\_____
             |     |  |  | ___ |     |
             | | | |  |  |    -|  |  |
