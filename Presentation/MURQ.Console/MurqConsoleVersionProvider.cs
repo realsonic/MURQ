@@ -6,29 +6,17 @@ namespace MURQ.Console;
 
 internal class MurqConsoleVersionProvider : IVersionProvider
 {
-    public string Version
-    {
-        get
-        {
-            Assembly assembly = Assembly.GetExecutingAssembly();
-            return assembly.GetName().Version?.ToString(3)
-                ?? assembly.GetCustomAttribute<AssemblyFileVersionAttribute>()?.Version
-                ?? GetInformationalVersion(assembly)
-                ?? "(версия не найдена)";
-        }
-    }
-
-    private static string? GetInformationalVersion(Assembly assembly)
-        => assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion;
+    public string VersionPrefix
+        => ExecutingAssembly.GetName().Version?.ToString(3)
+        ?? ExecutingAssembly.GetCustomAttribute<AssemblyFileVersionAttribute>()?.Version
+        ?? "(версия не найдена)";
 
     public string VersionSuffix
     {
         get
         {
-            Assembly assembly = Assembly.GetExecutingAssembly();
-            string? informationalVersion = GetInformationalVersion(assembly);
-            if (string.IsNullOrEmpty(informationalVersion))
-                return "(версия не найдена)";
+            string informationalVersion = ExecutingAssembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion
+                ?? "(версия не найдена)";
 
             // Разделяем основную версию и суффикс
             var parts = informationalVersion.Split('-', 2);
@@ -37,4 +25,6 @@ internal class MurqConsoleVersionProvider : IVersionProvider
             return versionSuffix;
         }
     }
+
+    private static Assembly ExecutingAssembly => Assembly.GetExecutingAssembly();
 }
