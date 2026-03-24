@@ -11,6 +11,19 @@ namespace MURQ.Domain.URQL.Lexing;
 
 public class UrqlLexer(IEnumerable<OriginatedCharacter> source)
 {
+    /// <summary>
+    /// Является ли <c>else</c> терминатором для открытого текста.
+    /// </summary>
+    /// <remarks>
+    ///     Примеры открытого текста:
+    ///     <list type="bullet">
+    ///         <item><c>pln Текст</c></item>
+    ///         <item><c>btn Метка,Надпись</c></item>
+    ///         <item><c>goto Метка</c></item>
+    ///     </list>
+    /// </remarks>
+    public bool IsElseOpenTextTerminator { get; set; } = false;
+
     public IEnumerable<Token> Scan()
     {
         MoveToNextCharacter();
@@ -52,6 +65,12 @@ public class UrqlLexer(IEnumerable<OriginatedCharacter> source)
             }
 
             _lexeme.Clear();
+
+            while (_postponedTokens.Count > 0)
+            {
+                Token token = _postponedTokens.Dequeue();
+                yield return token;
+            }
         }
 
         if (_lexeme.Count > 0)
@@ -308,7 +327,32 @@ public class UrqlLexer(IEnumerable<OriginatedCharacter> source)
                     isTerminated = true;
                     break;
 
-                // todo добавить else как терминатор, если мы внутри if - или(!) в парсере
+                // else как терминатор
+                case ' ' or '\t' when IsElseOpenTextTerminator && textBuilder.Length >= 5 && textBuilder[^5] is ' ' or '\t':
+                    string lastChars = textBuilder.ToString(textBuilder.Length - 4, 4); // пробел впереди уже проверили
+                    if (lastChars.Equals("else", StringComparison.InvariantCultureIgnoreCase))
+                    {
+                        // вырезаем else как терминатор
+                        
+                        textBuilder.Remove(textBuilder.Length - 5, 5); // убираем с пробелом впереди
+
+                        List<OriginatedCharacter> elseTail = _lexeme.GetRange(_lexeme.Count - 4, 4); // берём без пробела впереди
+                        Location elseLocation = Location
+                            .StartAt(elseTail.First().Origin.GetLocation().Start)
+                            .EndAt(elseTail.Last().Origin.GetLocation().End);
+                        _postponedTokens.Enqueue(new ElseToken(elseTail.ToPlainString(), elseLocation));
+
+                        _lexeme.RemoveRange(_lexeme.Count - 5, 5); // убираем с пробелом впереди
+
+                        isTerminated = true;
+                    }
+                    else
+                    {
+                        // поглощаем в текст
+                        textBuilder.Append(character);
+                        Match(character);
+                    }
+                    break;
 
                 default:
                     textBuilder.Append(character);
@@ -382,4 +426,5 @@ public class UrqlLexer(IEnumerable<OriginatedCharacter> source)
 
     private readonly List<OriginatedCharacter> _lexeme = [];
     private readonly IEnumerator<OriginatedCharacter> _characterEnumerator = source.GetEnumerator();
+    private readonly Queue<Token> _postponedTokens = [];
 }

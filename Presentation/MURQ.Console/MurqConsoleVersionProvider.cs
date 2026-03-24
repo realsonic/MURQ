@@ -6,14 +6,25 @@ namespace MURQ.Console;
 
 internal class MurqConsoleVersionProvider : IVersionProvider
 {
-    public string Version => GetVersion();
+    public string VersionPrefix
+        => ExecutingAssembly.GetName().Version?.ToString(3)
+        ?? ExecutingAssembly.GetCustomAttribute<AssemblyFileVersionAttribute>()?.Version
+        ?? "(версия не найдена)";
 
-    private static string GetVersion()
+    public string VersionSuffix
     {
-        Assembly assembly = Assembly.GetExecutingAssembly();
-        return assembly.GetName().Version?.ToString(3)
-            ?? assembly.GetCustomAttribute<AssemblyFileVersionAttribute>()?.Version
-            ?? assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion
-            ?? "(версия не найдена)";
+        get
+        {
+            string informationalVersion = ExecutingAssembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion
+                ?? "(версия не найдена)";
+
+            // Разделяем основную версию и суффикс
+            var parts = informationalVersion.Split('-', 2);
+            string versionSuffix = parts.Length > 1 ? parts[1] : string.Empty;
+
+            return versionSuffix;
+        }
     }
+
+    private static Assembly ExecutingAssembly => Assembly.GetExecutingAssembly();
 }
