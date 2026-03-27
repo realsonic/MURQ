@@ -31,9 +31,9 @@ jobs:
 
     - name: Publish executable
       run: |
-        dotnet publish Presentation\MURQ.Console\MURQ.Console.csproj --os win --configuration Debug --self-contained true -p:PublishReadyToRun=true -p:PublishSingleFile=true -p:PublishTrimmed=true -p:EnableCompressionInSingleFile=true -p:PublishAot=true -o ./publish-win `
-        && dotnet publish Presentation\MURQ.Console\MURQ.Console.csproj --os linux --configuration Debug --self-contained true -p:PublishReadyToRun=true -p:PublishSingleFile=true -p:PublishTrimmed=true -p:EnableCompressionInSingleFile=true -o ./publish-linux `
-        && dotnet publish Presentation\MURQ.Console\MURQ.Console.csproj --os osx --configuration Debug --self-contained true -p:PublishReadyToRun=true -p:PublishSingleFile=true -p:PublishTrimmed=true -p:EnableCompressionInSingleFile=true -o ./publish-osx
+        dotnet publish Presentation\MURQ.Console\MURQ.Console.csproj --os win --configuration Debug --self-contained true -p:PublishAot=true -o ./publish-win `
+        && dotnet publish Presentation\MURQ.Console\MURQ.Console.csproj --os linux --configuration Debug --self-contained true -p:StripSymbols=true -o ./publish-linux `
+        && dotnet publish Presentation\MURQ.Console\MURQ.Console.csproj --os osx --configuration Debug --self-contained true -p:StripSymbols=true -o ./publish-osx
 
     - name: Upload artifact - win
       uses: actions/upload-artifact@v4
