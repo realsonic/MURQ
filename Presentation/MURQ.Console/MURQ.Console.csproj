@@ -5,9 +5,19 @@
     <TargetFramework>net10.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+
+    <!-- Версия -->
 	<VersionPrefix>0.8.0</VersionPrefix>
     <VersionSuffix></VersionSuffix>
 	<SourceRevisionId>$([System.DateTime]::Now.ToString("yyMMdd.HHmm"))</SourceRevisionId>
+
+    <!-- Уменьшение размера -->
+    <PublishTrimmed>true</PublishTrimmed>
+	<PublishSingleFile>true</PublishSingleFile>
+    <EnableCompressionInSingleFile>true</EnableCompressionInSingleFile>
+    <UseSystemResourceKeys>true</UseSystemResourceKeys>
+    <InvariantGlobalization>true</InvariantGlobalization>
+    <PublishLzmaCompressed>true</PublishLzmaCompressed>
   </PropertyGroup>
 
   <ItemGroup>
@@ -28,6 +38,7 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="10.0.4" />
     <PackageReference Include="Microsoft.Extensions.Hosting" Version="10.0.4" />
+    <PackageReference Include="PublishAotCompressed" Version="1.0.5" />
   </ItemGroup>
 
   <ItemGroup>
