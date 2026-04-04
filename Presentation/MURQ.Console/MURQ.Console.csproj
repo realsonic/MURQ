@@ -7,7 +7,7 @@
     <Nullable>enable</Nullable>
 
     <!-- Версия -->
-	<VersionPrefix>0.8.0</VersionPrefix>
+	<VersionPrefix>0.8.1</VersionPrefix>
     <VersionSuffix></VersionSuffix>
 	<SourceRevisionId>$([System.DateTime]::Now.ToString("yyMMdd.HHmm"))</SourceRevisionId>
 

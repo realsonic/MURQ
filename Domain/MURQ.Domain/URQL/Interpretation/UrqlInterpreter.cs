@@ -41,10 +41,16 @@ public class UrqlInterpreter(UrqlLexer urqlLexer, IGameContext gameContext) : Ur
     /// joinedStatementsAdapted = statement, joinedStatementsRest;
     /// </code>
     /// </summary>
-    private async Task InterpretJoinedStatementsAdaptedAsync(InterpretationMode interpretationMode, CancellationToken cancellationToken)
+    private async Task<InterpretationResult> InterpretJoinedStatementsAdaptedAsync(InterpretationMode interpretationMode, CancellationToken cancellationToken)
     {
-        await InterpretStatementAsync(interpretationMode, cancellationToken);
-        await InterpretJoinedStatementsRestAsync(interpretationMode, cancellationToken);
+        InterpretationResult interpretationResult = await InterpretStatementAsync(interpretationMode, cancellationToken);
+        if (interpretationResult is InterpretationResult.ImmediateStop)
+        {
+            // т.к. нужно немедленно остановиться, то остаток кода мы только парсим, но не выполняем
+            interpretationMode = InterpretationMode.JustParse;
+        }
+
+        return await InterpretJoinedStatementsRestAsync(interpretationMode, cancellationToken);
     }
 
     /// <summary>
@@ -53,17 +59,24 @@ public class UrqlInterpreter(UrqlLexer urqlLexer, IGameContext gameContext) : Ur
     /// joinedStatementsRest = [? & ?, statement, joinedStatementsRest];
     /// </code>
     /// </summary>
-    private async Task InterpretJoinedStatementsRestAsync(InterpretationMode interpretationMode, CancellationToken cancellationToken)
+    private async Task<InterpretationResult> InterpretJoinedStatementsRestAsync(InterpretationMode interpretationMode, CancellationToken cancellationToken)
     {
         if (Lookahead is StatementJoinToken) // 2ая ветка
         {
             Match<StatementJoinToken>();
-            await InterpretStatementAsync(interpretationMode, cancellationToken);
-            await InterpretJoinedStatementsRestAsync(interpretationMode, cancellationToken);
+
+            InterpretationResult interpretationResult = await InterpretStatementAsync(interpretationMode, cancellationToken);
+            if (interpretationResult is InterpretationResult.ImmediateStop)
+            {
+                // т.к. нужно немедленно остановиться, то остаток кода мы только парсим, но не выполняем
+                interpretationMode = InterpretationMode.JustParse;
+            }
+
+            return await InterpretJoinedStatementsRestAsync(interpretationMode, cancellationToken);
         }
         else
         {
-            return; // ϵ-продукция
+            return InterpretationResult.Normal; // ϵ-продукция
         }
     }
 
@@ -73,52 +86,21 @@ public class UrqlInterpreter(UrqlLexer urqlLexer, IGameContext gameContext) : Ur
     /// statement = assignVariableStatement | ifStatement | ? Print ? | ? Button ? | ? End ? | ? ClearScreen ? | ? Goto ? | ? Perkill ? | ? Pause ?;
     /// </code>
     /// </summary>
-    private async Task InterpretStatementAsync(InterpretationMode interpretationMode, CancellationToken cancellationToken)
+    private async Task<InterpretationResult> InterpretStatementAsync(InterpretationMode interpretationMode, CancellationToken cancellationToken) => Lookahead switch
     {
-        switch (Lookahead)
-        {
-            case Token when Lookahead.IsStartOfIfStatement():
-                await InterpretIfThenStatement(interpretationMode, cancellationToken);
-                break;
+        Token when Lookahead.IsStartOfIfStatement() => await InterpretIfThenStatement(interpretationMode, cancellationToken),
+        Token when Lookahead.IsStartOfAssignVariableStatement() => await InterpretAssignVariableStatementAsync(interpretationMode, cancellationToken),
+        PrintToken => await InterpretPrintStatementAsync(interpretationMode, cancellationToken),
+        ButtonToken => await InterpretButtonStatementAsync(interpretationMode, cancellationToken),
+        EndToken => await InterpretEndStatementAsync(interpretationMode, cancellationToken),
+        ClearScreenToken => await InterpretClearScreenStatementAdync(interpretationMode, cancellationToken),
+        GotoToken => await InterpretGotoStatementAsync(interpretationMode, cancellationToken),
+        PerkillToken => await InterpretPerkillStatementAsync(interpretationMode, cancellationToken),
+        PauseToken => await InterpretPauseStatementAsync(interpretationMode, cancellationToken),
+        _ => throw new UnexpectedElementException("Ожидалась инструкция", Lookahead),
+    };
 
-            case Token when Lookahead.IsStartOfAssignVariableStatement():
-                await InterpretAssignVariableStatementAsync(interpretationMode, cancellationToken);
-                break;
-
-            case PrintToken:
-                await InterpretPrintStatementAsync(interpretationMode, cancellationToken);
-                break;
-
-            case ButtonToken:
-                await InterpretButtonStatementAsync(interpretationMode, cancellationToken);
-                break;
-
-            case EndToken:
-                await InterpretEndStatementAsync(interpretationMode, cancellationToken);
-                break;
-
-            case ClearScreenToken:
-                await InterpretClearScreenStatementAdync(interpretationMode, cancellationToken);
-                break;
-
-            case GotoToken:
-                await InterpretGotoStatementAsync(interpretationMode, cancellationToken);
-                break;
-
-            case PerkillToken:
-                await InterpretPerkillStatementAsync(interpretationMode, cancellationToken);
-                break;
-
-            case PauseToken:
-                await InterpretPauseStatementAsync(interpretationMode, cancellationToken);
-                break;
-
-            default:
-                throw new UnexpectedElementException("Ожидалась инструкция", Lookahead);
-        }
-    }
-
-    private async Task InterpretAssignVariableStatementAsync(InterpretationMode interpretationMode, CancellationToken cancellationToken)
+    private async Task<InterpretationResult> InterpretAssignVariableStatementAsync(InterpretationMode interpretationMode, CancellationToken cancellationToken)
     {
         AssignVariableStatement assignVariableStatement = ParseAssignVariableStatement();
 
@@ -126,6 +108,8 @@ public class UrqlInterpreter(UrqlLexer urqlLexer, IGameContext gameContext) : Ur
         {
             await assignVariableStatement.RunAsync(gameContext, cancellationToken);
         }
+
+        return InterpretationResult.Normal;
     }
 
     /// <summary>
@@ -134,7 +118,7 @@ public class UrqlInterpreter(UrqlLexer urqlLexer, IGameContext gameContext) : Ur
     /// ifStatement = ? If ?, relationExpression, ? Then ?, joinedStatements, [ ? Else ?, joinedStatements ];
     /// </code>
     /// </summary>
-    private async Task InterpretIfThenStatement(InterpretationMode interpretationMode, CancellationToken cancellationToken)
+    private async Task<InterpretationResult> InterpretIfThenStatement(InterpretationMode interpretationMode, CancellationToken cancellationToken)
     {
         Match<IfToken>();
 
@@ -143,27 +127,41 @@ public class UrqlInterpreter(UrqlLexer urqlLexer, IGameContext gameContext) : Ur
 
         bool isConditionTrue = relationResult.AsDecimal != 0;
 
-        // then
+        InterpretationResult interpretationResult = InterpretationResult.Normal;
+
+        // парсим [и выполняем] then
         EnterThen();
         try
         {
             Match<ThenToken>("в ветвлении if-then");
-            await InterpretJoinedStatementsAdaptedAsync(isConditionTrue ? interpretationMode : InterpretationMode.ParseNotRun, cancellationToken);
+
+            InterpretationResult thenInterpretationResult = await InterpretJoinedStatementsAdaptedAsync(isConditionTrue ? interpretationMode : InterpretationMode.JustParse, cancellationToken);
+            if (thenInterpretationResult is InterpretationResult.ImmediateStop)
+            {
+                interpretationResult = InterpretationResult.ImmediateStop;
+            }
         }
         finally
         {
             ExitThen();
         }
 
-        // else
+        // парсим [и выполняем] else
         if (Lookahead is ElseToken)
         {
             Match<ElseToken>();
-            await InterpretJoinedStatementsAdaptedAsync(isConditionTrue ? InterpretationMode.ParseNotRun : interpretationMode, cancellationToken);
+
+            InterpretationResult elseInterpretationResult = await InterpretJoinedStatementsAdaptedAsync(isConditionTrue ? InterpretationMode.JustParse : interpretationMode, cancellationToken);
+            if (elseInterpretationResult is InterpretationResult.ImmediateStop)
+            {
+                interpretationResult = InterpretationResult.ImmediateStop;
+            }
         }
+
+        return interpretationResult;
     }
 
-    private async Task InterpretPrintStatementAsync(InterpretationMode interpretationMode, CancellationToken cancellationToken)
+    private async Task<InterpretationResult> InterpretPrintStatementAsync(InterpretationMode interpretationMode, CancellationToken cancellationToken)
     {
         PrintStatement printStatement = ParsePrintTerminal();
 
@@ -171,9 +169,11 @@ public class UrqlInterpreter(UrqlLexer urqlLexer, IGameContext gameContext) : Ur
         {
             await printStatement.RunAsync(gameContext, cancellationToken);
         }
+
+        return InterpretationResult.Normal;
     }
 
-    private async Task InterpretButtonStatementAsync(InterpretationMode interpretationMode, CancellationToken cancellationToken)
+    private async Task<InterpretationResult> InterpretButtonStatementAsync(InterpretationMode interpretationMode, CancellationToken cancellationToken)
     {
         ButtonStatement buttonStatement = ParseButtonTerminal();
 
@@ -181,19 +181,24 @@ public class UrqlInterpreter(UrqlLexer urqlLexer, IGameContext gameContext) : Ur
         {
             await buttonStatement.RunAsync(gameContext, cancellationToken);
         }
+
+        return InterpretationResult.Normal;
     }
 
-    private async Task InterpretEndStatementAsync(InterpretationMode interpretationMode, CancellationToken cancellationToken)
+    private async Task<InterpretationResult> InterpretEndStatementAsync(InterpretationMode interpretationMode, CancellationToken cancellationToken)
     {
         EndStatement endStatement = ParseEndTerminal();
 
         if (interpretationMode is InterpretationMode.Run)
         {
             await endStatement.RunAsync(gameContext, cancellationToken);
+            return InterpretationResult.ImmediateStop;
         }
+
+        return InterpretationResult.Normal;
     }
 
-    private async Task InterpretClearScreenStatementAdync(InterpretationMode interpretationMode, CancellationToken cancellationToken)
+    private async Task<InterpretationResult> InterpretClearScreenStatementAdync(InterpretationMode interpretationMode, CancellationToken cancellationToken)
     {
         ClearScreenStatement clearScreenStatement = ParseClearScreenTerminal();
 
@@ -201,19 +206,24 @@ public class UrqlInterpreter(UrqlLexer urqlLexer, IGameContext gameContext) : Ur
         {
             await clearScreenStatement.RunAsync(gameContext, cancellationToken);
         }
+
+        return InterpretationResult.Normal;
     }
 
-    private async Task InterpretGotoStatementAsync(InterpretationMode interpretationMode, CancellationToken cancellationToken)
+    private async Task<InterpretationResult> InterpretGotoStatementAsync(InterpretationMode interpretationMode, CancellationToken cancellationToken)
     {
         GotoStatement gotoStatement = ParseGotoTerminal();
 
         if (interpretationMode is InterpretationMode.Run)
         {
             await gotoStatement.RunAsync(gameContext, cancellationToken);
+            return InterpretationResult.ImmediateStop;
         }
+
+        return InterpretationResult.Normal;
     }
 
-    private async Task InterpretPerkillStatementAsync(InterpretationMode interpretationMode, CancellationToken cancellationToken)
+    private async Task<InterpretationResult> InterpretPerkillStatementAsync(InterpretationMode interpretationMode, CancellationToken cancellationToken)
     {
         PerkillStatement perkillStatement = ParsePerkillTerminal();
 
@@ -221,9 +231,11 @@ public class UrqlInterpreter(UrqlLexer urqlLexer, IGameContext gameContext) : Ur
         {
             await perkillStatement.RunAsync(gameContext, cancellationToken);
         }
+
+        return InterpretationResult.Normal;
     }
 
-    private async Task InterpretPauseStatementAsync(InterpretationMode interpretationMode, CancellationToken cancellationToken)
+    private async Task<InterpretationResult> InterpretPauseStatementAsync(InterpretationMode interpretationMode, CancellationToken cancellationToken)
     {
         PauseStatement pauseStatement = ParsePauseTerminal();
 
@@ -231,11 +243,26 @@ public class UrqlInterpreter(UrqlLexer urqlLexer, IGameContext gameContext) : Ur
         {
             await pauseStatement.RunAsync(gameContext, cancellationToken);
         }
+
+        return InterpretationResult.Normal;
     }
 
     private enum InterpretationMode
     {
         Run,
-        ParseNotRun
+        JustParse
+    }
+
+    private enum InterpretationResult
+    {
+        /// <summary>
+        /// Нормальный режим (продолжаем)
+        /// </summary>
+        Normal,
+
+        /// <summary>
+        /// Немедленная остановка выполнения
+        /// </summary>
+        ImmediateStop
     }
 }
