@@ -1,6 +1,5 @@
 ﻿using MURQ.Common.Exceptions;
 using MURQ.Domain.Games.Values;
-using MURQ.Domain.Games.Variables;
 using MURQ.Domain.Quests;
 using MURQ.Domain.Quests.QuestLines;
 using MURQ.Domain.URQL;
@@ -137,10 +136,10 @@ public class Game(Quest quest) : IGameContext
     {
         if (TryAssignSystemVariable(name, value)) return;
 
-        _variables[name] = new Variable(name, value);
+        _variables[name] = value;
     }
 
-    public Variable? GetVariable(string variableName) => GetPseudoVariable(variableName) ?? GetTrueVariable(variableName);
+    public Value? GetVariableValue(string variableName) => GetPseudoVariableValue(variableName) ?? GetTrueVariableValue(variableName);
 
     void IGameContext.Goto(string label) => JumpByGoto(label);
 
@@ -186,19 +185,19 @@ public class Game(Quest quest) : IGameContext
 
     private void SeedSystemVariables()
     {
-        _variables[StyleDosTextColorVarName] = new Variable(StyleDosTextColorVarName, new NumberValue(7));
-        _variables[StyleDosButtonColorVarName] = new Variable(StyleDosButtonColorVarName, new NumberValue(15));
+        _variables[StyleDosTextColorVarName] = new NumberValue(7);
+        _variables[StyleDosButtonColorVarName] = new NumberValue(15);
     }
 
-    private Variable? GetPseudoVariable(string name) => name.ToLower() switch
+    private Value? GetPseudoVariableValue(string name) => name.ToLower() switch
     {
-        CurrentLocVarName => new Variable(CurrentLocVarName, new StringValue(currentLocationName ?? string.Empty)),
-        PreviousLocVarName => new Variable(PreviousLocVarName, new StringValue(previousLocationName ?? string.Empty)),
+        CurrentLocVarName => new StringValue(currentLocationName ?? string.Empty),
+        PreviousLocVarName => new StringValue(previousLocationName ?? string.Empty),
         _ when rndRegex.IsMatch(name) => GetRandom(name),
         _ => null
     };
 
-    private Variable? GetTrueVariable(string variableName) => _variables.TryGetValue(variableName, out Variable? variable) ? variable : null;
+    private Value? GetTrueVariableValue(string variableName) => _variables.TryGetValue(variableName, out Value? value) ? value : null;
 
     private bool TryAssignSystemVariable(string name, Value value)
     {
@@ -206,7 +205,7 @@ public class Game(Quest quest) : IGameContext
         {
             case StyleDosTextColorVarName or StyleDosButtonColorVarName:
                 if (value is NumberValue numberValue)
-                    _variables[name] = new Variable(name, numberValue);
+                    _variables[name] = numberValue;
                 return true;
 
             default:
@@ -216,8 +215,8 @@ public class Game(Quest quest) : IGameContext
 
     private (InterfaceColor ForegroundColor, InterfaceColor BackgroundColor) ExtractColorsFromVariable(string variableName)
     {
-        Variable colorVariable = GetTrueVariable(variableName) ?? throw new MurqException($"Системная переменная {variableName} не задана.");
-        NumberValue numberValue = colorVariable.Value as NumberValue ?? throw new MurqException($"Системная переменная {variableName} не числового типа.");
+        Value colorValue = GetTrueVariableValue(variableName) ?? throw new MurqException($"Системная переменная {variableName} не задана.");
+        NumberValue numberValue = colorValue as NumberValue ?? throw new MurqException($"Системная переменная {variableName} не числового типа.");
         decimal value = numberValue.AsDecimal;
 
         byte colorCode = value switch
@@ -237,19 +236,19 @@ public class Game(Quest quest) : IGameContext
         return (ForegroundColor: (InterfaceColor)foreground, BackgroundColor: (InterfaceColor)background);
     }
 
-    private Variable GetRandom(string variableName)
+    private NumberValue GetRandom(string variableName)
     {
         string rndLimitString = rndRegex.Match(variableName).Groups["number"].Value;
 
         if (rndLimitString == string.Empty)
         {
             float randomFloatNumber = random.NextSingle();
-            return new Variable(variableName, new NumberValue(Convert.ToDecimal(randomFloatNumber)));
+            return new NumberValue(Convert.ToDecimal(randomFloatNumber));
         }
 
         int rndLimit = Convert.ToInt32(rndLimitString);
         int randomIntNumber = random.Next(1, rndLimit + 1);
-        return new Variable(variableName, new NumberValue(randomIntNumber));
+        return new NumberValue(randomIntNumber);
     }
 
     private void ReportCodeLineError(CodeLine codeLine, UrqlException ex)
@@ -279,7 +278,7 @@ public class Game(Quest quest) : IGameContext
     private readonly List<Button> currentScreenButtons = [];
     private string? currentLocationName;
     private string? previousLocationName;
-    private readonly Dictionary<string, Variable> _variables = new(StringComparer.InvariantCultureIgnoreCase);
+    private readonly Dictionary<string, Value> _variables = new(StringComparer.InvariantCultureIgnoreCase);
     private readonly Regex rndRegex = new(@"^rnd(?<number>\d*)$", RegexOptions.Compiled | RegexOptions.IgnoreCase);
     private readonly Random random = new();
 

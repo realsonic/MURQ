@@ -1,13 +1,11 @@
 ﻿using MURQ.Application.UrqLoaders;
 using MURQ.Domain.Games;
 using MURQ.Domain.Games.Values;
-using MURQ.Domain.Games.Variables;
 using MURQ.Domain.Quests;
 using MURQ.Domain.Quests.QuestLines;
 using MURQ.Domain.URQL.Interpretation;
 using MURQ.Domain.URQL.Lexing;
 using MURQ.Domain.URQL.Locations;
-using MURQ.Domain.URQL.Tokens;
 using MURQ.Domain.URQL.Substitutions;
 
 using System.Text;
@@ -55,7 +53,7 @@ class Demo5GameContext : IGameContext
 
     public void AssignVariable(string name, Value value)
     {
-        _variables[name] = new Variable(name, value);
+        _variables[name] = value;
     }
 
     public void ClearScreen()
@@ -68,7 +66,7 @@ class Demo5GameContext : IGameContext
         throw new NotImplementedException();
     }
 
-    public Variable? GetVariable(string variableName) => _variables.TryGetValue(variableName, out Variable? variable) ? variable : null;
+    public Value? GetVariableValue(string variableName) => _variables.TryGetValue(variableName, out Value? value) ? value : null;
 
     public void Goto(string label)
     {
@@ -87,5 +85,5 @@ class Demo5GameContext : IGameContext
 
     public void PrintLine(string? text = null) => Console.WriteLine(text);
 
-    private Dictionary<string, Variable> _variables = new(StringComparer.InvariantCultureIgnoreCase);
+    private Dictionary<string, Value> _variables = new(StringComparer.InvariantCultureIgnoreCase);
 }
