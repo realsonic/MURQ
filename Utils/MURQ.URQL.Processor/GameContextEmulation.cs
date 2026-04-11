@@ -1,6 +1,5 @@
 ﻿using MURQ.Domain.Games;
 using MURQ.Domain.Games.Values;
-using MURQ.Domain.Games.Variables;
 
 class GameContextEmulation : IGameContext
 {
@@ -26,9 +25,9 @@ class GameContextEmulation : IGameContext
         throw new NotImplementedException();
     }
 
-    public Variable? GetVariable(string variableName)
+    public Value? GetVariableValue(string variableName)
     {
-        return new Variable(variableName, new StringValue($"<Строковая переменная {variableName}>"));
+        return new StringValue($"<Строковая переменная {variableName}>");
     }
 
     public void Goto(string label)

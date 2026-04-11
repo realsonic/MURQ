@@ -1,6 +1,5 @@
 ﻿using MURQ.Domain.Games;
 using MURQ.Domain.Games.Values;
-using MURQ.Domain.Games.Variables;
 
 using System.Diagnostics;
 
@@ -13,8 +12,8 @@ public class VariableExpression : Expression
 
     public override Value Calculate(IGameContext gameContext)
     {
-        Variable? variable = gameContext.GetVariable(Name);
+        Value? value = gameContext.GetVariableValue(Name);
 
-        return variable?.Value ?? new NumberValue(0);
+        return value ?? new NumberValue(0);
     }
 }

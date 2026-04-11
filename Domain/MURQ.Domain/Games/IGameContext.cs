@@ -1,6 +1,4 @@
 ﻿using MURQ.Domain.Games.Values;
-using MURQ.Domain.Games.Variables;
-using MURQ.Domain.Quests.Statements;
 
 namespace MURQ.Domain.Games;
 
@@ -22,7 +20,7 @@ public interface IGameContext
     void EndLocation();
     void ClearScreen();
     void AssignVariable(string variableName, Value value);
-    Variable? GetVariable(string variableName);
+    Value? GetVariableValue(string variableName);
     void Goto(string label);
     void Perkill();
 }

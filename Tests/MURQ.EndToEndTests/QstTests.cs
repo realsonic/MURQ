@@ -159,12 +159,12 @@ public class QstTests
         await sut.StartAsync();
 
         // Assert
-        var variable1 = sut.GetVariable("bT");
-        variable1!.Value.As<NumberValue>().Value.Should().Be(4);
-        var variable2 = sut.GetVariable("_under");
-        variable2!.Value.As<NumberValue>().Value.Should().Be(5);
-        var variable3 = sut.GetVariable("und_er");
-        variable3!.Value.As<NumberValue>().Value.Should().Be(10);
+        Value? value1 = sut.GetVariableValue("bT");
+        value1.As<NumberValue>().Value.Should().Be(4);
+        Value? value2 = sut.GetVariableValue("_under");
+        value2.As<NumberValue>().Value.Should().Be(5);
+        Value? value3 = sut.GetVariableValue("und_er");
+        value3.As<NumberValue>().Value.Should().Be(10);
     }
 
     [Fact(DisplayName = "if проверяет значение числа")]
