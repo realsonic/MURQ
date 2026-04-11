@@ -69,7 +69,8 @@ public class UrqPlayer(IQuestSource questSource, IUserInterface userInterface, I
 
         while (!cancellationToken.IsCancellationRequested)
         {
-            var userChoice = userInterface.PrintButtonsAndWaitChoice(game.CurrentLocation.Buttons, game.ButtonForegroundColor, game.ButtonBackgroundColor);
+            (InterfaceColor foregroundColor, InterfaceColor backgroundColor) = game.ButtonColors;
+            var userChoice = userInterface.PrintButtonsAndWaitChoice(game.CurrentLocation.Buttons, foregroundColor, backgroundColor);
 
             userInterface.PrintLine();
 
