@@ -101,6 +101,7 @@ public class Game(Quest quest) : IGameContext
     void IGameContext.AddButton(string caption, string label) => currentScreenButtons.Add(new Button
     {
         Caption = caption,
+        IsPhantom = Quest.IsLabelPhantom(label),
         OnButtonPressedAsync = (cancellationToken) => JumpByButtonAsync(label, cancellationToken)
     });
 
@@ -255,6 +256,7 @@ public class Game(Quest quest) : IGameContext
     public class Button
     {
         public required string Caption { get; init; }
+        public required bool IsPhantom { get; init; }
         public required Func<CancellationToken, Task> OnButtonPressedAsync { get; init; }
 
         public async Task PressAsync(CancellationToken cancellationToken = default) => await OnButtonPressedAsync(cancellationToken);
