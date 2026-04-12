@@ -32,6 +32,8 @@ public class Quest
         _currentLineIndex++;
     }
 
+    public bool IsLabelPhantom(string label) => _labelDictionary.ContainsKey(label) is false;
+
     public bool TryGoToLabel(string targetLabel, [NotNullWhen(true)] out string? resultLabel)
     {
         if (_labelDictionary.TryGetValue(targetLabel, out int index))

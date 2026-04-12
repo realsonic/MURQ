@@ -70,7 +70,7 @@ public class ConsoleUserInterface : IUserInterface, IDisposable
     /// <inheritdoc/>
     public UserChoice PrintButtonsAndWaitChoice(IEnumerable<Game.Button> buttons, InterfaceColor foreground, InterfaceColor background)
     {
-        var buttonMap = MapButtonsToCharacters(buttons);
+        Dictionary<char, Game.Button> buttonMap = MapButtonsToCharacters(buttons);
 
         PrintButtons(buttonMap, foreground, background);
         UserChoice userChoice = GetValidChoice(buttonMap);
@@ -112,7 +112,12 @@ public class ConsoleUserInterface : IUserInterface, IDisposable
 
         foreach (var mappedButton in buttonMap)
         {
-            PrintLine($"[{mappedButton.Key}] {mappedButton.Value.Caption}", foreground, background);
+            Print($"[{mappedButton.Key}] {mappedButton.Value.Caption}", foreground, background);
+            if (mappedButton.Value.IsPhantom)
+            {
+                Print(" // phantom");
+            }
+            PrintLine();
         }
     }
 
@@ -131,7 +136,7 @@ public class ConsoleUserInterface : IUserInterface, IDisposable
             if (userInput.IsButtonCharacter)
             {
                 char pressedButtonCharacter = userInput.GetButtonCharacter;
-                if (buttonMap.TryGetValue(pressedButtonCharacter, out Game.Button? button))
+                if (buttonMap.TryGetValue(pressedButtonCharacter, out Game.Button? button) && button.IsPhantom is false)
                     return new ButtonChosen(button, pressedButtonCharacter);
             }
 
