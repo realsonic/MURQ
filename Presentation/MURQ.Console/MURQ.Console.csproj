@@ -8,7 +8,7 @@
 
     <!-- Версия -->
 	<VersionPrefix>0.8.1</VersionPrefix>
-    <VersionSuffix></VersionSuffix>
+    <VersionSuffix>$(VersionSuffix)</VersionSuffix>
     <!-- Греческие буквы: alpha, beta, gamma, delta, epsilon, zeta, eta, theta, iota, kappa, lambda, mu, nu, xi, omicron, pi, rho, sigma, tau, upsilon, phi, chi, psi, omega -->
 	<SourceRevisionId>$([System.DateTime]::Now.ToString("yyMMdd.HHmm"))</SourceRevisionId>
 
