@@ -9,22 +9,23 @@ state MaybeMultilineCommentEnding
 
 [*] --> NotInComment
 
+' Однострочные комменты
 NotInComment --> InSinglelineComment : "";""
 InSinglelineComment --> NotInComment : ""\\n""
-note on link: Отдать текущий символ
+note on link: Отдать текущий символ (""\\n"")
 
+' Многострочные комменты
 NotInComment --> MaybeMultilineCommentStarting : ""/""
-note on link: Сохранить символ
-
-MaybeMultilineCommentStarting --> NotInComment
-note on link: Отдать сохранённый символ\nCтереть сохранённый символ\nОтдать текущий символ
+note on link: Сохранить символ (""/"")
+MaybeMultilineCommentStarting --> NotInComment : не ""*""
+note on link: # Отдать сохранённый символ (""/"")\n# Cтереть сохранённый символ\n# Отдать текущий символ (не ""*"")
 MaybeMultilineCommentStarting --> InMultilineComment : ""*""
-note on link: Стереть сохранённый символ
-
+note on link: Стереть сохранённый символ (""/"")
 InMultilineComment --> MaybeMultilineCommentEnding : ""*""
-
 MaybeMultilineCommentEnding --> NotInComment : ""/""
+MaybeMultilineCommentEnding --> InMultilineComment : не ""/""
 
-NotInComment --> NotInComment
-note on link: Отдать текущий символ
+' Основной код (не коммент)
+NotInComment -> NotInComment : не "";"" и не ""/""
+note on link: Отдать текущий символ (не "";"" и не ""/"")
 @enduml
