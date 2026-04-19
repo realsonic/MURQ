@@ -71,6 +71,10 @@ public class CharacterEnumerableWithoutComments(IEnumerable<PositionedCharacter>
                     {
                         commentState = CommentState.NotInComment;
                     }
+                    else
+                    {
+                        commentState = CommentState.InMultilineComment;
+                    }
                     break;
 
                 default:
