@@ -1,5 +1,6 @@
 ﻿using MURQ.Application.Interfaces;
 using MURQ.Application.UrqLoaders;
+using MURQ.Common;
 using MURQ.Common.Exceptions;
 using MURQ.Domain.Quests;
 
@@ -17,11 +18,25 @@ public class FileQuestSource(UrqLoader urqLoader, string? filePath, Encoding? en
         if (!File.Exists(filePath))
             throw new MurqException($"Заданный файл квеста ({filePath}) не найден (ищу по пути: {Path.GetFullPath(filePath)})");
 
-        encoding ??= await FileEncodingDetector.DetectAsync(filePath, cancellationToken);
-        string questSource = await File.ReadAllTextAsync(filePath, encoding, cancellationToken);
-
+        IEnumerable<char> questSource = ReadFile(filePath, encoding);
         Quest quest = urqLoader.LoadQuest(questSource);
 
         return (quest, $"Файл: {Path.GetFileName(filePath)}");
+    }
+
+    private static IEnumerable<char> ReadFile(string filePath, Encoding? encoding)
+    {
+        encoding ??= CommonEncodings.Windows;
+        const int bufferSize = 1024 * 8; // 8 KB — хороший компромисс
+
+        using StreamReader streamReader = new StreamReader(filePath, encoding, true, bufferSize);
+        char[] buffer = new char[bufferSize];
+
+        int charsRead;
+        while ((charsRead = streamReader.ReadBlock(buffer, 0, bufferSize)) > 0)
+        {
+            for (int i = 0; i < charsRead; i++)
+                yield return buffer[i];
+        }
     }
 }

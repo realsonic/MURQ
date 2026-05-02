@@ -2,6 +2,7 @@
 
 using MURQ.Application.Interfaces;
 using MURQ.Application.UrqLoaders;
+using MURQ.Common;
 using MURQ.Common.Exceptions;
 using MURQ.Infrastructure.ConsoleInterface;
 
@@ -31,16 +32,15 @@ public static class ServiceConfiguration
     {
         if (args is [_, string paramName, string paramValue] && paramName.ToLower() is "--encoding" or "-enc")
         {
-            Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
-
             return paramValue.ToLower() switch
             {
-                "utf8" => Encoding.UTF8,
-                "win" => Encoding.GetEncoding("Windows-1251"),
-                "dos" => Encoding.GetEncoding("cp866"),
+                "utf8" => CommonEncodings.UTF8,
+                "win" => CommonEncodings.Windows,
+                "dos" => CommonEncodings.DOS,
                 _ => throw new MurqException($"Неизвестная кодировка файла - {paramValue}")
             };
         }
+
         return null;
     }
 }

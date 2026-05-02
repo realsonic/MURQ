@@ -1,6 +1,8 @@
 ﻿using System.Text;
 
 namespace QuestSources.FileSource;
+
+[Obsolete("Нужно использовать StreamReader с параметром detectEncodingFromByteOrderMarks. Можно удалить с версии MURQ.Console 0.10.")]
 public class FileEncodingDetector
 {
     static FileEncodingDetector()
@@ -23,6 +25,6 @@ public class FileEncodingDetector
         [0xFE, 0xFF, ..] => Encoding.Unicode,
         [0, 0, 0xFE, 0xFF, ..] => Encoding.UTF32,
         [0xFF, 0xFE, ..] => Encoding.GetEncoding(1200), // 1200 utf-16 Unicode
-        _ => Encoding.GetEncoding("Windows-1251")
+        _ => Encoding.GetEncoding("windows-1251")
     };
 }
