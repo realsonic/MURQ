@@ -8,7 +8,6 @@ using MURQ.Domain.URQL.Lexing;
 using MURQ.Domain.URQL.Locations;
 
 using System.Text;
-using System.Text.RegularExpressions;
 
 namespace MURQ.Domain.Games;
 
@@ -142,7 +141,7 @@ public class Game(Quest quest) : IGameContext
         "previous_loc" => new StringValue(previousLocationName ?? string.Empty),
         StyleDosTextColorVarName => GetUserVariableValue(variableName) ?? new NumberValue(DefaultStyleDosTextColor),
         StyleDosButtonColorVarName => GetUserVariableValue(variableName) ?? new NumberValue(DefaultStyleDosButtonColor),
-        _ when rndRegex.IsMatch(variableName) => GetRandom(variableName),
+        _ when variableName.StartsWith("rnd", StringComparison.InvariantCultureIgnoreCase) => TryGetRandom(variableName) ?? GetUserVariableValue(variableName),
         _ => GetUserVariableValue(variableName)
     };
 
@@ -224,20 +223,20 @@ public class Game(Quest quest) : IGameContext
         return (ForegroundColor: (InterfaceColor)foreground, BackgroundColor: (InterfaceColor)background);
     }
 
-    private NumberValue GetRandom(string variableName)
+    private NumberValue? TryGetRandom(string variableName)
     {
-        string rndLimitString = rndRegex.Match(variableName).Groups["number"].Value;
-
-        if (rndLimitString == string.Empty)
+        if (variableName.StartsWith("rnd", StringComparison.InvariantCultureIgnoreCase))
         {
-            float randomFloatNumber = random.NextSingle();
-            return new NumberValue(Convert.ToDecimal(randomFloatNumber));
+            ReadOnlySpan<char> numberPart = variableName.AsSpan(3);
+
+            if (numberPart.Length == 0)
+                return new NumberValue(Convert.ToDecimal(random.NextSingle()));
+
+            if (int.TryParse(numberPart, out int maxValue))
+                return new NumberValue(random.Next(1, maxValue + 1));
         }
 
-        int rndLimit = Convert.ToInt32(rndLimitString);
-        int randomIntNumber = random.Next(1, rndLimit + 1);
-
-        return new NumberValue(randomIntNumber);
+        return null;
     }
 
     private Value? GetUserVariableValue(string variableName) => _userVariables.TryGetValue(variableName, out Value? value) ? value : null;
@@ -268,7 +267,6 @@ public class Game(Quest quest) : IGameContext
     private string? currentLocationName;
     private string? previousLocationName;
     private readonly Dictionary<string, Value> _userVariables = new(StringComparer.InvariantCultureIgnoreCase);
-    private readonly Regex rndRegex = new(@"^rnd(?<number>\d*)$", RegexOptions.Compiled | RegexOptions.IgnoreCase);
     private readonly Random random = new();
 
     private const string StyleDosTextColorVarName = "style_dos_textcolor";
