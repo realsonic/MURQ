@@ -8,7 +8,7 @@ on:
 
 jobs:
   build-test-publish:
-    runs-on: windows-latest # ubuntu-latest # или windows-latest, если нужны Windows-специфичные тесты
+    runs-on: windows-2025-vs2026 # ubuntu-latest # или windows-latest, если нужны Windows-специфичные тесты
 
     steps:
     - name: Checkout repository
