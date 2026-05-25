@@ -2,6 +2,7 @@
 ```plantuml
 @startebnf URQL Line
 !theme crt-amber
+' skinparam monochrome reverse
 
 statementLine = [ joinedStatements ];
 
@@ -20,19 +21,31 @@ statement =
   | ? Perkill ?
   | ? Pause ?;
 
-assignVariableStatement = ? Variable ?,  ? Equality ? (*""=""*), valueExpression;
+assignVariableStatement = ? Variable ?,  ? = ? (*Equality*), expression;
 
 ifStatement = ? If ?, relationExpression, ? Then ?, joinedStatements, [ ? Else ?, joinedStatements ];
 
+relationExpression = expression, ? = ? (*Equality*), expression;
+
 valueExpression = ? Variable ? | ? Number ? | ? StringLiteral ?;
 
-relationExpression = valueExpression, ? Equality ? (*""=""*), valueExpression;
+expression =
+    expression, (? + ? | ? - ?), term
+  | term;
+
+term =
+    term, (? * ? | ? / ?), factor
+  | factor;
+
+factor =
+    ? ( ?, expression, ? ) ?
+  | valueExpression; 
 @endebnf
 ```
 
 ## Адаптация левых рекурсий
 ### Общая формула
-$A \rightarrow A\alpha \mid A\beta \mid \gamma$
+$A \rightarrow A\alpha \mid A\beta \mid \gamma$  
 преобразуется в:
 - $A \rightarrow \gamma R$
 - $R \rightarrow \alpha R \mid \beta R \mid \epsilon$
