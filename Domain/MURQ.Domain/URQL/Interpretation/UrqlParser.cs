@@ -3,6 +3,7 @@ using MURQ.Domain.Quests.Statements;
 using MURQ.Domain.URQL.Interpretation.Exceptions;
 using MURQ.Domain.URQL.Lexing;
 using MURQ.Domain.URQL.Tokens;
+using MURQ.Domain.URQL.Tokens.Expressions;
 using MURQ.Domain.URQL.Tokens.Statements;
 using MURQ.Domain.URQL.Tokens.Statements.If;
 

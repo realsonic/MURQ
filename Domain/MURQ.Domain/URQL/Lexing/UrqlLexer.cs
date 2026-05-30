@@ -2,6 +2,7 @@
 using MURQ.Domain.URQL.Lexing.Exceptions;
 using MURQ.Domain.URQL.Locations;
 using MURQ.Domain.URQL.Tokens;
+using MURQ.Domain.URQL.Tokens.Expressions;
 using MURQ.Domain.URQL.Tokens.Statements;
 using MURQ.Domain.URQL.Tokens.Statements.If;
 
