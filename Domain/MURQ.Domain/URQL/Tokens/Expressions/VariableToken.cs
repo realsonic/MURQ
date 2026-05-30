@@ -2,7 +2,7 @@
 
 using System.ComponentModel;
 
-namespace MURQ.Domain.URQL.Tokens;
+namespace MURQ.Domain.URQL.Tokens.Expressions;
 
 [Description("переменная")]
 public record VariableToken(string Name, string Lexeme, Location Location) : Token(Lexeme, Location)

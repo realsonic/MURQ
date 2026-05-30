@@ -2,7 +2,7 @@
 
 using System.ComponentModel;
 
-namespace MURQ.Domain.URQL.Tokens;
+namespace MURQ.Domain.URQL.Tokens.Expressions;
 
 [Description("число")]
 public record NumberToken(decimal Value, string Lexeme, Location Location) : Token(Lexeme, Location)
