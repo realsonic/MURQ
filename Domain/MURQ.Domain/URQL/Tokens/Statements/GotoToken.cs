@@ -4,8 +4,8 @@ using System.ComponentModel;
 
 namespace MURQ.Domain.URQL.Tokens.Statements;
 
-[Description("безусловный переход (goto)")]
+[Description("оператор безусловный переход (goto)")]
 public record GotoToken(string Label, string Lexeme, Location Location) : StatementToken(Lexeme, Location)
 {
-    public override string GetDescription() => $"безусловный переход (goto), ведущий на метку {Label}";
+    public override string Description => $@"оператор безусловный переход (goto), ведущий на метку ""{Label}""";
 }

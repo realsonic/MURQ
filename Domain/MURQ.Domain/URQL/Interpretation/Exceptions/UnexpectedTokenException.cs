@@ -22,7 +22,7 @@ public class UnexpectedTokenException<TExpectedToken>(Token? metToken, string? c
 
     private static string FormatMetToken(Token? metToken) => metToken switch
     {
-        not null => $"<{metToken.GetDescription()}> на {metToken.Location}",
+        not null => $"<{metToken.Description}> на {metToken.Location}",
         _ => "конец"
     };
 }
