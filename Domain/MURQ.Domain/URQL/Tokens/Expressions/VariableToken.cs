@@ -7,5 +7,5 @@ namespace MURQ.Domain.URQL.Tokens.Expressions;
 [Description("переменная")]
 public record VariableToken(string Name, string Lexeme, Location Location) : Token(Lexeme, Location)
 {
-    public override string GetDescription() => $"переменная {Name}";
+    public override string Description => $@"переменная ""{Name}""";
 }

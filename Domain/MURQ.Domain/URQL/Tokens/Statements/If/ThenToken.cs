@@ -4,8 +4,5 @@ using System.ComponentModel;
 
 namespace MURQ.Domain.URQL.Tokens.Statements.If;
 
-[Description("ветвление if-then-else (then)")]
-public record ThenToken(string Lexeme, Location Location) : Token(Lexeme, Location)
-{
-    public override string GetDescription() => "ветвление if-then-else (then)";
-}
+[Description("элемент then оператора ветвления if-then-else")]
+public record ThenToken(string Lexeme, Location Location) : Token(Lexeme, Location);

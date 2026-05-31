@@ -19,7 +19,7 @@ public class UnexpectedElementException(string expectedElement, Token? metToken,
 
     private static string FormatMetToken(Token? metToken) => metToken switch
     {
-        not null => $"<{metToken.GetDescription()}> на {metToken.Location}",
+        not null => $"<{metToken.Description}> на {metToken.Location}",
         _ => "конец"
     };
 }
