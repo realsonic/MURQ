@@ -24,7 +24,7 @@ public class UrqlInterpreter(UrqlLexer urqlLexer, IGameContext gameContext) : Ur
 
         if (Lookahead.IsStartOfStatement()) // 2ая линия
         {
-            await InterpretJoinedStatementsAdaptedAsync(InterpretationMode.Run, cancellationToken);
+            await InterpretJoinedStatementsAsync(InterpretationMode.Run, cancellationToken);
         }
         else if (Lookahead is null) // ϵ-продукция
         {
@@ -38,10 +38,10 @@ public class UrqlInterpreter(UrqlLexer urqlLexer, IGameContext gameContext) : Ur
     /// <summary>
     /// Грамматика:
     /// <code>
-    /// joinedStatementsAdapted = statement, joinedStatementsRest;
+    /// joinedStatements = statement, joinedStatementsRest;
     /// </code>
     /// </summary>
-    private async Task<InterpretationResult> InterpretJoinedStatementsAdaptedAsync(InterpretationMode interpretationMode, CancellationToken cancellationToken)
+    private async Task<InterpretationResult> InterpretJoinedStatementsAsync(InterpretationMode interpretationMode, CancellationToken cancellationToken)
     {
         InterpretationResult interpretationResult = await InterpretStatementAsync(interpretationMode, cancellationToken);
         if (interpretationResult is InterpretationResult.ImmediateStop)
@@ -122,7 +122,7 @@ public class UrqlInterpreter(UrqlLexer urqlLexer, IGameContext gameContext) : Ur
     {
         Match<IfToken>();
 
-        RelationExpression relationExpression = ParseRelationExpression();
+        RelationExpression relationExpression = ParseEquationRelationExpression();
         Value relationResult = relationExpression.Calculate(gameContext);
 
         bool isConditionTrue = relationResult.AsDecimal != 0;
@@ -135,7 +135,7 @@ public class UrqlInterpreter(UrqlLexer urqlLexer, IGameContext gameContext) : Ur
         {
             Match<ThenToken>("в ветвлении if-then");
 
-            InterpretationResult thenInterpretationResult = await InterpretJoinedStatementsAdaptedAsync(isConditionTrue ? interpretationMode : InterpretationMode.JustParse, cancellationToken);
+            InterpretationResult thenInterpretationResult = await InterpretJoinedStatementsAsync(isConditionTrue ? interpretationMode : InterpretationMode.JustParse, cancellationToken);
             if (thenInterpretationResult is InterpretationResult.ImmediateStop)
             {
                 interpretationResult = InterpretationResult.ImmediateStop;
@@ -151,7 +151,7 @@ public class UrqlInterpreter(UrqlLexer urqlLexer, IGameContext gameContext) : Ur
         {
             Match<ElseToken>();
 
-            InterpretationResult elseInterpretationResult = await InterpretJoinedStatementsAdaptedAsync(isConditionTrue ? InterpretationMode.JustParse : interpretationMode, cancellationToken);
+            InterpretationResult elseInterpretationResult = await InterpretJoinedStatementsAsync(isConditionTrue ? InterpretationMode.JustParse : interpretationMode, cancellationToken);
             if (elseInterpretationResult is InterpretationResult.ImmediateStop)
             {
                 interpretationResult = InterpretationResult.ImmediateStop;

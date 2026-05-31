@@ -58,6 +58,10 @@ public class UrqlLexer(IEnumerable<OriginatedCharacter> source)
                     yield return ParseEquality();
                     break;
 
+                case '+':
+                    yield return ParseAddition();
+                    break;
+
                 case '&':
                     yield return ParseStatementJoin();
                     break;
@@ -255,6 +259,14 @@ public class UrqlLexer(IEnumerable<OriginatedCharacter> source)
         (string lexeme, Location location) = GetLexemeData();
         return new EqualityToken(lexeme, location);
     }
+
+    private AdditionToken ParseAddition()
+    {
+        Match('+');
+
+        (string lexeme, Location location) = GetLexemeData();
+        return new AdditionToken(AdditionToken.OperationEnum.Addition, lexeme, location);
+    }    
 
     private StatementJoinToken ParseStatementJoin()
     {

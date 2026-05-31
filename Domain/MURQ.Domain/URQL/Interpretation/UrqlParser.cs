@@ -16,14 +16,14 @@ public class UrqlParser(UrqlLexer urqlLexer)
     /// <summary>
     /// Грамматика:
     /// <code>
-    /// assignVariableStatement = ? Variable ?, ? Equality ? (*""=""*), valueExpression;
+    /// assignVariableStatement = ? Variable ?, ?=?, expression;
     /// </code>
     /// </summary>
     protected AssignVariableStatement ParseAssignVariableStatement()
     {
         VariableToken variableToken = Match<VariableToken>("в левой части присвоения значения переменной");
         Match<EqualityToken>($"при присвоении значения переменной {variableToken.Name}");
-        Expression expression = ParseValueExpression();
+        Expression expression = ParseExpression();
 
         return new AssignVariableStatement
         {
@@ -103,6 +103,32 @@ public class UrqlParser(UrqlLexer urqlLexer)
 
     #region Expressions
 
+    protected Expression ParseExpression()
+     {
+        Expression expression = ParseTermExpression();
+
+        while (Lookahead is AdditionToken)
+        {
+            AdditionToken additionToken = Match<AdditionToken>();
+            Expression rightTermExpression = ParseTermExpression();
+
+            expression = additionToken.Operation switch
+            {
+                AdditionToken.OperationEnum.Addition => new AdditionExpression { LeftExpression = expression, RightExpression = rightTermExpression },
+                AdditionToken.OperationEnum.Substraction => new SubstractionExpression { LeftExpression = expression, RightExpression = rightTermExpression },
+                _ => throw new NotImplementedException($"Тип операции {additionToken.Operation} ещё не обрабатывается.")
+            };
+        }
+
+        return expression;
+    }
+
+    protected Expression ParseTermExpression()
+    {
+        //todo ParseTermExpression
+        return ParseFactorExpression();
+    }
+
     protected DecimalConstantExpression ParseNumberExpressionTerminal()
     {
         NumberToken numberToken = Match<NumberToken>();
@@ -115,11 +141,11 @@ public class UrqlParser(UrqlLexer urqlLexer)
     /// relationExpression = valueExpression, ? Equality ? (*""=""*), valueExpression;
     /// </code>
     /// </summary>
-    protected RelationExpression ParseRelationExpression()
+    protected RelationExpression ParseEquationRelationExpression()
     {
-        Expression leftExpression = ParseValueExpression();
+        Expression leftExpression = ParseExpression();
         Match<EqualityToken>("в выражении сравнения значений");
-        Expression rightExpression = ParseValueExpression();
+        Expression rightExpression = ParseExpression();
 
         return new RelationExpression
         {
@@ -137,11 +163,12 @@ public class UrqlParser(UrqlLexer urqlLexer)
     /// <summary>
     /// Грамматика:
     /// <code>
-    /// valueExpression = ? Variable ? | ? Number ? | ? StringLiteral ?;
+    /// factor = ?(?, expression, ?)? | ?Variable? | ?Number? | ?StringLiteral?;
     /// </code>
     /// </summary>
-    protected Expression ParseValueExpression() => Lookahead switch
+    protected Expression ParseFactorExpression() => Lookahead switch
     {
+        //todo LeftBraceToken => 
         VariableToken => ParseVariableExpressionTerminal(),
         NumberToken => ParseNumberExpressionTerminal(),
         StringLiteralToken => ParseStringLiteralExpressionTerminal(),

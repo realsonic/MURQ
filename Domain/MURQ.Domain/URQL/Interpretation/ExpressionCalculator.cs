@@ -17,7 +17,7 @@ public class ExpressionCalculator(IEnumerable<OriginatedCharacter> sourceCharact
             return null;
         }
 
-        Expression expression = ParseValueExpression();
+        Expression expression = ParseExpression();
 
         return expression.Calculate(gameContext);
     }
