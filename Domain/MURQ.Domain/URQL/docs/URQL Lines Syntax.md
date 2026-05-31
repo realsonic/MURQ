@@ -35,11 +35,7 @@ term =
     term, (?*? | ?/?), factor
   | factor;
 
-factor =
-    ?(?, expression, ?)?
-  | ? Variable ?
-  | ? Number ?
-  | ? StringLiteral ?;
+factor = ?(?, expression, ?)? | ?Variable? | ?Number? | ?StringLiteral?;
 @endebnf
 ```
 

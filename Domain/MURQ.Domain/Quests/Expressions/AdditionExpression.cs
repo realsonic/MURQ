@@ -1,0 +1,22 @@
+﻿using MURQ.Domain.Games;
+using MURQ.Domain.Games.Values;
+
+using System.Diagnostics;
+
+namespace MURQ.Domain.Quests.Expressions;
+
+[DebuggerDisplay("{LeftExpression} + {RightExpression}")]
+public class AdditionExpression : Expression
+{
+    public required Expression LeftExpression { get; init; }
+
+    public required Expression RightExpression { get; init; }
+
+    public override Value Calculate(IGameContext gameContext)
+    {
+        //todo Сложение чисел и строк
+        Value leftValue = LeftExpression.Calculate(gameContext);
+        Value rightValue = RightExpression.Calculate(gameContext);
+        return new NumberValue(leftValue.AsDecimal + rightValue.AsDecimal);
+    }
+}

@@ -2,7 +2,16 @@
 
 using System.ComponentModel;
 
+using static MURQ.Domain.URQL.Tokens.Expressions.MultiplicationToken;
+
 namespace MURQ.Domain.URQL.Tokens.Expressions;
 
-[Description(@"умножение ""*""")]
-public record MultiplicationToken(string Lexeme, Location Location) : Token(Lexeme, Location);
+[Description(@"умножение ""*"" или деление ""/""")]
+public record MultiplicationToken(OperationEnum Operation, string Lexeme, Location Location) : Token(Lexeme, Location)
+{
+    public enum OperationEnum
+    {
+        Multiplication,
+        Division
+    }
+}
