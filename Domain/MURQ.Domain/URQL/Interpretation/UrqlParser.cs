@@ -16,7 +16,7 @@ public class UrqlParser(UrqlLexer urqlLexer)
     /// <summary>
     /// Грамматика:
     /// <code>
-    /// assignVariableStatement = ? Variable ?, ?=?, expression;
+    /// assignVariableStatement = ?Variable?, '=', expression;
     /// </code>
     /// </summary>
     protected AssignVariableStatement ParseAssignVariableStatement()
@@ -103,19 +103,33 @@ public class UrqlParser(UrqlLexer urqlLexer)
 
     #region Expressions
 
+    /// <summary>
+    /// Грамматика:
+    /// <code>
+    /// expression =
+    ///     expression, ('+' | '-'), multiplication
+    ///   | multiplication;
+    /// </code>
+    /// Адаптация через цикл:
+    /// <code>
+    /// expression = multiplication, { ('+' | '-'), multiplication };
+    /// </code>
+    /// </summary>
+    /// <returns><see cref="Expression"/></returns>
+    /// <exception cref="NotImplementedException"></exception>
     protected Expression ParseExpression()
     {
         Expression expression = ParseMultiplicationExpression();
 
-        while (Lookahead is AdditionToken)
+        while (Lookahead is AdditionOrSubstructionToken)
         {
-            AdditionToken additionToken = Match<AdditionToken>();
+            AdditionOrSubstructionToken additionToken = Match<AdditionOrSubstructionToken>();
             Expression rightMultiplicationExpression = ParseMultiplicationExpression();
 
             expression = additionToken.Operation switch
             {
-                AdditionToken.OperationEnum.Addition => new AdditionExpression { LeftExpression = expression, RightExpression = rightMultiplicationExpression },
-                AdditionToken.OperationEnum.Substraction => new SubstractionExpression { LeftExpression = expression, RightExpression = rightMultiplicationExpression },
+                AdditionOrSubstructionToken.OperationEnum.Addition => new AdditionExpression { LeftExpression = expression, RightExpression = rightMultiplicationExpression },
+                AdditionOrSubstructionToken.OperationEnum.Substraction => new SubstractionExpression { LeftExpression = expression, RightExpression = rightMultiplicationExpression },
                 _ => throw new NotImplementedException($"Тип операции {additionToken.Operation} ещё не обрабатывается.")
             };
         }
@@ -125,8 +139,21 @@ public class UrqlParser(UrqlLexer urqlLexer)
 
     protected Expression ParseMultiplicationExpression()
     {
-        //todo ParseTermExpression
-        return ParseFactorExpression();
+        Expression expression = ParseFactorExpression();
+
+        while (Lookahead is MultiplicationOrDivisionToken)
+        { 
+            MultiplicationOrDivisionToken multiplicationToken = Match<MultiplicationOrDivisionToken>();
+            Expression rightFactorExpression = ParseFactorExpression();
+
+            expression = multiplicationToken.Operation switch{
+                MultiplicationOrDivisionToken.OperationEnum.Multiplication => new MultiplicationExpression { LeftExpression = expression, RightExpression = rightFactorExpression },
+                MultiplicationOrDivisionToken.OperationEnum.Division => new DivisionExpression { LeftExpression = expression, RightExpression = rightFactorExpression },
+                _ => throw new NotImplementedException($"Тип операции {multiplicationToken.Operation} ещё не обрабатывается.")
+            };
+        }
+
+        return expression;
     }
 
     protected DecimalConstantExpression ParseNumberExpressionTerminal()

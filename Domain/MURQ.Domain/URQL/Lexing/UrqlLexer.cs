@@ -62,6 +62,18 @@ public class UrqlLexer(IEnumerable<OriginatedCharacter> source)
                     yield return ParseAddition();
                     break;
 
+                case '-':
+                    yield return ParseSubstruction();
+                    break;
+
+                case '*':
+                    yield return ParseMultiplication();
+                    break;
+
+                case '/':
+                    yield return ParseDivision();
+                    break;
+
                 case '&':
                     yield return ParseStatementJoin();
                     break;
@@ -260,13 +272,37 @@ public class UrqlLexer(IEnumerable<OriginatedCharacter> source)
         return new EqualityToken(lexeme, location);
     }
 
-    private AdditionToken ParseAddition()
+    private AdditionOrSubstructionToken ParseAddition()
     {
         Match('+');
 
         (string lexeme, Location location) = GetLexemeData();
-        return new AdditionToken(AdditionToken.OperationEnum.Addition, lexeme, location);
-    }    
+        return new AdditionOrSubstructionToken(AdditionOrSubstructionToken.OperationEnum.Addition, lexeme, location);
+    }
+
+    private AdditionOrSubstructionToken ParseSubstruction()
+    {
+        Match('-');
+
+        (string lexeme, Location location) = GetLexemeData();
+        return new AdditionOrSubstructionToken(AdditionOrSubstructionToken.OperationEnum.Substraction, lexeme, location);
+    }
+
+    private MultiplicationOrDivisionToken ParseMultiplication()
+    {
+        Match('*');
+
+        (string lexeme, Location location) = GetLexemeData();
+        return new MultiplicationOrDivisionToken(MultiplicationOrDivisionToken.OperationEnum.Multiplication, lexeme, location);
+    }
+
+    private MultiplicationOrDivisionToken ParseDivision()
+    {
+        Match('/');
+
+        (string lexeme, Location location) = GetLexemeData();
+        return new MultiplicationOrDivisionToken(MultiplicationOrDivisionToken.OperationEnum.Division, lexeme, location);
+    }
 
     private StatementJoinToken ParseStatementJoin()
     {
