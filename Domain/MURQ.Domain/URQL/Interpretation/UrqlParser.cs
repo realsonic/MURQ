@@ -137,16 +137,31 @@ public class UrqlParser(UrqlLexer urqlLexer)
         return expression;
     }
 
+    /// <summary>
+    /// Грамматика:
+    /// <code>
+    /// multiplication =
+    ///     multiplication, ('*' | "/"), factor
+    ///   | factor;
+    /// </code>
+    /// Адаптация через цикл:
+    /// <code>
+    /// multiplication = factor, {('*' | '/'), factor};
+    /// </code>
+    /// </summary>
+    /// <returns><see cref="Expression"/></returns>
+    /// <exception cref="NotImplementedException"></exception>
     protected Expression ParseMultiplicationExpression()
     {
         Expression expression = ParseFactorExpression();
 
         while (Lookahead is MultiplicationOrDivisionToken)
-        { 
+        {
             MultiplicationOrDivisionToken multiplicationToken = Match<MultiplicationOrDivisionToken>();
             Expression rightFactorExpression = ParseFactorExpression();
 
-            expression = multiplicationToken.Operation switch{
+            expression = multiplicationToken.Operation switch
+            {
                 MultiplicationOrDivisionToken.OperationEnum.Multiplication => new MultiplicationExpression { LeftExpression = expression, RightExpression = rightFactorExpression },
                 MultiplicationOrDivisionToken.OperationEnum.Division => new DivisionExpression { LeftExpression = expression, RightExpression = rightFactorExpression },
                 _ => throw new NotImplementedException($"Тип операции {multiplicationToken.Operation} ещё не обрабатывается.")
@@ -193,14 +208,29 @@ public class UrqlParser(UrqlLexer urqlLexer)
     /// factor = ?(?, expression, ?)? | ?Variable? | ?Number? | ?StringLiteral?;
     /// </code>
     /// </summary>
-    protected Expression ParseFactorExpression() => Lookahead switch
+    protected Expression ParseFactorExpression()
     {
-        //todo LeftBraceToken => 
-        VariableToken => ParseVariableExpressionTerminal(),
-        NumberToken => ParseNumberExpressionTerminal(),
-        StringLiteralToken => ParseStringLiteralExpressionTerminal(),
-        _ => throw new UnexpectedElementException("Ожидалась переменная, число или строка в кавычках", Lookahead)
-    };
+        switch (Lookahead)
+        {
+            case LeftBraceToken:
+                Match<LeftBraceToken>();
+                Expression expression = ParseExpression();
+                Match<RightBraceToken>("после открывающей скобки");
+                return expression;
+
+            case VariableToken:
+                return ParseVariableExpressionTerminal();
+
+            case NumberToken:
+                return ParseNumberExpressionTerminal();
+
+            case StringLiteralToken:
+                return ParseStringLiteralExpressionTerminal();
+
+            default:
+                throw new UnexpectedElementException("Ожидалась переменная, число, строка в кавычках или выражение в скобках", Lookahead);
+        }
+    }
 
     protected VariableExpression ParseVariableExpressionTerminal()
     {
