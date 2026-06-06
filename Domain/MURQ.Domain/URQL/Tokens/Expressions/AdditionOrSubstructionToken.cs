@@ -9,6 +9,13 @@ namespace MURQ.Domain.URQL.Tokens.Expressions;
 [Description(@"плюс ""+"" или минус ""-""")]
 public record AdditionOrSubstructionToken(OperationEnum Operation, string Lexeme, Location Location) : Token(Lexeme, Location)
 {
+    public override string Description => Operation switch
+    {
+        OperationEnum.Addition => @"плюс ""+""",
+        OperationEnum.Substraction => @"минус ""-""",
+        _ => throw new NotImplementedException($"Операция {Operation} пока не поддерживается.")
+    };
+
     public enum OperationEnum
     {
         Addition,
