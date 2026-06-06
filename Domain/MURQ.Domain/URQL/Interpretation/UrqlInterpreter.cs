@@ -39,6 +39,7 @@ public class UrqlInterpreter(UrqlLexer urqlLexer, IGameContext gameContext) : Ur
     /// Грамматика:
     /// <code>
     /// joinedStatements = statement, joinedStatementsRest;
+    /// joinedStatementsRest = [?&?, statement, joinedStatementsRest];
     /// </code>
     /// </summary>
     private async Task<InterpretationResult> InterpretJoinedStatementsAsync(InterpretationMode interpretationMode, CancellationToken cancellationToken)
@@ -50,34 +51,20 @@ public class UrqlInterpreter(UrqlLexer urqlLexer, IGameContext gameContext) : Ur
             interpretationMode = InterpretationMode.JustParse;
         }
 
-        return await InterpretJoinedStatementsRestAsync(interpretationMode, cancellationToken);
-    }
-
-    /// <summary>
-    /// Грамматика:
-    /// <code>
-    /// joinedStatementsRest = [? & ?, statement, joinedStatementsRest];
-    /// </code>
-    /// </summary>
-    private async Task<InterpretationResult> InterpretJoinedStatementsRestAsync(InterpretationMode interpretationMode, CancellationToken cancellationToken)
-    {
-        if (Lookahead is StatementJoinToken) // 2ая ветка
+        // joinedStatementsRest
+        while (Lookahead is StatementJoinToken)
         {
             Match<StatementJoinToken>();
 
-            InterpretationResult interpretationResult = await InterpretStatementAsync(interpretationMode, cancellationToken);
-            if (interpretationResult is InterpretationResult.ImmediateStop)
+            InterpretationResult rightStatementInterpretationResult = await InterpretStatementAsync(interpretationMode, cancellationToken);
+            if (rightStatementInterpretationResult is InterpretationResult.ImmediateStop)
             {
                 // т.к. нужно немедленно остановиться, то остаток кода мы только парсим, но не выполняем
                 interpretationMode = InterpretationMode.JustParse;
             }
+        }
 
-            return await InterpretJoinedStatementsRestAsync(interpretationMode, cancellationToken);
-        }
-        else
-        {
-            return InterpretationResult.Normal; // ϵ-продукция
-        }
+        return InterpretationResult.Normal; // ϵ-продукция
     }
 
     /// <summary>

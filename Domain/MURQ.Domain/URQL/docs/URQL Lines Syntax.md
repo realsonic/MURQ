@@ -28,11 +28,11 @@ ifStatement = ? If ?, relationExpression, ? Then ?, joinedStatements, [ ? Else ?
 relationExpression = expression, ?=?, expression;
 
 expression =
-    expression, (?+? | ?-?), term
-  | term;
+    expression, (?+? | ?-?), multiplication
+  | multiplication;
 
-term =
-    term, (?*? | ?/?), factor
+multiplication =
+    multiplication, (?*? | ?/?), factor
   | factor;
 
 factor = ?(?, expression, ?)? | ?Variable? | ?Number? | ?StringLiteral?;
@@ -90,8 +90,8 @@ joinedStatementsRest = [? & ?, statement, joinedStatementsRest];
 !theme crt-amber
 
 expression =
-    expression, (? + ? | ? - ?), term
-  | term;
+    expression, (? + ? | ? - ?), multiplication
+  | multiplication;
 @endebnf
 ```
 
@@ -99,32 +99,32 @@ expression =
 | Элемент | Значение  |
 |:-------:| --------- |
 | $A$ | $expression$  |
-| $\alpha$  | ${"+"}, term$ |
-| $\beta$ | ${"-"}, term$ |
-| $\gamma$  | $term$ |
+| $\alpha$  | ${"+"}, multiplication$ |
+| $\beta$ | ${"-"}, multiplication$ |
+| $\gamma$  | $multiplication$ |
 
 ### Преобразование
 | Формула | Результат |
 | ------- | --------- |
-| $A \rightarrow \gamma R$  | $expression \rightarrow term, expressionRest$  |
-| $R \rightarrow {\alpha R} \mid {\beta R} \mid \epsilon$ | $expressionRest \rightarrow {{"+"}, term, expressionRest} \mid {{"-"}, term, expressionRest} \mid \epsilon$  |
+| $A \rightarrow \gamma R$  | $expression \rightarrow multiplication, expressionRest$  |
+| $R \rightarrow {\alpha R} \mid {\beta R} \mid \epsilon$ | $expressionRest \rightarrow {{"+"}, multiplication, expressionRest} \mid {{"-"}, multiplication, expressionRest} \mid \epsilon$  |
 
 ```plantuml
 @startebnf joinedStatements
 !theme crt-amber
-expression = term, expressionRest;
-expressionRest = [ (? + ? | ? - ?), term, expressionRest] ;
+expression = multiplication, expressionRest;
+expressionRest = [ (? + ? | ? - ?), multiplication, expressionRest] ;
 @endebnf
 ```
 
-## Адаптация `term`
+## Адаптация `multiplication`
 ### Исходный нетерминал
 ```plantuml
 @startebnf joinedStatements
 !theme crt-amber
 
-term =
-    term, (? * ? | ? / ?), factor
+multiplication =
+    multiplication, (? * ? | ? / ?), factor
   | factor;
 @endebnf
 ```
@@ -132,7 +132,7 @@ term =
 ### Разбивка на элементы
 | Элемент | Значение  |
 |:-------:| --------- |
-| $A$ | $term$  |
+| $A$ | $multiplication$  |
 | $\alpha$  | ${"*"}, factor$ |
 | $\beta$ | ${"*"}, factor$ |
 | $\gamma$  | $factor$ |
@@ -140,13 +140,13 @@ term =
 ### Преобразование
 | Формула | Результат |
 | ------- | --------- |
-| $A \rightarrow \gamma R$  | $term \rightarrow factor, termRest$  |
-| $R \rightarrow {\alpha R} \mid {\beta R} \mid \epsilon$ | $termRest \rightarrow {{"*"}, factor, termRest} \mid {{"/"}, factor, termRest} \mid \epsilon$  |
+| $A \rightarrow \gamma R$  | $multiplication \rightarrow factor, multiplicationRest$  |
+| $R \rightarrow {\alpha R} \mid {\beta R} \mid \epsilon$ | $multiplicationRest \rightarrow {{"*"}, factor, multiplicationRest} \mid {{"/"}, factor, multiplicationRest} \mid \epsilon$  |
 
 ```plantuml
 @startebnf joinedStatements
 !theme crt-amber
-term = factor, termRest;
-termRest = [ (? * ? | ? / ?) ], factor, termRest;
+multiplication = factor, multiplicationRest;
+multiplicationRest = [ (? * ? | ? / ?) ], factor, multiplicationRest;
 @endebnf
 ```

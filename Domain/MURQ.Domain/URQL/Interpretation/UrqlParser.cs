@@ -104,18 +104,18 @@ public class UrqlParser(UrqlLexer urqlLexer)
     #region Expressions
 
     protected Expression ParseExpression()
-     {
-        Expression expression = ParseTermExpression();
+    {
+        Expression expression = ParseMultiplicationExpression();
 
         while (Lookahead is AdditionToken)
         {
             AdditionToken additionToken = Match<AdditionToken>();
-            Expression rightTermExpression = ParseTermExpression();
+            Expression rightMultiplicationExpression = ParseMultiplicationExpression();
 
             expression = additionToken.Operation switch
             {
-                AdditionToken.OperationEnum.Addition => new AdditionExpression { LeftExpression = expression, RightExpression = rightTermExpression },
-                AdditionToken.OperationEnum.Substraction => new SubstractionExpression { LeftExpression = expression, RightExpression = rightTermExpression },
+                AdditionToken.OperationEnum.Addition => new AdditionExpression { LeftExpression = expression, RightExpression = rightMultiplicationExpression },
+                AdditionToken.OperationEnum.Substraction => new SubstractionExpression { LeftExpression = expression, RightExpression = rightMultiplicationExpression },
                 _ => throw new NotImplementedException($"Тип операции {additionToken.Operation} ещё не обрабатывается.")
             };
         }
@@ -123,7 +123,7 @@ public class UrqlParser(UrqlLexer urqlLexer)
         return expression;
     }
 
-    protected Expression ParseTermExpression()
+    protected Expression ParseMultiplicationExpression()
     {
         //todo ParseTermExpression
         return ParseFactorExpression();
@@ -138,7 +138,7 @@ public class UrqlParser(UrqlLexer urqlLexer)
     /// <summary>
     /// Грамматика:
     /// <code>
-    /// relationExpression = valueExpression, ? Equality ? (*""=""*), valueExpression;
+    /// relationExpression = valueExpression, ?=?, valueExpression;
     /// </code>
     /// </summary>
     protected RelationExpression ParseEquationRelationExpression()
