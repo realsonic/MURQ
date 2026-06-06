@@ -74,6 +74,14 @@ public class UrqlLexer(IEnumerable<OriginatedCharacter> source)
                     yield return ParseDivision();
                     break;
 
+                case '(':
+                    yield return ParseLeftBrace();
+                    break;
+
+                case ')':
+                    yield return ParseRightBrace();
+                    break;
+
                 case '&':
                     yield return ParseStatementJoin();
                     break;
@@ -302,6 +310,22 @@ public class UrqlLexer(IEnumerable<OriginatedCharacter> source)
 
         (string lexeme, Location location) = GetLexemeData();
         return new MultiplicationOrDivisionToken(MultiplicationOrDivisionToken.OperationEnum.Division, lexeme, location);
+    }
+
+    private LeftBraceToken ParseLeftBrace()
+    {
+        Match('(');
+
+        (string lexeme, Location location) = GetLexemeData();
+        return new LeftBraceToken(lexeme, location);
+    }
+
+    private RightBraceToken ParseRightBrace()
+    {
+        Match(')');
+
+        (string lexeme, Location location) = GetLexemeData();
+        return new RightBraceToken(lexeme, location);
     }
 
     private StatementJoinToken ParseStatementJoin()

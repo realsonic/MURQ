@@ -4,6 +4,8 @@
 !theme crt-amber
 ' skinparam monochrome reverse
 
+title Строка кода URQL
+
 statementLine = [ joinedStatements ];
 
 joinedStatements = 
@@ -43,7 +45,9 @@ factor = '(', expression, ')' | ?Variable? | ?Number? | ?StringLiteral?;
 $$
 A \rightarrow A\alpha \mid A\beta \mid \gamma
 $$
+
 преобразуется в:
+
 $$
 A \rightarrow \gamma R \newline
 R \rightarrow \alpha R \mid \beta R \mid \epsilon
