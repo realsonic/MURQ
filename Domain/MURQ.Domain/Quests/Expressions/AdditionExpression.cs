@@ -14,9 +14,14 @@ public class AdditionExpression : Expression
 
     public override Value Calculate(IGameContext gameContext)
     {
-        //todo Сложение чисел и строк
         Value leftValue = LeftExpression.Calculate(gameContext);
         Value rightValue = RightExpression.Calculate(gameContext);
+
+        if (leftValue is StringValue leftStringValue && rightValue is StringValue rightStringValue)
+        {
+            return new StringValue(leftStringValue.Value + rightStringValue.Value);
+        }
+
         return new NumberValue(leftValue.AsDecimal + rightValue.AsDecimal);
     }
 }
