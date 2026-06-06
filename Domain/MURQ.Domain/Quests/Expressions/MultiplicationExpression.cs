@@ -5,8 +5,8 @@ using System.Diagnostics;
 
 namespace MURQ.Domain.Quests.Expressions;
 
-[DebuggerDisplay("{LeftExpression} - {RightExpression}")]
-public class SubstractionExpression : Expression
+[DebuggerDisplay("{LeftExpression} * {RightExpression}")]
+public class MultiplicationExpression : Expression
 {
     public required Expression LeftExpression { get; init; }
 
@@ -16,6 +16,6 @@ public class SubstractionExpression : Expression
     {
         Value leftValue = LeftExpression.Calculate(gameContext);
         Value rightValue = RightExpression.Calculate(gameContext);
-        return new NumberValue(leftValue.AsDecimal - rightValue.AsDecimal);
+        return new NumberValue(leftValue.AsDecimal * rightValue.AsDecimal);
     }
 }

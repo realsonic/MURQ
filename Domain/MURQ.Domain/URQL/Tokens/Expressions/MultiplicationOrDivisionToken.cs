@@ -2,12 +2,12 @@
 
 using System.ComponentModel;
 
-using static MURQ.Domain.URQL.Tokens.Expressions.MultiplicationToken;
+using static MURQ.Domain.URQL.Tokens.Expressions.MultiplicationOrDivisionToken;
 
 namespace MURQ.Domain.URQL.Tokens.Expressions;
 
 [Description(@"умножение ""*"" или деление ""/""")]
-public record MultiplicationToken(OperationEnum Operation, string Lexeme, Location Location) : Token(Lexeme, Location)
+public record MultiplicationOrDivisionToken(OperationEnum Operation, string Lexeme, Location Location) : Token(Lexeme, Location)
 {
     public enum OperationEnum
     {
