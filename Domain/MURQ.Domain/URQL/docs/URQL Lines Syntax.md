@@ -37,7 +37,12 @@ multiplication =
     multiplication, ('*' | "/"), factor
   | factor;
 
-factor = '(', expression, ')' | ?Variable? | ?Number? | ?StringLiteral?;
+factor =
+    ('+' | '-'), factor
+  | '(', expression, ')'
+  | ?Variable?
+  | ?Number?
+  | ?StringLiteral?;
 @endebnf
 ```
 

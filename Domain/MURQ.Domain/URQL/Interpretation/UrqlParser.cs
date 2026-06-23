@@ -217,13 +217,21 @@ public class UrqlParser(UrqlLexer urqlLexer)
     /// <summary>
     /// Грамматика:
     /// <code>
-    /// factor = ?(?, expression, ?)? | ?Variable? | ?Number? | ?StringLiteral?;
+    /// factor = ('+' | '-'), factor | ?(?, expression, ?)? | ?Variable? | ?Number? | ?StringLiteral?;
     /// </code>
     /// </summary>
     protected Expression ParseFactorExpression()
     {
         switch (Lookahead)
         {
+            case PlusToken:
+                Match<PlusToken>();
+                return new UnaryPlusExpression { Expression = ParseFactorExpression() };
+
+            case MinusToken:
+                Match<MinusToken>();
+                return new UnaryMinusExpression { Expression = ParseFactorExpression() };
+            
             case LeftBraceToken:
                 Match<LeftBraceToken>();
                 Expression expression = ParseExpression();
