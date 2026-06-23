@@ -121,17 +121,23 @@ public class UrqlParser(UrqlLexer urqlLexer)
     {
         Expression expression = ParseMultiplicationExpression();
 
-        while (Lookahead is AdditionOrSubstructionToken)
+        while (Lookahead is PlusToken or MinusToken)
         {
-            AdditionOrSubstructionToken additionToken = Match<AdditionOrSubstructionToken>();
-            Expression rightMultiplicationExpression = ParseMultiplicationExpression();
-
-            expression = additionToken.Operation switch
+            switch (Lookahead)
             {
-                AdditionOrSubstructionToken.OperationEnum.Addition => new AdditionExpression { LeftExpression = expression, RightExpression = rightMultiplicationExpression },
-                AdditionOrSubstructionToken.OperationEnum.Substraction => new SubstractionExpression { LeftExpression = expression, RightExpression = rightMultiplicationExpression },
-                _ => throw new NotImplementedException($"Тип операции {additionToken.Operation} ещё не обрабатывается.")
-            };
+                case PlusToken:
+                    Match<PlusToken>();
+                    expression = new AdditionExpression { LeftExpression = expression, RightExpression = ParseMultiplicationExpression() };
+                    break;
+
+                case MinusToken:
+                    Match<MinusToken>();
+                    expression = new SubstractionExpression { LeftExpression = expression, RightExpression = ParseMultiplicationExpression() };
+                    break;
+
+                default:
+                    throw new NotImplementedException($"Тип операции {Lookahead} ещё не обрабатывается.");
+            }
         }
 
         return expression;
@@ -155,17 +161,23 @@ public class UrqlParser(UrqlLexer urqlLexer)
     {
         Expression expression = ParseFactorExpression();
 
-        while (Lookahead is MultiplicationOrDivisionToken)
+        while (Lookahead is MultiplicationToken or DivisionToken)
         {
-            MultiplicationOrDivisionToken multiplicationToken = Match<MultiplicationOrDivisionToken>();
-            Expression rightFactorExpression = ParseFactorExpression();
-
-            expression = multiplicationToken.Operation switch
+            switch (Lookahead)
             {
-                MultiplicationOrDivisionToken.OperationEnum.Multiplication => new MultiplicationExpression { LeftExpression = expression, RightExpression = rightFactorExpression },
-                MultiplicationOrDivisionToken.OperationEnum.Division => new DivisionExpression { LeftExpression = expression, RightExpression = rightFactorExpression },
-                _ => throw new NotImplementedException($"Тип операции {multiplicationToken.Operation} ещё не обрабатывается.")
-            };
+                case MultiplicationToken:
+                    Match<MultiplicationToken>();
+                    expression = new MultiplicationExpression { LeftExpression = expression, RightExpression = ParseFactorExpression() };
+                    break;
+
+                case DivisionToken:
+                    Match<DivisionToken>();
+                    expression = new DivisionExpression { LeftExpression = expression, RightExpression = ParseFactorExpression() };
+                    break;
+
+                default:
+                    throw new NotImplementedException($"Тип операции {Lookahead} ещё не обрабатывается.");
+            }
         }
 
         return expression;
