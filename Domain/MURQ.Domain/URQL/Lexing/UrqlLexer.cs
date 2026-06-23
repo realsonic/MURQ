@@ -59,11 +59,11 @@ public class UrqlLexer(IEnumerable<OriginatedCharacter> source)
                     break;
 
                 case '+':
-                    yield return ParseAddition();
+                    yield return ParsePlus();
                     break;
 
                 case '-':
-                    yield return ParseSubstruction();
+                    yield return ParseMinus();
                     break;
 
                 case '*':
@@ -280,36 +280,36 @@ public class UrqlLexer(IEnumerable<OriginatedCharacter> source)
         return new EqualityToken(lexeme, location);
     }
 
-    private AdditionOrSubstructionToken ParseAddition()
+    private PlusToken ParsePlus()
     {
         Match('+');
 
         (string lexeme, Location location) = GetLexemeData();
-        return new AdditionOrSubstructionToken(AdditionOrSubstructionToken.OperationEnum.Addition, lexeme, location);
+        return new PlusToken(lexeme, location);
     }
 
-    private AdditionOrSubstructionToken ParseSubstruction()
+    private MinusToken ParseMinus()
     {
         Match('-');
 
         (string lexeme, Location location) = GetLexemeData();
-        return new AdditionOrSubstructionToken(AdditionOrSubstructionToken.OperationEnum.Substraction, lexeme, location);
+        return new MinusToken(lexeme, location);
     }
 
-    private MultiplicationOrDivisionToken ParseMultiplication()
+    private MultiplicationToken ParseMultiplication()
     {
         Match('*');
 
         (string lexeme, Location location) = GetLexemeData();
-        return new MultiplicationOrDivisionToken(MultiplicationOrDivisionToken.OperationEnum.Multiplication, lexeme, location);
+        return new MultiplicationToken(lexeme, location);
     }
 
-    private MultiplicationOrDivisionToken ParseDivision()
+    private DivisionToken ParseDivision()
     {
         Match('/');
 
         (string lexeme, Location location) = GetLexemeData();
-        return new MultiplicationOrDivisionToken(MultiplicationOrDivisionToken.OperationEnum.Division, lexeme, location);
+        return new DivisionToken(lexeme, location);
     }
 
     private LeftBraceToken ParseLeftBrace()
