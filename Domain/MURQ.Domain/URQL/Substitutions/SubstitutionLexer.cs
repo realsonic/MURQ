@@ -40,16 +40,19 @@ public class SubstitutionLexer
 
                 case LexemState.SubstitutionStartMet:
                     Position start = substitutionStartPosition ?? throw new InvalidOperationException($"Неожиданно не задана стартовая позиция для состояния {lexemState}.");
-                    
-                    if (positionedCharacter.Character is '%')
+
+                    switch (positionedCharacter.Character)
                     {
-                        yield return new SubstitutionStartToken(ModifierEnum.AsString, new Location(start, positionedCharacter.Position));
+                        case '%':
+                            yield return new SubstitutionStartToken(ModifierEnum.AsString, new Location(start, positionedCharacter.Position));
+                            break;
+
+                        default:
+                            yield return new SubstitutionStartToken(ModifierEnum.None, new Location(start, start));
+                            PushCharacter(positionedCharacter);
+                            break;
                     }
-                    else
-                    {
-                        yield return new SubstitutionStartToken(ModifierEnum.None, new Location(start, start));
-                        PushCharacter(positionedCharacter);
-                    }
+
                     lexemState = LexemState.StringInProgress;
                     substitutionStartPosition = null;
                     break;

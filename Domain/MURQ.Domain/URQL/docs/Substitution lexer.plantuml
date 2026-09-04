@@ -1,0 +1,19 @@
+@startuml Лексер подстановок
+hide empty description
+
+state StringInProgress
+state SubstitutionStartMet
+
+[*] --> StringInProgress
+
+StringInProgress --> SubstitutionStartMet : ""#""
+note on link: 📤 StringToken
+StringInProgress --> StringInProgress : ""$""
+note on link: 📤 StringToken\n📤 SubstitutionStopToken
+
+SubstitutionStartMet --> StringInProgress : ""%""
+note on link: 📤 SubstitutionStartToken(AsString)
+SubstitutionStartMet --> StringInProgress : для других символов
+note on link: 📤 SubstitutionStartToken(None)
+
+@enduml
