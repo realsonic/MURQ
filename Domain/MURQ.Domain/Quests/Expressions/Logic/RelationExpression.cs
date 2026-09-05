@@ -3,10 +3,10 @@ using MURQ.Domain.Games.Values;
 
 using System.Diagnostics;
 
-namespace MURQ.Domain.Quests.Expressions;
+namespace MURQ.Domain.Quests.Expressions.Logic;
 
 [DebuggerDisplay("{LeftExpression} {RelationDebuggerDisplay} {RightExpression}")]
-public class RelationExpression : Expression
+public class RelationExpression : LogicExpression
 {
     public required RelationKind Kind { get; init; }
 
@@ -14,7 +14,7 @@ public class RelationExpression : Expression
 
     public required Expression RightExpression { get; init; }
 
-    public override Value Calculate(IGameContext gameContext)
+    public override bool Calculate(IGameContext gameContext)
     {
         Value leftValue = LeftExpression.Calculate(gameContext);
         Value rightValue = RightExpression.Calculate(gameContext);
@@ -38,7 +38,7 @@ public class RelationExpression : Expression
                 throw new NotImplementedException($"Тип отношения {Kind} ещё не обрабатывается.");
         };
 
-        return new NumberValue(result ? 1 : 0);
+        return result;
     }
 
     private string RelationDebuggerDisplay => Kind switch

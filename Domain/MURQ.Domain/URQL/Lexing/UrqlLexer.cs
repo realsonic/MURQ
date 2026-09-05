@@ -3,7 +3,8 @@ using MURQ.Domain.URQL.Lexing.Exceptions;
 using MURQ.Domain.URQL.Locations;
 using MURQ.Domain.URQL.Tokens;
 using MURQ.Domain.URQL.Tokens.Expressions;
-using MURQ.Domain.URQL.Tokens.Relations;
+using MURQ.Domain.URQL.Tokens.Expressions.Logic;
+using MURQ.Domain.URQL.Tokens.Expressions.Relations;
 using MURQ.Domain.URQL.Tokens.Statements;
 using MURQ.Domain.URQL.Tokens.Statements.If;
 
@@ -149,6 +150,8 @@ public class UrqlLexer(IEnumerable<OriginatedCharacter> source)
             "goto" => ParseGotoAfterGoto(),
             "perkill" => ParsePerkillAfterPerkill(),
             "pause" => ParsePauseAfterPause(),
+            "and" => ParseAndAfterAnd(),
+            "or" => ParseOrAfterOr(),
             _ => ParseVariable(collectedWord)
         };
     }
@@ -254,6 +257,18 @@ public class UrqlLexer(IEnumerable<OriginatedCharacter> source)
 
         (string lexeme, Location location) = GetLexemeData();
         return new PauseToken((int)duration, lexeme, location);
+    }
+
+    private AndToken ParseAndAfterAnd()
+    {
+        (string lexeme, Location location) = GetLexemeData();
+        return new AndToken(lexeme, location);
+    }
+
+    private OrToken ParseOrAfterOr()
+    {
+        (string lexeme, Location location) = GetLexemeData();
+        return new OrToken(lexeme, location);
     }
 
     private VariableToken ParseVariable(string collectedName)
