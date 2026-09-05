@@ -17,17 +17,25 @@ statement =
   | ifStatement
   | ?Print?
   | ?Button?
-  | ?End?
-  | ?ClearScreen?
+  | 'end'
+  | 'cls'
   | ?Goto?
-  | ?Perkill?
+  | 'perkill'
   | ?Pause?;
 
 assignVariableStatement = ?Variable?,  '=', expression;
 
-ifStatement = ?If?, relationExpression, ?Then?, joinedStatements, [ ?Else?, joinedStatements ];
+ifStatement = 'if', disjunction, 'then', joinedStatements, [ 'else', joinedStatements ];
 
-relationExpression = expression, ('=' | '<' | '>'), expression;
+disjunction =
+    disjunction, 'or', conjuction
+  | conjuction;
+
+conjuction =
+    conjuction, 'and', relation
+  | relation;
+
+relation = expression, ('=' | '<' | '>'), expression;
 
 expression =
     expression, ('+' | '-'), multiplication
@@ -198,5 +206,53 @@ multiplicationRest = [('*' | '/'), factor, multiplicationRest];
 title Через цикл
 
 multiplication = factor, {('*' | '/'), factor};
+@endebnf
+```
+
+## Адаптация `disjunction`
+
+```plantuml
+@startebnf Исходный disjunction
+!theme crt-amber
+
+title Исходный нетерминал
+
+disjunction =
+    disjunction, 'or', conjuction
+  | conjuction;
+@endebnf
+```
+
+### Разбивка на элементы
+| Элемент | Значение  |
+|:-------:| --------- |
+| $A$ | $disjunction$  |
+| $\alpha$  | ${'or'}, conjuction$ |
+| $\gamma$  | $conjuction$ |
+
+### Преобразование
+| Формула | Результат |
+| ------- | --------- |
+| $A \rightarrow \gamma R$  | $conjuction \rightarrow conjuction, disjunctionRest$  |
+| $R \rightarrow {\alpha R} \mid \epsilon$ | $disjunctionRest \rightarrow {{'or'}, conjuction, disjunctionRest} \mid \epsilon$  |
+
+```plantuml
+@startebnf Адаптация disjunction через рекурсию
+!theme crt-amber
+
+title Через рекурсию
+
+disjunction = conjuction, disjunctionRest;
+disjunctionRest = ['or', conjuction, disjunctionRest];
+@endebnf
+```
+
+```plantuml
+@startebnf Адаптация disjunction через цикл
+!theme crt-amber
+
+title Через цикл
+
+disjunction = conjuction, {'or', conjuction};
 @endebnf
 ```

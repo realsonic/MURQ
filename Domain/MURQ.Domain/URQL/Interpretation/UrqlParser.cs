@@ -1,10 +1,12 @@
 ﻿using MURQ.Domain.Quests.Expressions;
+using MURQ.Domain.Quests.Expressions.Logic;
 using MURQ.Domain.Quests.Statements;
 using MURQ.Domain.URQL.Interpretation.Exceptions;
 using MURQ.Domain.URQL.Lexing;
 using MURQ.Domain.URQL.Tokens;
 using MURQ.Domain.URQL.Tokens.Expressions;
-using MURQ.Domain.URQL.Tokens.Relations;
+using MURQ.Domain.URQL.Tokens.Expressions.Logic;
+using MURQ.Domain.URQL.Tokens.Expressions.Relations;
 using MURQ.Domain.URQL.Tokens.Statements;
 using MURQ.Domain.URQL.Tokens.Statements.If;
 
@@ -193,7 +195,57 @@ public class UrqlParser(UrqlLexer urqlLexer)
     /// <summary>
     /// Грамматика:
     /// <code>
-    /// relationExpression = valueExpression, ('=' | '<' | '>'), valueExpression;
+    /// disjunction = disjunction, 'or', conjuction | conjuction;
+    /// </code>
+    /// </summary>
+    protected LogicExpression ParseLogicExpression()
+    {
+        LogicExpression logicExpression = ParseConjunctionExpression();
+
+        while (Lookahead is OrToken)
+        {
+            Match<OrToken>();
+            LogicExpression rightConjunctionExpression = ParseConjunctionExpression();
+            
+            logicExpression = new DisjunctionExpression
+            {
+                LeftExpression = logicExpression,
+                RightExpression = rightConjunctionExpression
+            };
+        }
+
+        return logicExpression;
+    }
+
+    /// <summary>
+    /// Грамматика:
+    /// <code>
+    /// conjuction = conjuction, 'and', relation | relation;
+    /// </code>
+    /// </summary>
+    private LogicExpression ParseConjunctionExpression()
+    {
+        LogicExpression logicExpression = ParseRelationExpression();
+
+        while (Lookahead is AndToken)
+        {
+            Match<AndToken>();
+            RelationExpression relationExpression = ParseRelationExpression();
+
+            logicExpression = new ConjunctionExpression
+            {
+                LeftExpression = logicExpression,
+                RightExpression = relationExpression
+            };
+        }
+
+        return logicExpression;
+    }
+
+    /// <summary>
+    /// Грамматика:
+    /// <code>
+    /// relation = expression, ('=' | '<' | '>'), expression;
     /// </code>
     /// </summary>
     protected RelationExpression ParseRelationExpression()
