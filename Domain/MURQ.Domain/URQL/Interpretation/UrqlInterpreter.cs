@@ -109,7 +109,7 @@ public class UrqlInterpreter(UrqlLexer urqlLexer, IGameContext gameContext) : Ur
     {
         Match<IfToken>();
 
-        RelationExpression relationExpression = ParseEquationRelationExpression();
+        RelationExpression relationExpression = ParseRelationExpression();
         Value relationResult = relationExpression.Calculate(gameContext);
 
         bool isConditionTrue = relationResult.AsDecimal != 0;

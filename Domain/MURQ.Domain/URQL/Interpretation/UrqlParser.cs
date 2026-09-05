@@ -4,6 +4,7 @@ using MURQ.Domain.URQL.Interpretation.Exceptions;
 using MURQ.Domain.URQL.Lexing;
 using MURQ.Domain.URQL.Tokens;
 using MURQ.Domain.URQL.Tokens.Expressions;
+using MURQ.Domain.URQL.Tokens.Relations;
 using MURQ.Domain.URQL.Tokens.Statements;
 using MURQ.Domain.URQL.Tokens.Statements.If;
 
@@ -192,17 +193,40 @@ public class UrqlParser(UrqlLexer urqlLexer)
     /// <summary>
     /// Грамматика:
     /// <code>
-    /// relationExpression = valueExpression, ?=?, valueExpression;
+    /// relationExpression = valueExpression, ('=' | '<' | '>'), valueExpression;
     /// </code>
     /// </summary>
-    protected RelationExpression ParseEquationRelationExpression()
+    protected RelationExpression ParseRelationExpression()
     {
         Expression leftExpression = ParseExpression();
-        Match<EqualityToken>("в выражении сравнения значений");
+
+        RelationExpression.RelationKind relationKind;
+        switch (Lookahead)
+        {
+            case EqualityToken:
+                Match<EqualityToken>("в выражении сравнения значений");
+                relationKind = RelationExpression.RelationKind.Equal;
+                break;
+
+            case LessThanToken:
+                Match<LessThanToken>("в выражении сравнения значений");
+                relationKind = RelationExpression.RelationKind.LessThan;
+                break;
+
+            case GreaterThanToken:
+                Match<GreaterThanToken>("в выражении сравнения значений");
+                relationKind = RelationExpression.RelationKind.GreaterThan;
+                break;
+
+            default:
+                throw new UnexpectedElementException("Ожидался оператор сравнения значений: '=', '<' или '>'", Lookahead, "в выражении сравнения значений");
+        }
+
         Expression rightExpression = ParseExpression();
 
         return new RelationExpression
         {
+            Kind = relationKind,
             LeftExpression = leftExpression,
             RightExpression = rightExpression
         };
@@ -248,7 +272,7 @@ public class UrqlParser(UrqlLexer urqlLexer)
                 return ParseStringLiteralExpressionTerminal();
 
             default:
-                throw new UnexpectedElementException("Ожидалась переменная, число, строка в кавычках или выражение в скобках", Lookahead);
+                throw new UnexpectedElementException("Ожидалось одно из: '+', '-', выражение в скобках, переменная, число, строка в кавычках", Lookahead, "в выражении");
         }
     }
 

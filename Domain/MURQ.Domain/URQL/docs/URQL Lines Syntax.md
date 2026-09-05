@@ -27,7 +27,7 @@ assignVariableStatement = ?Variable?,  '=', expression;
 
 ifStatement = ?If?, relationExpression, ?Then?, joinedStatements, [ ?Else?, joinedStatements ];
 
-relationExpression = expression, '=', expression;
+relationExpression = expression, ('=' | '<' | '>'), expression;
 
 expression =
     expression, ('+' | '-'), multiplication
