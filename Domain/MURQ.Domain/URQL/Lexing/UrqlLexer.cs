@@ -3,6 +3,7 @@ using MURQ.Domain.URQL.Lexing.Exceptions;
 using MURQ.Domain.URQL.Locations;
 using MURQ.Domain.URQL.Tokens;
 using MURQ.Domain.URQL.Tokens.Expressions;
+using MURQ.Domain.URQL.Tokens.Relations;
 using MURQ.Domain.URQL.Tokens.Statements;
 using MURQ.Domain.URQL.Tokens.Statements.If;
 
@@ -56,6 +57,14 @@ public class UrqlLexer(IEnumerable<OriginatedCharacter> source)
 
                 case '=':
                     yield return ParseEquality();
+                    break;
+
+                case '<':
+                    yield return ParseLessThan();
+                    break;
+
+                case '>':
+                    yield return ParseGreaterThan();
                     break;
 
                 case '+':
@@ -278,6 +287,22 @@ public class UrqlLexer(IEnumerable<OriginatedCharacter> source)
 
         (string lexeme, Location location) = GetLexemeData();
         return new EqualityToken(lexeme, location);
+    }
+
+    private LessThanToken ParseLessThan()
+    {
+        Match('<');
+
+        (string lexeme, Location location) = GetLexemeData();
+        return new LessThanToken(lexeme, location);
+    }
+
+    private GreaterThanToken ParseGreaterThan()
+    {
+        Match('>');
+
+        (string lexeme, Location location) = GetLexemeData();
+        return new GreaterThanToken(lexeme, location);
     }
 
     private PlusToken ParsePlus()
