@@ -206,7 +206,7 @@ public class UrqlParser(UrqlLexer urqlLexer)
         {
             Match<OrToken>();
             LogicExpression rightConjunctionExpression = ParseConjunctionExpression();
-            
+
             logicExpression = new DisjunctionExpression
             {
                 LeftExpression = logicExpression,
@@ -265,13 +265,28 @@ public class UrqlParser(UrqlLexer urqlLexer)
                 relationKind = RelationExpression.RelationKind.LessThan;
                 break;
 
+            case LessThanOrEqualToken:
+                Match<LessThanOrEqualToken>("в выражении сравнения значений");
+                relationKind = RelationExpression.RelationKind.LessThanOrEqual;
+                break;
+
             case GreaterThanToken:
                 Match<GreaterThanToken>("в выражении сравнения значений");
                 relationKind = RelationExpression.RelationKind.GreaterThan;
                 break;
 
+            case GreaterThanOrEqualToken:
+                Match<GreaterThanOrEqualToken>("в выражении сравнения значений");
+                relationKind = RelationExpression.RelationKind.GreaterThanOrEqual;
+                break;
+
+            case NotEqualToken:
+                Match<NotEqualToken>("в выражении сравнения значений");
+                relationKind = RelationExpression.RelationKind.NotEqual;
+                break;
+
             default:
-                throw new UnexpectedElementException("Ожидался оператор сравнения значений: '=', '<' или '>'", Lookahead, "в выражении сравнения значений");
+                throw new UnexpectedElementException("Ожидался оператор сравнения значений: '=', '<', '<=', '>', '>=' или '<>'", Lookahead, "в выражении сравнения значений");
         }
 
         Expression rightExpression = ParseExpression();
@@ -307,7 +322,7 @@ public class UrqlParser(UrqlLexer urqlLexer)
             case MinusToken:
                 Match<MinusToken>();
                 return new UnaryMinusExpression { Expression = ParseFactorExpression() };
-            
+
             case LeftBraceToken:
                 Match<LeftBraceToken>();
                 Expression expression = ParseExpression();

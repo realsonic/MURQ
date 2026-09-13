@@ -19,27 +19,24 @@ public class RelationExpression : LogicExpression
         Value leftValue = LeftExpression.Calculate(gameContext);
         Value rightValue = RightExpression.Calculate(gameContext);
 
-        bool result;
-        switch (Kind)
+        return Kind switch
         {
-            case RelationKind.Equal:
-                result = leftValue == rightValue;
-                break;
-            
-            case RelationKind.LessThan:
-                result = leftValue.AsDecimal < rightValue.AsDecimal;
-                break;
-            
-            case RelationKind.GreaterThan:
-                result = leftValue.AsDecimal > rightValue.AsDecimal;
-                break;
-
-            default:
-                throw new NotImplementedException($"Тип отношения {Kind} ещё не обрабатывается.");
+            RelationKind.Equal => IsEqual(leftValue, rightValue),
+            RelationKind.LessThan => leftValue.AsDecimal < rightValue.AsDecimal,
+            RelationKind.LessThanOrEqual => leftValue.AsDecimal <= rightValue.AsDecimal,
+            RelationKind.GreaterThan => leftValue.AsDecimal > rightValue.AsDecimal,
+            RelationKind.GreaterThanOrEqual => leftValue.AsDecimal >= rightValue.AsDecimal,
+            RelationKind.NotEqual => !IsEqual(leftValue, rightValue),
+            _ => throw new NotImplementedException($"Тип отношения {Kind} ещё не обрабатывается."),
         };
-
-        return result;
     }
+
+    private static bool IsEqual(Value leftValue, Value rightValue) => leftValue switch
+    {
+        NumberValue => leftValue.AsDecimal == rightValue.AsDecimal,
+        StringValue => leftValue.AsString == rightValue.AsString,
+        _ => throw new NotImplementedException($"Тип значения {leftValue.GetType()} ещё не обрабатывается.")
+    };
 
     private string RelationDebuggerDisplay => Kind switch
     {
@@ -53,6 +50,9 @@ public class RelationExpression : LogicExpression
     {
         Equal,
         LessThan,
-        GreaterThan
+        LessThanOrEqual,
+        GreaterThan,
+        GreaterThanOrEqual,
+        NotEqual
     }
 }

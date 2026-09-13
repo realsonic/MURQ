@@ -5,4 +5,4 @@ using System.ComponentModel;
 namespace MURQ.Domain.URQL.Tokens.Expressions.Relations;
 
 [Description(@"больше "">""")]
-public record GreaterThanToken(string Lexeme, Location Location) : Token(Lexeme, Location);
+public record GreaterThanToken(string Lexeme, Location Location) : RelationToken(Lexeme, Location);
