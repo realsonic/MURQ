@@ -61,7 +61,7 @@ public class UrqlLexer(IEnumerable<OriginatedCharacter> source)
                     break;
 
                 case '<':
-                    yield return ParseLessThan();
+                    yield return ParseLessAndNotEqualRelations();
                     break;
 
                 case '>':
@@ -304,20 +304,41 @@ public class UrqlLexer(IEnumerable<OriginatedCharacter> source)
         return new EqualityToken(lexeme, location);
     }
 
-    private LessThanToken ParseLessThan()
+    private RelationToken ParseLessAndNotEqualRelations()
     {
         Match('<');
 
-        (string lexeme, Location location) = GetLexemeData();
-        return new LessThanToken(lexeme, location);
+        switch (Lookahead?.Character)
+        {
+            case '=':
+                Match('=');
+                var lessThanOrEqualLexeme = GetLexemeData();
+                return new LessThanOrEqualToken(lessThanOrEqualLexeme.Lexeme, lessThanOrEqualLexeme.Location);
+
+            case '>':
+                Match('>');
+                var notEqualLexeme = GetLexemeData();
+                return new NotEqualToken(notEqualLexeme.Lexeme, notEqualLexeme.Location);
+
+            default:
+                var lessThanLexeme = GetLexemeData();
+                return new LessThanToken(lessThanLexeme.Lexeme, lessThanLexeme.Location);
+        }
     }
 
-    private GreaterThanToken ParseGreaterThan()
+    private RelationToken ParseGreaterThan()
     {
         Match('>');
 
-        (string lexeme, Location location) = GetLexemeData();
-        return new GreaterThanToken(lexeme, location);
+        if (Lookahead?.Character == '=')
+        {
+            Match('=');
+            var greaterThanOrEqualLexeme = GetLexemeData();
+            return new GreaterThanOrEqualToken(greaterThanOrEqualLexeme.Lexeme, greaterThanOrEqualLexeme.Location);
+        }
+
+        var greaterThanLexeme = GetLexemeData();
+        return new GreaterThanToken(greaterThanLexeme.Lexeme, greaterThanLexeme.Location);
     }
 
     private PlusToken ParsePlus()
@@ -446,7 +467,7 @@ public class UrqlLexer(IEnumerable<OriginatedCharacter> source)
                     if (lastChars.Equals("else", StringComparison.InvariantCultureIgnoreCase))
                     {
                         // вырезаем else как терминатор
-                        
+
                         textBuilder.Remove(textBuilder.Length - 5, 5); // убираем с пробелом впереди
 
                         List<OriginatedCharacter> elseTail = _lexeme.GetRange(_lexeme.Count - 4, 4); // берём без пробела впереди

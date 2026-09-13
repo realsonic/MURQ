@@ -35,7 +35,7 @@ conjuction =
     conjuction, 'and', relation
   | relation;
 
-relation = expression, ('=' | '<' | '>'), expression;
+relation = expression, ('=' | '<' | '<=' | '>' | '>=' | '<>'), expression;
 
 expression =
     expression, ('+' | '-'), multiplication
