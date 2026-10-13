@@ -96,10 +96,10 @@ public class UrqlLexer(IEnumerable<OriginatedCharacter> source)
                     yield return ParseStatementJoin();
                     break;
 
-                default: throw new UnknownLexemeException((Lexeme: Lookahead.Value.Character.ToString(), Location: Lookahead.Value.Origin.GetLocation()));
+                default: throw new UnknownLexemeException(new Lexeme(Lookahead.Value.Character.ToString(), Lookahead.Value.Origin.GetLocation()));
             }
 
-            _lexeme.Clear();
+            _lexemeCharacters.Clear();
 
             while (_postponedTokens.Count > 0)
             {
@@ -108,8 +108,8 @@ public class UrqlLexer(IEnumerable<OriginatedCharacter> source)
             }
         }
 
-        if (_lexeme.Count > 0)
-            throw new UnknownLexemeException(GetLexemeData());
+        if (_lexemeCharacters.Count > 0)
+            throw new UnknownLexemeException(GetLexeme());
     }
 
     private Token ParseWord()
@@ -164,8 +164,7 @@ public class UrqlLexer(IEnumerable<OriginatedCharacter> source)
         // Собираем текст
         string text = ParseTextTillTermination();
 
-        (string lexeme, Location location) = GetLexemeData();
-        return new PrintToken(text, isNewLine, lexeme, location);
+        return new PrintToken(text, isNewLine, GetLexeme());
     }
 
     private ButtonToken ParseButtonAfterBtn()
@@ -192,44 +191,23 @@ public class UrqlLexer(IEnumerable<OriginatedCharacter> source)
         }
 
         if (!isCommaMet)
-            throw new LexingException($"В команде btn после метки ожидалась запятая", GetLexemeData());
+            throw new LexingException($"В команде btn после метки ожидалась запятая", GetLexeme());
 
         // Собираем надпись
         string caption = ParseTextTillTermination();
 
-        (string lexeme, Location location) = GetLexemeData();
-        return new ButtonToken(labelBuilder.ToString().Trim(), caption, lexeme, location);
+        return new ButtonToken(labelBuilder.ToString().Trim(), caption, GetLexeme());
     }
 
-    private EndToken ParseEndAfterEnd()
-    {
-        (string lexeme, Location location) = GetLexemeData();
-        return new EndToken(lexeme, location);
-    }
+    private EndToken ParseEndAfterEnd() => new(GetLexeme());
 
-    private ClearScreenToken ParseClearScreenAfterCls()
-    {
-        (string lexeme, Location location) = GetLexemeData();
-        return new ClearScreenToken(lexeme, location);
-    }
+    private ClearScreenToken ParseClearScreenAfterCls() => new(GetLexeme());
 
-    private IfToken ParseIfAfterIf()
-    {
-        (string lexeme, Location location) = GetLexemeData();
-        return new IfToken(lexeme, location);
-    }
+    private IfToken ParseIfAfterIf() => new(GetLexeme());
 
-    private ThenToken ParseThenAfterThen()
-    {
-        (string lexeme, Location location) = GetLexemeData();
-        return new ThenToken(lexeme, location);
-    }
+    private ThenToken ParseThenAfterThen() => new(GetLexeme());
 
-    private ElseToken ParseElseAfterThen()
-    {
-        (string lexeme, Location location) = GetLexemeData();
-        return new ElseToken(lexeme, location);
-    }
+    private ElseToken ParseElseAfterThen() => new(GetLexeme());
 
     private GotoToken ParseGotoAfterGoto()
     {
@@ -239,15 +217,10 @@ public class UrqlLexer(IEnumerable<OriginatedCharacter> source)
         // Собираем метку
         var label = ParseTextTillTermination();
 
-        (string lexeme, Location location) = GetLexemeData();
-        return new GotoToken(label.Trim(), lexeme, location);
+        return new GotoToken(label.Trim(), GetLexeme());
     }
 
-    private PerkillToken ParsePerkillAfterPerkill()
-    {
-        (string lexeme, Location location) = GetLexemeData();
-        return new PerkillToken(lexeme, location);
-    }
+    private PerkillToken ParsePerkillAfterPerkill() => new(GetLexeme());
 
     private PauseToken ParsePauseAfterPause()
     {
@@ -255,21 +228,12 @@ public class UrqlLexer(IEnumerable<OriginatedCharacter> source)
 
         decimal duration = ParseNumber();
 
-        (string lexeme, Location location) = GetLexemeData();
-        return new PauseToken((int)duration, lexeme, location);
+        return new PauseToken((int)duration, GetLexeme());
     }
 
-    private AndToken ParseAndAfterAnd()
-    {
-        (string lexeme, Location location) = GetLexemeData();
-        return new AndToken(lexeme, location);
-    }
+    private AndToken ParseAndAfterAnd() => new(GetLexeme());
 
-    private OrToken ParseOrAfterOr()
-    {
-        (string lexeme, Location location) = GetLexemeData();
-        return new OrToken(lexeme, location);
-    }
+    private OrToken ParseOrAfterOr() => new(GetLexeme());
 
     private VariableToken ParseVariable(string collectedName)
     {
@@ -292,16 +256,14 @@ public class UrqlLexer(IEnumerable<OriginatedCharacter> source)
             }
         }
 
-        (string lexeme, Location location) = GetLexemeData();
-        return new VariableToken(nameBuilder.ToString(), lexeme, location);
+        return new VariableToken(nameBuilder.ToString(), GetLexeme());
     }
 
     private EqualityToken ParseEquality()
     {
         Match('=');
 
-        (string lexeme, Location location) = GetLexemeData();
-        return new EqualityToken(lexeme, location);
+        return new EqualityToken(GetLexeme());
     }
 
     private RelationToken ParseLessAndNotEqualRelations()
@@ -312,17 +274,14 @@ public class UrqlLexer(IEnumerable<OriginatedCharacter> source)
         {
             case '=':
                 Match('=');
-                var lessThanOrEqualLexeme = GetLexemeData();
-                return new LessThanOrEqualToken(lessThanOrEqualLexeme.Lexeme, lessThanOrEqualLexeme.Location);
+                return new LessThanOrEqualToken(GetLexeme());
 
             case '>':
                 Match('>');
-                var notEqualLexeme = GetLexemeData();
-                return new NotEqualToken(notEqualLexeme.Lexeme, notEqualLexeme.Location);
+                return new NotEqualToken(GetLexeme());
 
             default:
-                var lessThanLexeme = GetLexemeData();
-                return new LessThanToken(lessThanLexeme.Lexeme, lessThanLexeme.Location);
+                return new LessThanToken(GetLexeme());
         }
     }
 
@@ -333,68 +292,59 @@ public class UrqlLexer(IEnumerable<OriginatedCharacter> source)
         if (Lookahead?.Character == '=')
         {
             Match('=');
-            var greaterThanOrEqualLexeme = GetLexemeData();
-            return new GreaterThanOrEqualToken(greaterThanOrEqualLexeme.Lexeme, greaterThanOrEqualLexeme.Location);
+            return new GreaterThanOrEqualToken(GetLexeme());
         }
 
-        var greaterThanLexeme = GetLexemeData();
-        return new GreaterThanToken(greaterThanLexeme.Lexeme, greaterThanLexeme.Location);
+        return new GreaterThanToken(GetLexeme());
     }
 
     private PlusToken ParsePlus()
     {
         Match('+');
 
-        (string lexeme, Location location) = GetLexemeData();
-        return new PlusToken(lexeme, location);
+        return new PlusToken(GetLexeme());
     }
 
     private MinusToken ParseMinus()
     {
         Match('-');
 
-        (string lexeme, Location location) = GetLexemeData();
-        return new MinusToken(lexeme, location);
+        return new MinusToken(GetLexeme());
     }
 
     private MultiplicationToken ParseMultiplication()
     {
         Match('*');
 
-        (string lexeme, Location location) = GetLexemeData();
-        return new MultiplicationToken(lexeme, location);
+        return new MultiplicationToken(GetLexeme());
     }
 
     private DivisionToken ParseDivision()
     {
         Match('/');
 
-        (string lexeme, Location location) = GetLexemeData();
-        return new DivisionToken(lexeme, location);
+        return new DivisionToken(GetLexeme());
     }
 
     private LeftBraceToken ParseLeftBrace()
     {
         Match('(');
 
-        (string lexeme, Location location) = GetLexemeData();
-        return new LeftBraceToken(lexeme, location);
+        return new LeftBraceToken(GetLexeme());
     }
 
     private RightBraceToken ParseRightBrace()
     {
         Match(')');
 
-        (string lexeme, Location location) = GetLexemeData();
-        return new RightBraceToken(lexeme, location);
+        return new RightBraceToken(GetLexeme());
     }
 
     private StatementJoinToken ParseStatementJoin()
     {
         Match('&');
 
-        (string lexeme, Location location) = GetLexemeData();
-        return new StatementJoinToken(lexeme, location);
+        return new StatementJoinToken(GetLexeme());
     }
 
     private StringLiteralToken ParseStringLiteral()
@@ -422,15 +372,13 @@ public class UrqlLexer(IEnumerable<OriginatedCharacter> source)
 
         Match('"');
 
-        (string lexeme, Location location) = GetLexemeData();
-        return new StringLiteralToken(textBuilder.ToString(), lexeme, location);
+        return new StringLiteralToken(textBuilder.ToString(), GetLexeme());
     }
 
     private NumberToken ParseNumberLiteral()
     {
         decimal number = ParseNumber();
-        (string lexeme, Location location) = GetLexemeData();
-        return new NumberToken(number, lexeme, location);
+        return new NumberToken(number, GetLexeme());
     }
 
     private void AllowSpaceOrTab(string commandName)
@@ -443,7 +391,7 @@ public class UrqlLexer(IEnumerable<OriginatedCharacter> source)
 
             default:
                 if (Lookahead is not null)
-                    throw new LexingException($"После команды {commandName} ожидался пробел или табуляция", GetLexemeData());
+                    throw new LexingException($"После команды {commandName} ожидался пробел или табуляция", GetLexeme());
                 break;
         }
     }
@@ -470,13 +418,13 @@ public class UrqlLexer(IEnumerable<OriginatedCharacter> source)
 
                         textBuilder.Remove(textBuilder.Length - 5, 5); // убираем с пробелом впереди
 
-                        List<OriginatedCharacter> elseTail = _lexeme.GetRange(_lexeme.Count - 4, 4); // берём без пробела впереди
+                        List<OriginatedCharacter> elseTail = _lexemeCharacters.GetRange(_lexemeCharacters.Count - 4, 4); // берём без пробела впереди
                         Location elseLocation = Location
                             .StartAt(elseTail.First().Origin.GetLocation().Start)
                             .EndAt(elseTail.Last().Origin.GetLocation().End);
-                        _postponedTokens.Enqueue(new ElseToken(elseTail.ToPlainString(), elseLocation));
+                        _postponedTokens.Enqueue(new ElseToken(new Lexeme(elseTail.ToLiteral(), elseLocation)));
 
-                        _lexeme.RemoveRange(_lexeme.Count - 5, 5); // убираем с пробелом впереди
+                        _lexemeCharacters.RemoveRange(_lexemeCharacters.Count - 5, 5); // убираем с пробелом впереди
 
                         isTerminated = true;
                     }
@@ -522,35 +470,35 @@ public class UrqlLexer(IEnumerable<OriginatedCharacter> source)
         string numberString = numberBuilder.ToString();
         return decimal.TryParse(numberString, out decimal number)
             ? number
-            : throw new LexingException($"{numberString} не подходит как число", GetLexemeData());
+            : throw new LexingException($"{numberString} не подходит как число", GetLexeme());
     }
 
-    private (string Lexeme, Location Location)? TryGetLexemeData()
+    private Lexeme? TryGetLexeme()
     {
-        if (_lexeme.Count is 0)
+        if (_lexemeCharacters.Count is 0)
             return null;
 
-        string lexemeString = _lexeme.ToPlainString();
+        string literal = _lexemeCharacters.ToLiteral();
 
         Location location = Location
-            .StartAt(_lexeme.First().Origin.GetLocation().Start)
-            .EndAt(_lexeme.Last().Origin.GetLocation().End);
+            .StartAt(_lexemeCharacters.First().Origin.GetLocation().Start)
+            .EndAt(_lexemeCharacters.Last().Origin.GetLocation().End);
 
-        return (Lexeme: lexemeString, Location: location);
+        return new Lexeme(literal, location);
     }
 
-    private (string Lexeme, Location Location) GetLexemeData()
-        => TryGetLexemeData() ?? throw new InvalidOperationException("Лексема оказалось пустой");
+    private Lexeme GetLexeme()
+        => TryGetLexeme() ?? throw new InvalidOperationException("Лексема оказалось пустой");
 
     private void Match(char expectedCharacter)
     {
         if (Lookahead is null)
-            throw new LexingException($"Ожидался '{expectedCharacter}', а встретился конец строки", GetLexemeData());
+            throw new LexingException($"Ожидался '{expectedCharacter}', а встретился конец строки", GetLexeme());
 
         if (Lookahead.Value.Character != expectedCharacter)
-            throw new LexingException($"Ожидался '{expectedCharacter}', а встретился '{Lookahead.Value.Character}'", GetLexemeData());
+            throw new LexingException($"Ожидался '{expectedCharacter}', а встретился '{Lookahead.Value.Character}'", GetLexeme());
 
-        _lexeme.Add(Lookahead.Value);
+        _lexemeCharacters.Add(Lookahead.Value);
         MoveToNextCharacter();
     }
 
@@ -558,7 +506,7 @@ public class UrqlLexer(IEnumerable<OriginatedCharacter> source)
 
     private OriginatedCharacter? Lookahead { get; set; }
 
-    private readonly List<OriginatedCharacter> _lexeme = [];
+    private readonly List<OriginatedCharacter> _lexemeCharacters = [];
     private readonly IEnumerator<OriginatedCharacter> _characterEnumerator = source.GetEnumerator();
     private readonly Queue<Token> _postponedTokens = [];
 }

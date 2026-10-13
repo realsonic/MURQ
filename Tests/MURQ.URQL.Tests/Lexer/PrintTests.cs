@@ -19,7 +19,7 @@ public class PrintTests
 
         // Assert
         tokens.Should().BeEquivalentTo([
-            new PrintToken("Привет!", false, "p Привет!", ((1, 1), (1, 9)))
+            new PrintToken("Привет!", false, new Lexeme("p Привет!", ((1, 1), (1, 9))))
         ]);
     }
 }

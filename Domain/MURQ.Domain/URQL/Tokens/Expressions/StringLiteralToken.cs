@@ -1,11 +1,9 @@
-﻿using MURQ.Domain.URQL.Locations;
-
-using System.ComponentModel;
+﻿using System.ComponentModel;
 
 namespace MURQ.Domain.URQL.Tokens.Expressions;
 
 [Description("строковый литерал")]
-public record StringLiteralToken(string Text, string Lexeme, Location Location) : Token(Lexeme, Location)
+public record StringLiteralToken(string Text, Lexeme Lexeme) : Token(Lexeme)
 {
     public override string Description => $@"строковый литерал ""{Text}""";
 }
