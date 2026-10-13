@@ -1,8 +1,6 @@
-﻿using MURQ.Domain.URQL.Locations;
-
-using System.ComponentModel;
+﻿using System.ComponentModel;
 
 namespace MURQ.Domain.URQL.Tokens.Expressions.Logic;
 
 [Description(@"логическое ИЛИ ""or""")]
-public record OrToken(string Lexeme, Location Location) : Token(Lexeme, Location);
+public record OrToken(Lexeme Lexeme) : Token(Lexeme);

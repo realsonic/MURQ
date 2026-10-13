@@ -1,12 +1,10 @@
-﻿using MURQ.Domain.URQL.Locations;
-
-using System.ComponentModel;
+﻿using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 
 namespace MURQ.Domain.URQL.Tokens;
 
-public abstract record Token(string Lexeme, Location Location)
+public abstract record Token(Lexeme Lexeme)
 {
     public static string GetTokenTypeDescription<TToken>() where TToken : Token
     {

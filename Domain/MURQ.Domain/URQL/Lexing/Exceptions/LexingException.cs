@@ -1,4 +1,5 @@
 ﻿using MURQ.Domain.URQL.Locations;
+using MURQ.Domain.URQL.Tokens;
 
 namespace MURQ.Domain.URQL.Lexing.Exceptions;
 
@@ -13,7 +14,7 @@ internal class LexingException : UrqlException
     {
     }
 
-    public LexingException(string? message, (string Lexeme, Location Location) lexemeData) : this($"{message}: {lexemeData.Lexeme}", lexemeData.Location)
+    public LexingException(string? message, Lexeme lexeme) : this($"{message}: {lexeme.Literal}", lexeme.Location)
     {
     }
 

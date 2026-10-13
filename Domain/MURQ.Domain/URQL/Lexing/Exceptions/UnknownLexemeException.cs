@@ -1,4 +1,4 @@
-﻿using MURQ.Domain.URQL.Locations;
+﻿using MURQ.Domain.URQL.Tokens;
 
 namespace MURQ.Domain.URQL.Lexing.Exceptions;
 
@@ -9,11 +9,7 @@ internal class UnknownLexemeException : LexingException
     {
     }
 
-    public UnknownLexemeException(string lexeme, Location location) : base($"Неизвестная лексема \"{lexeme}\"", location)
-    {
-    }
-
-    public UnknownLexemeException((string Lexeme, Location Location) lexemeData) : this(lexemeData.Lexeme, lexemeData.Location)
+    public UnknownLexemeException(Lexeme lexeme) : base($"Неизвестная лексема \"{lexeme}\"", lexeme.Location)
     {
     }
 

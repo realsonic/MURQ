@@ -57,7 +57,7 @@ stopwatch.Stop();
 totalTime += stopwatch.Elapsed;
 Console.WriteLine($"""
     -- Этап 3. Удаление комментариев ------------------------- ({stopwatch.Elapsed:mm\:ss\.fff})
-    {uncommentedSource.ToPlainString()}
+    {uncommentedSource.ToLiteral()}
     ----------------------------------------------------------------------
         
     """);
@@ -68,7 +68,7 @@ stopwatch.Stop();
 totalTime += stopwatch.Elapsed;
 Console.WriteLine($"""
     -- Этап 4. Схлопывание переносов ------------------------- ({stopwatch.Elapsed:mm\:ss\.fff})
-    {uncontinuedSource.ToPlainString()}
+    {uncontinuedSource.ToLiteral()}
     ----------------------------------------------------------------------
 
     """);
@@ -79,7 +79,7 @@ stopwatch.Stop();
 totalTime += stopwatch.Elapsed;
 Console.WriteLine($"""
     -- Этап 5. Разбивка на строки ---------------------------- ({stopwatch.Elapsed:mm\:ss\.fff})
-    {lines.ToJoinedNumberedLines(line => line.ToPlainString())}
+    {lines.ToJoinedNumberedLines(line => line.ToLiteral())}
     ----------------------------------------------------------------------
 
     """);
