@@ -203,11 +203,29 @@ public class UrqlLexer(IEnumerable<OriginatedCharacter> source)
 
     private ClearScreenToken ParseClearScreenAfterCls() => new(GetLexeme());
 
-    private IfToken ParseIfAfterIf() => new(GetLexeme());
+    private IfToken ParseIfAfterIf()
+    {
+        // После if разрешён пробел или табуляция
+        AllowSpaceOrTab("if");
+        
+        return new(GetLexeme());
+    }
 
-    private ThenToken ParseThenAfterThen() => new(GetLexeme());
+    private ThenToken ParseThenAfterThen()
+    {
+        // После then разрешён пробел или табуляция
+        AllowSpaceOrTab("then");
+        
+        return new(GetLexeme());
+    }
 
-    private ElseToken ParseElseAfterThen() => new(GetLexeme());
+    private ElseToken ParseElseAfterThen()
+    {
+        // После else разрешён пробел или табуляция
+        AllowSpaceOrTab("else");
+        
+        return new(GetLexeme());
+    }
 
     private GotoToken ParseGotoAfterGoto()
     {
@@ -224,6 +242,7 @@ public class UrqlLexer(IEnumerable<OriginatedCharacter> source)
 
     private PauseToken ParsePauseAfterPause()
     {
+        // После pause разрешён пробел или табуляция
         AllowSpaceOrTab("pause");
 
         decimal duration = ParseNumber();
@@ -231,9 +250,21 @@ public class UrqlLexer(IEnumerable<OriginatedCharacter> source)
         return new PauseToken((int)duration, GetLexeme());
     }
 
-    private AndToken ParseAndAfterAnd() => new(GetLexeme());
+    private AndToken ParseAndAfterAnd()
+    {
+        // После and разрешён пробел или табуляция
+        AllowSpaceOrTab("and");
 
-    private OrToken ParseOrAfterOr() => new(GetLexeme());
+        return new(GetLexeme());
+    }
+
+    private OrToken ParseOrAfterOr()
+    {
+        // После or разрешён пробел или табуляция
+        AllowSpaceOrTab("or");
+
+        return new(GetLexeme());
+    }
 
     private VariableToken ParseVariable(string collectedName)
     {
