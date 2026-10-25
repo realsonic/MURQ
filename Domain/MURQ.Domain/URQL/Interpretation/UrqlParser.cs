@@ -109,148 +109,85 @@ public class UrqlParser(UrqlLexer urqlLexer)
     /// <summary>
     /// Грамматика:
     /// <code>
-    /// expression =
-    ///     expression, ('+' | '-'), multiplication
-    ///   | multiplication;
-    /// </code>
-    /// Адаптация через цикл:
-    /// <code>
-    /// expression = multiplication, { ('+' | '-'), multiplication };
+    /// expression = orExpression;
     /// </code>
     /// </summary>
     /// <returns><see cref="Expression"/></returns>
-    /// <exception cref="NotImplementedException"></exception>
-    protected Expression ParseExpression()
-    {
-        Expression expression = ParseMultiplicationExpression();
-
-        while (Lookahead is PlusToken or MinusToken)
-        {
-            switch (Lookahead)
-            {
-                case PlusToken:
-                    Match<PlusToken>();
-                    expression = new AdditionExpression { LeftExpression = expression, RightExpression = ParseMultiplicationExpression() };
-                    break;
-
-                case MinusToken:
-                    Match<MinusToken>();
-                    expression = new SubstractionExpression { LeftExpression = expression, RightExpression = ParseMultiplicationExpression() };
-                    break;
-
-                default:
-                    throw new NotImplementedException($"Тип операции {Lookahead} ещё не обрабатывается.");
-            }
-        }
-
-        return expression;
-    }
+    protected Expression ParseExpression() => ParseOrExpression();
 
     /// <summary>
     /// Грамматика:
     /// <code>
-    /// multiplication =
-    ///     multiplication, ('*' | "/"), factor
-    ///   | factor;
+    /// orExpression =
+    ///     orExpression, 'or', andExpression
+    ///   | andExpression;
     /// </code>
     /// Адаптация через цикл:
     /// <code>
-    /// multiplication = factor, {('*' | '/'), factor};
+    /// orExpression = andExpression, { 'or', andExpression };
     /// </code>
     /// </summary>
-    /// <returns><see cref="Expression"/></returns>
-    /// <exception cref="NotImplementedException"></exception>
-    protected Expression ParseMultiplicationExpression()
+    protected Expression ParseOrExpression()
     {
-        Expression expression = ParseFactorExpression();
-
-        while (Lookahead is MultiplicationToken or DivisionToken)
-        {
-            switch (Lookahead)
-            {
-                case MultiplicationToken:
-                    Match<MultiplicationToken>();
-                    expression = new MultiplicationExpression { LeftExpression = expression, RightExpression = ParseFactorExpression() };
-                    break;
-
-                case DivisionToken:
-                    Match<DivisionToken>();
-                    expression = new DivisionExpression { LeftExpression = expression, RightExpression = ParseFactorExpression() };
-                    break;
-
-                default:
-                    throw new NotImplementedException($"Тип операции {Lookahead} ещё не обрабатывается.");
-            }
-        }
-
-        return expression;
-    }
-
-    protected DecimalConstantExpression ParseNumberExpressionTerminal()
-    {
-        NumberToken numberToken = Match<NumberToken>();
-        return new DecimalConstantExpression { Value = numberToken.Value };
-    }
-
-    /// <summary>
-    /// Грамматика:
-    /// <code>
-    /// disjunction = disjunction, 'or', conjuction | conjuction;
-    /// </code>
-    /// </summary>
-    protected LogicExpression ParseLogicExpression()
-    {
-        LogicExpression logicExpression = ParseConjunctionExpression();
+        Expression resultExpression = ParseAndExpression();
 
         while (Lookahead is OrToken)
         {
             Match<OrToken>();
-            LogicExpression rightConjunctionExpression = ParseConjunctionExpression();
+            
+            Expression rightAndExpression = ParseAndExpression();
 
-            logicExpression = new DisjunctionExpression
+            resultExpression = new OrExpression
             {
-                LeftExpression = logicExpression,
-                RightExpression = rightConjunctionExpression
+                LeftExpression = resultExpression,
+                RightExpression = rightAndExpression
             };
         }
 
-        return logicExpression;
+        return resultExpression;
     }
 
     /// <summary>
     /// Грамматика:
     /// <code>
-    /// conjuction = conjuction, 'and', relation | relation;
+    /// andExpression =
+    ///     andExpression, 'and', relationExpression
+    ///   | relationExpression;
+    /// </code>
+    /// Адаптация через цикл:
+    /// <code>
+    /// andExpression = relationExpression, { 'and', relationExpression };
     /// </code>
     /// </summary>
-    private LogicExpression ParseConjunctionExpression()
+    private Expression ParseAndExpression()
     {
-        LogicExpression logicExpression = ParseRelationExpression();
+        Expression resultExpression = ParseRelationExpression();
 
         while (Lookahead is AndToken)
         {
             Match<AndToken>();
-            RelationExpression relationExpression = ParseRelationExpression();
 
-            logicExpression = new ConjunctionExpression
+            Expression relationExpression = ParseRelationExpression();
+
+            resultExpression = new AndExpression
             {
-                LeftExpression = logicExpression,
+                LeftExpression = resultExpression,
                 RightExpression = relationExpression
             };
         }
 
-        return logicExpression;
+        return resultExpression;
     }
 
     /// <summary>
     /// Грамматика:
     /// <code>
-    /// relation = expression, ('=' | '<' | '>'), expression;
+    /// relationExpression = additionExpression, [ ( '=' | '<' | '<=' | '>' | '>=' | '<>' ), additionExpression ];
     /// </code>
     /// </summary>
-    protected RelationExpression ParseRelationExpression()
+    protected Expression ParseRelationExpression()
     {
-        Expression leftExpression = ParseExpression();
+        Expression leftExpression = ParseAdditionExpression();
 
         RelationExpression.RelationKind relationKind;
         switch (Lookahead)
@@ -286,10 +223,10 @@ public class UrqlParser(UrqlLexer urqlLexer)
                 break;
 
             default:
-                throw new UnexpectedElementException("Ожидался оператор сравнения значений: '=', '<', '<=', '>', '>=' или '<>'", Lookahead, "в выражении сравнения значений");
+                return leftExpression;
         }
 
-        Expression rightExpression = ParseExpression();
+        Expression rightExpression = ParseAdditionExpression();
 
         return new RelationExpression
         {
@@ -299,10 +236,110 @@ public class UrqlParser(UrqlLexer urqlLexer)
         };
     }
 
-    protected StringLiteralExpression ParseStringLiteralExpressionTerminal()
+    /// <summary>
+    /// Грамматика:
+    /// <code>
+    /// additionExpression =
+    ///     additionExpression, ( '+' | '-' ), multiplicationExpression
+    ///   | multiplicationExpression;
+    /// </code>
+    /// Адаптация через цикл:
+    /// <code>
+    /// additionExpression = multiplicationExpression, { ( '+' | '-' ), multiplicationExpression };
+    /// </code>
+    /// </summary>
+    /// <returns><see cref="Expression"/></returns>
+    /// <exception cref="NotImplementedException"></exception>
+    protected Expression ParseAdditionExpression()
     {
-        StringLiteralToken stringLiteralToken = Match<StringLiteralToken>();
-        return new StringLiteralExpression { Text = stringLiteralToken.Text };
+        Expression resultExpression = ParseMultiplicationExpression();
+
+        while (Lookahead is PlusToken or MinusToken)
+        {
+            switch (Lookahead)
+            {
+                case PlusToken:
+                    Match<PlusToken>();
+                    resultExpression = new AdditionExpression { LeftExpression = resultExpression, RightExpression = ParseMultiplicationExpression() };
+                    break;
+
+                case MinusToken:
+                    Match<MinusToken>();
+                    resultExpression = new SubstractionExpression { LeftExpression = resultExpression, RightExpression = ParseMultiplicationExpression() };
+                    break;
+
+                default:
+                    throw new NotImplementedException($"Тип операции {Lookahead} ещё не обрабатывается.");
+            }
+        }
+
+        return resultExpression;
+    }
+
+    /// <summary>
+    /// Грамматика:
+    /// <code>
+    /// multiplicationExpression =
+    ///     multiplicationExpression, ( '*' | "/" ), signExpression
+    ///   | signExpression;
+    /// </code>
+    /// Адаптация через цикл:
+    /// <code>
+    /// multiplicationExpression = signExpression, { ( '*' | '/' ), signExpression };
+    /// </code>
+    /// </summary>
+    /// <returns><see cref="Expression"/></returns>
+    /// <exception cref="NotImplementedException"></exception>
+    protected Expression ParseMultiplicationExpression()
+    {
+        Expression resultExpression = ParseSignExpression();
+
+        while (Lookahead is MultiplicationToken or DivisionToken)
+        {
+            switch (Lookahead)
+            {
+                case MultiplicationToken:
+                    Match<MultiplicationToken>();
+                    resultExpression = new MultiplicationExpression { LeftExpression = resultExpression, RightExpression = ParseFactorExpression() };
+                    break;
+
+                case DivisionToken:
+                    Match<DivisionToken>();
+                    resultExpression = new DivisionExpression { LeftExpression = resultExpression, RightExpression = ParseFactorExpression() };
+                    break;
+
+                default:
+                    throw new NotImplementedException($"Тип операции {Lookahead} ещё не обрабатывается.");
+            }
+        }
+
+        return resultExpression;
+    }
+
+    /// <summary>
+    /// Грамматика:
+    /// <code>
+    /// signExpression =
+    ///     ( '+' | '-' ), signExpression
+    ///   | factorExpression;
+    /// </code>
+    /// </summary>
+    /// <returns><see cref="Expression"/></returns>
+    protected Expression ParseSignExpression()
+    {
+        switch (Lookahead)
+        {
+            case PlusToken:
+                Match<PlusToken>();
+                return new UnaryPlusExpression { Expression = ParseSignExpression() };
+
+            case MinusToken:
+                Match<MinusToken>();
+                return new UnaryMinusExpression { Expression = ParseSignExpression() };
+
+            default:
+                return ParseFactorExpression();
+        }
     }
 
     /// <summary>
@@ -315,14 +352,6 @@ public class UrqlParser(UrqlLexer urqlLexer)
     {
         switch (Lookahead)
         {
-            case PlusToken:
-                Match<PlusToken>();
-                return new UnaryPlusExpression { Expression = ParseFactorExpression() };
-
-            case MinusToken:
-                Match<MinusToken>();
-                return new UnaryMinusExpression { Expression = ParseFactorExpression() };
-
             case LeftBraceToken:
                 Match<LeftBraceToken>();
                 Expression expression = ParseExpression();
@@ -339,7 +368,7 @@ public class UrqlParser(UrqlLexer urqlLexer)
                 return ParseStringLiteralExpressionTerminal();
 
             default:
-                throw new UnexpectedElementException("Ожидалось одно из: '+', '-', выражение в скобках, переменная, число, строка в кавычках", Lookahead, "в выражении");
+                throw new UnexpectedElementException("Ожидалось одно из: выражение в скобках, переменная, число, строка в кавычках", Lookahead, "в выражении");
         }
     }
 
@@ -347,6 +376,18 @@ public class UrqlParser(UrqlLexer urqlLexer)
     {
         VariableToken variableToken = Match<VariableToken>();
         return new VariableExpression { Name = variableToken.Name };
+    }
+
+    protected DecimalConstantExpression ParseNumberExpressionTerminal()
+    {
+        NumberToken numberToken = Match<NumberToken>();
+        return new DecimalConstantExpression { Value = numberToken.Value };
+    }
+
+    protected StringLiteralExpression ParseStringLiteralExpressionTerminal()
+    {
+        StringLiteralToken stringLiteralToken = Match<StringLiteralToken>();
+        return new StringLiteralExpression { Text = stringLiteralToken.Text };
     }
 
     #endregion

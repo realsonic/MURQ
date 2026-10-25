@@ -6,7 +6,7 @@ using System.Diagnostics;
 namespace MURQ.Domain.Quests.Expressions.Logic;
 
 [DebuggerDisplay("{LeftExpression} {RelationDebuggerDisplay} {RightExpression}")]
-public class RelationExpression : LogicExpression
+public class RelationExpression : Expression
 {
     public required RelationKind Kind { get; init; }
 
@@ -14,12 +14,12 @@ public class RelationExpression : LogicExpression
 
     public required Expression RightExpression { get; init; }
 
-    public override bool Calculate(IGameContext gameContext)
+    public override Value Calculate(IGameContext gameContext)
     {
         Value leftValue = LeftExpression.Calculate(gameContext);
         Value rightValue = RightExpression.Calculate(gameContext);
 
-        return Kind switch
+        bool result = Kind switch
         {
             RelationKind.Equal => IsEqual(leftValue, rightValue),
             RelationKind.LessThan => leftValue.AsDecimal < rightValue.AsDecimal,
@@ -29,6 +29,8 @@ public class RelationExpression : LogicExpression
             RelationKind.NotEqual => !IsEqual(leftValue, rightValue),
             _ => throw new NotImplementedException($"Тип отношения {Kind} ещё не обрабатывается."),
         };
+
+        return new NumberValue(result ? 1 : 0);
     }
 
     private static bool IsEqual(Value leftValue, Value rightValue) => leftValue switch

@@ -1,5 +1,6 @@
 ﻿using MURQ.Domain.Games;
-using MURQ.Domain.Quests.Expressions.Logic;
+using MURQ.Domain.Games.Values;
+using MURQ.Domain.Quests.Expressions;
 using MURQ.Domain.Quests.Statements;
 using MURQ.Domain.URQL.Interpretation.Exceptions;
 using MURQ.Domain.URQL.Lexing;
@@ -108,8 +109,9 @@ public class UrqlInterpreter(UrqlLexer urqlLexer, IGameContext gameContext) : Ur
     {
         Match<IfToken>();
 
-        LogicExpression logicExpression = ParseLogicExpression();
-        bool isConditionTrue = logicExpression.Calculate(gameContext);
+        Expression expression = ParseExpression();
+        Value result = expression.Calculate(gameContext);
+        bool isConditionTrue = result.AsDecimal != 0;
 
         InterpretationResult interpretationResult = InterpretationResult.Normal;
 

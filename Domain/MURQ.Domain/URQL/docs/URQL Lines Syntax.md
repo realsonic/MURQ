@@ -25,29 +25,34 @@ statement =
 
 assignVariableStatement = ?Variable?,  '=', expression;
 
-ifStatement = 'if', disjunction, 'then', joinedStatements, [ 'else', joinedStatements ];
+ifStatement = 'if', expression, 'then', joinedStatements, [ 'else', joinedStatements ];
 
-disjunction =
-    disjunction, 'or', conjuction
-  | conjuction;
+expression = orExpression;
 
-conjuction =
-    conjuction, 'and', relation
-  | relation;
+orExpression =
+    orExpression, 'or', andExpression
+  | andExpression;
 
-relation = expression, ('=' | '<' | '<=' | '>' | '>=' | '<>'), expression;
+andExpression =
+    andExpression, 'and', relationExpression
+  | relationExpression;
 
-expression =
-    expression, ('+' | '-'), multiplication
-  | multiplication;
+relationExpression = additionExpression, [ ( '=' | '<' | '<=' | '>' | '>=' | '<>' ), additionExpression ];
 
-multiplication =
-    multiplication, ('*' | "/"), factor
-  | factor;
+additionExpression =
+    additionExpression, ( '+' | '-' ), multiplicationExpression
+  | multiplicationExpression;
 
-factor =
-    ('+' | '-'), factor
-  | '(', expression, ')'
+multiplicationExpression =
+    multiplicationExpression, ( '*' | "/" ), signExpression
+  | signExpression;
+
+signExpression =
+    ( '+' | '-' ), signExpression
+  | factorExpression;
+
+factorExpression =
+    ( '(', expression, ')' )
   | ?Variable?
   | ?Number?
   | ?StringLiteral?;
@@ -113,146 +118,131 @@ joinedStatements = statement, { '&', statement };
 @endebnf
 ```
 
-## Адаптация `expression`
+## Адаптация `additionExpression`
 ```plantuml
-@startebnf Исходный expression
+@startebnf Исходный additionExpression
 !theme crt-amber
 
 title Исходный нетерминал
 
-expression =
-    expression, ('+' | '-'), multiplication
-  | multiplication;
+additionExpression =
+    additionExpression, ('+' | '-'), multiplicationExpression
+  | multiplicationExpression;
 @endebnf
 ```
 
 ### Разбивка на элементы
 | Элемент | Значение  |
 |:-------:| --------- |
-| $A$ | $expression$  |
-| $\alpha$  | ${'+'}, multiplication$ |
-| $\beta$ | ${'-'}, multiplication$ |
-| $\gamma$  | $multiplication$ |
+| $A$ | $additionExpression$  |
+| $\alpha$  | ${'+'}, multiplicationExpression$ |
+| $\beta$ | ${'-'}, multiplicationExpression$ |
+| $\gamma$  | $multiplicationExpression$ |
 
 ### Преобразование
 | Формула | Результат |
 | ------- | --------- |
-| $A \rightarrow \gamma R$  | $expression \rightarrow multiplication, expressionRest$  |
-| $R \rightarrow {\alpha R} \mid {\beta R} \mid \epsilon$ | $expressionRest \rightarrow {{'+'}, multiplication, expressionRest} \mid {{'-'}, multiplication, expressionRest} \mid \epsilon$  |
+| $A \rightarrow \gamma R$  | $additionExpression \rightarrow multiplicationExpression, additionExpressionRest$  |
+| $R \rightarrow {\alpha R} \mid {\beta R} \mid \epsilon$ | $additionExpressionRest \rightarrow {{'+'}, multiplicationExpression, additionExpressionRest} \mid {{'-'}, multiplicationExpression, additionExpressionRest} \mid \epsilon$  |
 
 ```plantuml
-@startebnf Адаптация expression через рекурсию
+@startebnf Адаптация additionExpression через рекурсию
 !theme crt-amber
 
 title Через рекурсию
 
-expression = multiplication, expressionRest;
-expressionRest = [ ('+' | '-'), multiplication, expressionRest] ;
+additionExpression = multiplicationExpression, additionExpressionRest;
+additionExpressionRest = [ ('+' | '-'), multiplicationExpression, additionExpressionRest] ;
 @endebnf
 ```
 
 ```plantuml
-@startebnf Адаптация expression через цикл
+@startebnf Адаптация additionExpression через цикл
 !theme crt-amber
-
 title Через цикл
-
-expression = multiplication, { ('+' | '-'), multiplication };
+additionExpression = multiplicationExpression, { ('+' | '-'), multiplicationExpression };
 @endebnf
 ```
 
-## Адаптация `multiplication`
+## Адаптация `multiplicationExpression`
 ```plantuml
-@startebnf Исходный multiplication
+@startebnf Исходный multiplicationExpression
 !theme crt-amber
-
 title Исходный нетерминал
-
-multiplication =
-    multiplication, ('*' | "/"), factor
-  | factor;
+multiplicationExpression =
+    multiplicationExpression, ( '*' | "/" ), signExpression
+  | signExpression;
 @endebnf
 ```
 
 ### Разбивка на элементы
 | Элемент | Значение  |
 |:-------:| --------- |
-| $A$ | $multiplication$  |
-| $\alpha$  | ${'*'}, factor$ |
-| $\beta$ | ${'*'}, factor$ |
-| $\gamma$  | $factor$ |
+| $A$ | $multiplicationExpression$  |
+| $\alpha$  | ${'*'}, signExpression$ |
+| $\beta$ | ${'*'}, signExpression$ |
+| $\gamma$  | $signExpression$ |
 
 ### Преобразование
 | Формула | Результат |
 | ------- | --------- |
-| $A \rightarrow \gamma R$  | $multiplication \rightarrow factor, multiplicationRest$  |
-| $R \rightarrow {\alpha R} \mid {\beta R} \mid \epsilon$ | $multiplicationRest \rightarrow {{'*'}, factor, multiplicationRest} \mid {{'/'}, factor, multiplicationRest} \mid \epsilon$  |
+| $A \rightarrow \gamma R$  | $multiplicationExpression \rightarrow signExpression, multiplicationRest$  |
+| $R \rightarrow {\alpha R} \mid {\beta R} \mid \epsilon$ | $multiplicationRest \rightarrow {{'*'}, signExpression, multiplicationRest} \mid {{'/'}, signExpression, multiplicationRest} \mid \epsilon$  |
 
 ```plantuml
-@startebnf Адаптация multiplication через рекурсию
+@startebnf Адаптация multiplicationExpression через рекурсию
 !theme crt-amber
-
 title Через рекурсию
-
-multiplication = factor, multiplicationRest;
-multiplicationRest = [('*' | '/'), factor, multiplicationRest];
+multiplicationExpression = signExpression, multiplicationRest;
+multiplicationRest = [ ( '*' | '/' ), signExpression, multiplicationRest ];
 @endebnf
 ```
 
 ```plantuml
-@startebnf Адаптация multiplication через цикл
+@startebnf Адаптация multiplicationExpression через цикл
 !theme crt-amber
-
 title Через цикл
-
-multiplication = factor, {('*' | '/'), factor};
+multiplicationExpression = signExpression, { ( '*' | '/' ), signExpression };
 @endebnf
 ```
 
-## Адаптация `disjunction`
-
+## Адаптация `orExpression`
 ```plantuml
-@startebnf Исходный disjunction
+@startebnf Исходный orExpression
 !theme crt-amber
-
 title Исходный нетерминал
-
-disjunction =
-    disjunction, 'or', conjuction
-  | conjuction;
+orExpression =
+    orExpression, 'or', andExpression
+  | andExpression;
 @endebnf
 ```
 
 ### Разбивка на элементы
 | Элемент | Значение  |
 |:-------:| --------- |
-| $A$ | $disjunction$  |
-| $\alpha$  | ${'or'}, conjuction$ |
-| $\gamma$  | $conjuction$ |
+| $A$ | $orExpression$  |
+| $\alpha$  | ${'or'}, andExpression$ |
+| $\gamma$  | $andExpression$ |
 
 ### Преобразование
 | Формула | Результат |
 | ------- | --------- |
-| $A \rightarrow \gamma R$  | $conjuction \rightarrow conjuction, disjunctionRest$  |
-| $R \rightarrow {\alpha R} \mid \epsilon$ | $disjunctionRest \rightarrow {{'or'}, conjuction, disjunctionRest} \mid \epsilon$  |
+| $A \rightarrow \gamma R$  | $andExpression \rightarrow andExpression, orExpressionRest$  |
+| $R \rightarrow {\alpha R} \mid \epsilon$ | $orExpressionRest \rightarrow {{'or'}, andExpression, orExpressionRest} \mid \epsilon$  |
 
 ```plantuml
-@startebnf Адаптация disjunction через рекурсию
+@startebnf Адаптация orExpression через рекурсию
 !theme crt-amber
-
 title Через рекурсию
-
-disjunction = conjuction, disjunctionRest;
-disjunctionRest = ['or', conjuction, disjunctionRest];
+orExpression = andExpression, orExpressionRest;
+orExpressionRest = [ 'or', andExpression, orExpressionRest ];
 @endebnf
 ```
 
 ```plantuml
-@startebnf Адаптация disjunction через цикл
+@startebnf Адаптация orExpression через цикл
 !theme crt-amber
-
 title Через цикл
-
-disjunction = conjuction, {'or', conjuction};
+orExpression = andExpression, { 'or', andExpression };
 @endebnf
 ```
