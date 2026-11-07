@@ -1,5 +1,6 @@
 ﻿using MURQ.Domain.Quests.Expressions;
 using MURQ.Domain.Quests.Expressions.Logic;
+using MURQ.Domain.Quests.Expressions.Math;
 using MURQ.Domain.Quests.Statements;
 using MURQ.Domain.URQL.Interpretation.Exceptions;
 using MURQ.Domain.URQL.Lexing;
@@ -134,7 +135,7 @@ public class UrqlParser(UrqlLexer urqlLexer)
         while (Lookahead is OrToken)
         {
             Match<OrToken>();
-            
+
             Expression rightAndExpression = ParseAndExpression();
 
             resultExpression = new OrExpression
@@ -321,7 +322,7 @@ public class UrqlParser(UrqlLexer urqlLexer)
     /// <code>
     /// signExpression =
     ///     ( '+' | '-' ), signExpression
-    ///   | factorExpression;
+    ///   | notExpression;
     /// </code>
     /// </summary>
     /// <returns><see cref="Expression"/></returns>
@@ -336,6 +337,28 @@ public class UrqlParser(UrqlLexer urqlLexer)
             case MinusToken:
                 Match<MinusToken>();
                 return new UnaryMinusExpression { Expression = ParseSignExpression() };
+
+            default:
+                return ParseNotExpression();
+        }
+    }
+
+    /// <summary>
+    /// Грамматика:
+    /// <code>
+    /// notExpression =
+    ///     ( 'not' ), notExpression
+    ///   | factorExpression;
+    /// </code>
+    /// </summary>
+    /// <returns><see cref="Expression"/></returns>
+    protected Expression ParseNotExpression()
+    {
+        switch (Lookahead)
+        {
+            case NotToken:
+                Match<NotToken>();
+                return new NotExpression { Expression = ParseNotExpression() };
 
             default:
                 return ParseFactorExpression();

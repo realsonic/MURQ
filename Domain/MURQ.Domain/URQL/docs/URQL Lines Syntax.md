@@ -49,6 +49,10 @@ multiplicationExpression =
 
 signExpression =
     ( '+' | '-' ), signExpression
+  | notExpression;
+
+notExpression =
+    ( 'not' ), notExpression
   | factorExpression;
 
 factorExpression =

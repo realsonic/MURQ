@@ -152,6 +152,7 @@ public class UrqlLexer(IEnumerable<OriginatedCharacter> source)
             "pause" => ParsePauseAfterPause(),
             "and" => ParseAndAfterAnd(),
             "or" => ParseOrAfterOr(),
+            "not" => ParseNotAfterNot(),
             _ => ParseVariable(collectedWord)
         };
     }
@@ -262,6 +263,14 @@ public class UrqlLexer(IEnumerable<OriginatedCharacter> source)
     {
         // После or разрешён пробел или табуляция
         AllowSpaceOrTab("or");
+
+        return new(GetLexeme());
+    }
+
+    private NotToken ParseNotAfterNot()
+    {
+        // После not разрешён пробел или табуляция
+        AllowSpaceOrTab("not");
 
         return new(GetLexeme());
     }

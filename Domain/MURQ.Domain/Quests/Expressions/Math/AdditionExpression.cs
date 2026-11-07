@@ -3,7 +3,7 @@ using MURQ.Domain.Games.Values;
 
 using System.Diagnostics;
 
-namespace MURQ.Domain.Quests.Expressions;
+namespace MURQ.Domain.Quests.Expressions.Math;
 
 [DebuggerDisplay("{LeftExpression} + {RightExpression}")]
 public class AdditionExpression : Expression

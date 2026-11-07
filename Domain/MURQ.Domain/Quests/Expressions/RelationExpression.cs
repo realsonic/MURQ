@@ -3,7 +3,7 @@ using MURQ.Domain.Games.Values;
 
 using System.Diagnostics;
 
-namespace MURQ.Domain.Quests.Expressions.Logic;
+namespace MURQ.Domain.Quests.Expressions;
 
 [DebuggerDisplay("{LeftExpression} {RelationDebuggerDisplay} {RightExpression}")]
 public class RelationExpression : Expression
