@@ -122,12 +122,13 @@ public class UrqlLexer(IEnumerable<OriginatedCharacter> source)
             switch (character)
             {
                 case char when char.IsLetter(character):
+                case '_' when wordBuilder.Length > 0: // '_' в середине - это слово
                     wordBuilder.Append(character);
                     Match(character);
                     continue;
 
-                case '_':
-                case char when char.IsDigit(character):
+                case char when char.IsDigit(character) && wordBuilder.Length > 0: // цифра в середине - это переменная
+                case '_' when wordBuilder.Length == 0: // '_' в начале - это переменная
                     return ParseVariable(wordBuilder.ToString());
 
                 default:
@@ -149,6 +150,7 @@ public class UrqlLexer(IEnumerable<OriginatedCharacter> source)
             "else" => ParseElseAfterThen(),
             "goto" => ParseGotoAfterGoto(),
             "proc" => ParseProcAfterProc(),
+            "forget_procs" => ParseForgetProcsAfterForgetProcs(),
             "perkill" => ParsePerkillAfterPerkill(),
             "pause" => ParsePauseAfterPause(),
             "and" => ParseAndAfterAnd(),
@@ -209,7 +211,7 @@ public class UrqlLexer(IEnumerable<OriginatedCharacter> source)
     {
         // После if разрешён пробел или табуляция
         AllowSpaceOrTab("if");
-        
+
         return new(GetLexeme());
     }
 
@@ -217,7 +219,7 @@ public class UrqlLexer(IEnumerable<OriginatedCharacter> source)
     {
         // После then разрешён пробел или табуляция
         AllowSpaceOrTab("then");
-        
+
         return new(GetLexeme());
     }
 
@@ -225,7 +227,7 @@ public class UrqlLexer(IEnumerable<OriginatedCharacter> source)
     {
         // После else разрешён пробел или табуляция
         AllowSpaceOrTab("else");
-        
+
         return new(GetLexeme());
     }
 
@@ -250,6 +252,8 @@ public class UrqlLexer(IEnumerable<OriginatedCharacter> source)
 
         return new ProcToken(label.Trim(), GetLexeme());
     }
+
+    private ForgetProcsToken ParseForgetProcsAfterForgetProcs() => new(GetLexeme());
 
     private PerkillToken ParsePerkillAfterPerkill() => new(GetLexeme());
 

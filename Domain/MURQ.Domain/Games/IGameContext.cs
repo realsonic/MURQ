@@ -34,5 +34,10 @@ public interface IGameContext
     /// <param name="label">Метка процедуры.</param>
     void Proc(string label);
 
+    /// <summary>
+    /// Забыть стек вызовов proc.
+    /// </summary>
+    void ForgetProcs();
+
     void Perkill();
 }
