@@ -21,6 +21,18 @@ public interface IGameContext
     void ClearScreen();
     void AssignVariable(string variableName, Value value);
     Value? GetVariableValue(string variableName);
+    
+    /// <summary>
+    /// Перейти на метку. Если такой метки нет, переход не выполняется.
+    /// </summary>
+    /// <param name="label">Метка.</param>
     void Goto(string label);
+
+    /// <summary>
+    /// Выполнить процедуру. Если такой метки нет, переход не выполняется.
+    /// </summary>
+    /// <param name="label">Метка процедуры.</param>
+    void Proc(string label);
+
     void Perkill();
 }

@@ -48,7 +48,7 @@ public class Game(Quest quest) : IGameContext
         while (gameState == GameState.RunningStatements && !cancellationToken.IsCancellationRequested)
         {
             await InterpretCurrentQuestLineAsync(cancellationToken);
-            Quest.NextLine();
+            Quest.GoToNextLine();
         }
     }
 
@@ -107,8 +107,16 @@ public class Game(Quest quest) : IGameContext
     /// <inheritdoc/>
     void IGameContext.EndLocation()
     {
-        Quest.ClearCurrentLine();
-        gameState = GameState.WaitingUserInput;
+        if (_procStack.Count > 0)
+        {
+            QuestLine procLine = _procStack.Pop();
+            Quest.GoToQuestLine(procLine); // вернулись на строку, с которой был вызван proc
+        }
+        else
+        {
+            Quest.ClearCurrentLine();
+            gameState = GameState.WaitingUserInput;
+        }
     }
 
     /// <inheritdoc/>
@@ -149,6 +157,9 @@ public class Game(Quest quest) : IGameContext
     void IGameContext.Goto(string label) => JumpByGoto(label);
 
     /// <inheritdoc/>
+    void IGameContext.Proc(string label) => JumpByProc(label);
+
+    /// <inheritdoc/>
     void IGameContext.Perkill() => _userVariables.Clear();
 
     private async Task JumpByButtonAsync(string label, CancellationToken cancellationToken)
@@ -171,6 +182,19 @@ public class Game(Quest quest) : IGameContext
             return;
 
         Quest.TryGoToLabel(label, out _);
+    }
+
+    private void JumpByProc(string label)
+    {
+        if (string.IsNullOrWhiteSpace(label))
+            return;
+
+        QuestLine currentLine = Quest.CurrentLine ?? throw new InvalidOperationException($"Неожиданно {nameof(Quest.CurrentLine)} пуст.");
+
+        if (Quest.TryGoToLabel(label, out _))
+        {
+            _procStack.Push(currentLine);
+        }
     }
 
     private void ClearCurrentView()
@@ -267,6 +291,7 @@ public class Game(Quest quest) : IGameContext
     private string? currentLocationName;
     private string? previousLocationName;
     private readonly Dictionary<string, Value> _userVariables = new(StringComparer.InvariantCultureIgnoreCase);
+    private readonly Stack<QuestLine> _procStack = new();
     private readonly Random random = new();
 
     private const string StyleDosTextColorVarName = "style_dos_textcolor";
