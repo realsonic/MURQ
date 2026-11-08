@@ -20,6 +20,7 @@ statement =
   | 'end'
   | 'cls'
   | ?Goto?
+  | ?Proc?
   | 'perkill'
   | ?Pause?;
 

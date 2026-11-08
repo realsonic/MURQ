@@ -70,18 +70,29 @@ public class UrqlInterpreter(UrqlLexer urqlLexer, IGameContext gameContext) : Ur
     /// <summary>
     /// Грамматика:
     /// <code>
-    /// statement = assignVariableStatement | ifStatement | ? Print ? | ? Button ? | ? End ? | ? ClearScreen ? | ? Goto ? | ? Perkill ? | ? Pause ?;
+    /// statement =
+    ///   assignVariableStatement
+    /// | ifStatement
+    /// | ?Print?
+    /// | ?Button?
+    /// | 'end'
+    /// | 'cls'
+    /// | ?Goto?
+    /// | ?Proc?
+    /// | 'perkill'
+    /// | ?Pause?;
     /// </code>
     /// </summary>
     private async Task<InterpretationResult> InterpretStatementAsync(InterpretationMode interpretationMode, CancellationToken cancellationToken) => Lookahead switch
     {
-        Token when Lookahead.IsStartOfIfStatement() => await InterpretIfThenStatement(interpretationMode, cancellationToken),
         Token when Lookahead.IsStartOfAssignVariableStatement() => await InterpretAssignVariableStatementAsync(interpretationMode, cancellationToken),
+        Token when Lookahead.IsStartOfIfStatement() => await InterpretIfThenStatement(interpretationMode, cancellationToken),
         PrintToken => await InterpretPrintStatementAsync(interpretationMode, cancellationToken),
         ButtonToken => await InterpretButtonStatementAsync(interpretationMode, cancellationToken),
         EndToken => await InterpretEndStatementAsync(interpretationMode, cancellationToken),
         ClearScreenToken => await InterpretClearScreenStatementAdync(interpretationMode, cancellationToken),
         GotoToken => await InterpretGotoStatementAsync(interpretationMode, cancellationToken),
+        ProcToken => await InterpretProcStatementAsync(interpretationMode, cancellationToken),
         PerkillToken => await InterpretPerkillStatementAsync(interpretationMode, cancellationToken),
         PauseToken => await InterpretPauseStatementAsync(interpretationMode, cancellationToken),
         _ => throw new UnexpectedElementException("Ожидалась инструкция", Lookahead),
@@ -203,6 +214,19 @@ public class UrqlInterpreter(UrqlLexer urqlLexer, IGameContext gameContext) : Ur
         if (interpretationMode is InterpretationMode.Run)
         {
             await gotoStatement.RunAsync(gameContext, cancellationToken);
+            return InterpretationResult.ImmediateStop;
+        }
+
+        return InterpretationResult.Normal;
+    }
+
+    private async Task<InterpretationResult> InterpretProcStatementAsync(InterpretationMode interpretationMode, CancellationToken cancellationToken)
+    {
+        ProcStatement procStatement = ParseProcTerminal();
+
+        if (interpretationMode is InterpretationMode.Run)
+        {
+            await procStatement.RunAsync(gameContext, cancellationToken);
             return InterpretationResult.ImmediateStop;
         }
 

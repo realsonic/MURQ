@@ -148,6 +148,7 @@ public class UrqlLexer(IEnumerable<OriginatedCharacter> source)
             "then" => ParseThenAfterThen(),
             "else" => ParseElseAfterThen(),
             "goto" => ParseGotoAfterGoto(),
+            "proc" => ParseProcAfterProc(),
             "perkill" => ParsePerkillAfterPerkill(),
             "pause" => ParsePauseAfterPause(),
             "and" => ParseAndAfterAnd(),
@@ -237,6 +238,17 @@ public class UrqlLexer(IEnumerable<OriginatedCharacter> source)
         var label = ParseTextTillTermination();
 
         return new GotoToken(label.Trim(), GetLexeme());
+    }
+
+    private ProcToken ParseProcAfterProc()
+    {
+        // После proc разрешён пробел или табуляция
+        AllowSpaceOrTab("proc");
+
+        // Собираем метку
+        var label = ParseTextTillTermination();
+
+        return new ProcToken(label.Trim(), GetLexeme());
     }
 
     private PerkillToken ParsePerkillAfterPerkill() => new(GetLexeme());

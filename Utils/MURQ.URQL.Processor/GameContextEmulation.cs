@@ -49,4 +49,9 @@ class GameContextEmulation : IGameContext
     {
         OnCommandExecuted?.Invoke($"PrintLine(\"{text}\"); ");
     }
+
+    public void Proc(string label)
+    {
+        throw new NotImplementedException();
+    }
 }

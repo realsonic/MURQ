@@ -91,6 +91,17 @@ public class UrqlParser(UrqlLexer urqlLexer)
         return new GotoStatement { Label = label };
     }
 
+    protected ProcStatement ParseProcTerminal()
+    {
+        ProcToken procToken = Match<ProcToken>();
+        string label = procToken.Label.Trim();
+        if (label == string.Empty)
+        {
+            throw new ParseException($"Метка процедуры пустая: {procToken}");
+        }
+        return new ProcStatement { Label = label };
+    }
+
     protected PerkillStatement ParsePerkillTerminal()
     {
         Match<PerkillToken>();

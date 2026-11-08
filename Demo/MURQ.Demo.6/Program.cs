@@ -85,5 +85,10 @@ class Demo6GameContext : IGameContext
 
     public void PrintLine(string? text = null) => Console.WriteLine(text);
 
+    public void Proc(string label)
+    {
+        throw new NotImplementedException();
+    }
+
     private readonly Dictionary<string, Value> _variables = new(StringComparer.InvariantCultureIgnoreCase);
 }
