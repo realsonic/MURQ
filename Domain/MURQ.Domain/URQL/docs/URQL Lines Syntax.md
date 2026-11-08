@@ -21,6 +21,7 @@ statement =
   | 'cls'
   | ?Goto?
   | ?Proc?
+  | 'forget_procs'
   | 'perkill'
   | ?Pause?;
 
