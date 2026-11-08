@@ -90,5 +90,10 @@ class Demo5GameContext : IGameContext
         throw new NotImplementedException();
     }
 
+    public void ForgetProcs()
+    {
+        throw new NotImplementedException();
+    }
+
     private readonly Dictionary<string, Value> _variables = new(StringComparer.InvariantCultureIgnoreCase);
 }

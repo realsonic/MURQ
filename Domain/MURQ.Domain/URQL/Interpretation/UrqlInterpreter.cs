@@ -93,6 +93,7 @@ public class UrqlInterpreter(UrqlLexer urqlLexer, IGameContext gameContext) : Ur
         ClearScreenToken => await InterpretClearScreenStatementAdync(interpretationMode, cancellationToken),
         GotoToken => await InterpretGotoStatementAsync(interpretationMode, cancellationToken),
         ProcToken => await InterpretProcStatementAsync(interpretationMode, cancellationToken),
+        ForgetProcsToken => await InterpretForgetProcsStatementAsync(interpretationMode, cancellationToken),
         PerkillToken => await InterpretPerkillStatementAsync(interpretationMode, cancellationToken),
         PauseToken => await InterpretPauseStatementAsync(interpretationMode, cancellationToken),
         _ => throw new UnexpectedElementException("Ожидалась инструкция", Lookahead),
@@ -228,6 +229,18 @@ public class UrqlInterpreter(UrqlLexer urqlLexer, IGameContext gameContext) : Ur
         {
             await procStatement.RunAsync(gameContext, cancellationToken);
             return InterpretationResult.ImmediateStop;
+        }
+
+        return InterpretationResult.Normal;
+    }
+
+    private async Task<InterpretationResult> InterpretForgetProcsStatementAsync(InterpretationMode interpretationMode, CancellationToken cancellationToken)
+    {
+        ForgetProcsStatement forgetProcsStatement = ParseForgetProcsTerminal();
+
+        if (interpretationMode is InterpretationMode.Run)
+        {
+            await forgetProcsStatement.RunAsync(gameContext, cancellationToken);
         }
 
         return InterpretationResult.Normal;

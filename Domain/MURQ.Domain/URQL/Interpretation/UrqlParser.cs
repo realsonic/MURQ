@@ -102,6 +102,12 @@ public class UrqlParser(UrqlLexer urqlLexer)
         return new ProcStatement { Label = label };
     }
 
+    protected ForgetProcsStatement ParseForgetProcsTerminal()
+    {
+        Match<ForgetProcsToken>();
+        return new ForgetProcsStatement();
+    }
+
     protected PerkillStatement ParsePerkillTerminal()
     {
         Match<PerkillToken>();

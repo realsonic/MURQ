@@ -160,6 +160,9 @@ public class Game(Quest quest) : IGameContext
     void IGameContext.Proc(string label) => JumpByProc(label);
 
     /// <inheritdoc/>
+    void IGameContext.ForgetProcs() => _procStack.Clear();
+
+    /// <inheritdoc/>
     void IGameContext.Perkill() => _userVariables.Clear();
 
     private async Task JumpByButtonAsync(string label, CancellationToken cancellationToken)

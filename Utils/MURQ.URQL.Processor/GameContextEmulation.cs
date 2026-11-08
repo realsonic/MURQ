@@ -25,6 +25,11 @@ class GameContextEmulation : IGameContext
         throw new NotImplementedException();
     }
 
+    public void ForgetProcs()
+    {
+        throw new NotImplementedException();
+    }
+
     public Value? GetVariableValue(string variableName)
     {
         return new StringValue($"<Строковая переменная {variableName}>");
